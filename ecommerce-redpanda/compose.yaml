@@ -1,0 +1,63 @@
+services:
+  materialized:
+    image: materialize/materialized:v0.16.0
+    command: -w2 --disable-telemetry
+    ports:
+      - 6875:6875
+  mysql:
+    image: debezium/example-mysql:1.8
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=debezium
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=mysqlpw
+    healthcheck: {test: mysql -pdebezium -e 'select 1', interval: 1s, start_period: 60s}
+  redpanda:
+    image: docker.vectorized.io/vectorized/redpanda:v21.11.2
+    command:
+      - redpanda start
+      - --overprovisioned
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --node-id 0
+      - --check=false
+      - --kafka-addr 0.0.0.0:9092
+      - --advertise-kafka-addr redpanda:9092
+      - --pandaproxy-addr 0.0.0.0:8082
+      - --advertise-pandaproxy-addr redpanda:8082
+      - --set redpanda.enable_transactions=true
+      - --set redpanda.enable_idempotence=true
+    ports:
+      - 9092:9092
+      - 8081:8081
+      - 8082:8082
+    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
+  debezium:
+    image: debezium/connect:1.8
+    environment:
+      BOOTSTRAP_SERVERS: redpanda:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
+    ports:
+      - 8083:8083
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
+    depends_on:
+      redpanda: {condition: service_healthy}
+  loadgen:
+    build: ../ecommerce/loadgen
+    init: true
+    environment:
+      KAFKA_ADDR: redpanda:9092
+    depends_on:
+      mysql: {condition: service_healthy}
+      debezium: {condition: service_healthy}
+      redpanda: {condition: service_healthy}
+  cli:
+    image: materialize/cli:v0.16.0

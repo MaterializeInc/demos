@@ -1,0 +1,49 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+  # Run against the latest unstable every night to catch problems before they
+  # ship in a release.
+  schedule:
+    - cron: '0 5 * * *'
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        docker-compose: [1.29.2, v2.1.1]
+        demo:
+          - ecommerce
+          - ecommerce-redpanda
+          - http-logs
+          - wikirecent
+    steps:
+      - uses: actions/checkout@v1
+      - uses: KengoTODA/actions-setup-docker-compose@v1.0.4
+        with:
+          version: ${{ matrix.docker-compose }}
+      - run: .github/tools/bump.py materialize unstable
+        if: github.event.schedule
+      - run: |
+          cd ${{ matrix.demo }}
+          $GITHUB_WORKSPACE/.github/tests/${{ matrix.demo }}.sh
+      - run: |
+          cd ${{ matrix.demo }}
+          docker-compose logs > $GITHUB_WORKSPACE/docker-compose.log
+        if: always()
+      - uses: actions/upload-artifact@v2
+        with:
+          name: docker-compose.log
+          path: docker-compose.log
+        if: always()
+
+  lint:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v1
+      - run: pip install pre-commit==2.16.0
+      - run: pre-commit run --all-files

@@ -1,0 +1,44 @@
+# This file determines what Docker images are permitted for use in the
+# repository. The goal is to ensure that only one version of each image in use
+# across the entire repository.
+#
+# Each entry in this file is a group of images that are versioned together.
+# To update an image group to a new version, run:
+#
+#      $ .github/tools/bump.py IMAGE-GROUP VERSION
+#
+# That script will update the versions here and in every Dockerfile and
+# compose.yaml file across the repository.
+
+materialize:
+  tag: v0.16.0
+  images:
+    - materialize/cli
+    - materialize/materialized
+debezium:
+  tag: '1.8'
+  images:
+    - debezium/connect
+    - debezium/example-mysql
+python:
+  tag: 3.9.9-bullseye
+  images:
+    - python
+buildpack:
+  tag: bullseye-curl
+  images:
+    - buildpack-deps
+confluent:
+  tag: 7.0.1
+  images:
+    - confluentinc/cp-zookeeper
+    - confluentinc/cp-enterprise-kafka
+    - confluentinc/cp-schema-registry
+metabase:
+  tag: v0.41.5
+  images:
+    - metabase/metabase
+redpanda:
+  tag: v21.11.2
+  images:
+    - docker.vectorized.io/vectorized/redpanda

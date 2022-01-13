@@ -1,0 +1,5 @@
+barnum==0.5.1
+kafka-python==2.0.2
+mysql-connector-python==8.0.27
+noise==1.2.2
+requests==2.27.1

@@ -1,0 +1,72 @@
+services:
+  materialized:
+    image: materialize/materialized:v0.16.0
+    command: -w2 --disable-telemetry
+    ports:
+      - 6875:6875
+  mysql:
+    image: debezium/example-mysql:1.8
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=debezium
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=mysqlpw
+    healthcheck: {test: mysql -pdebezium -e 'select 1', interval: 1s, start_period: 60s}
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    healthcheck: {test: nc -z localhost 2181, interval: 1s, start_period: 120s}
+  kafka:
+    image: confluentinc/cp-enterprise-kafka:7.0.1
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - 9092:9092
+    depends_on:
+      zookeeper: {condition: service_healthy}
+    healthcheck: {test: nc -z localhost 9092, interval: 1s, start_period: 120s}
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.0.1
+    environment:
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=kafka:9092
+      - SCHEMA_REGISTRY_HOST_NAME=schema-registry
+      - SCHEMA_REGISTRY_LISTENERS=http://schema-registry:8081,http://localhost:8081
+    depends_on:
+      zookeeper: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+    healthcheck: {test: curl -f localhost:8081, interval: 1s, start_period: 120s}
+  debezium:
+    image: debezium/connect:1.8
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    ports:
+      - 8083:8083
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
+    depends_on:
+      kafka: {condition: service_healthy}
+  metabase:
+    image: metabase/metabase:v0.41.5
+    depends_on: [materialized]
+    ports:
+      - 3030:3000
+  loadgen:
+    build: loadgen
+    init: true
+    depends_on:
+      mysql: {condition: service_healthy}
+      debezium: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+      schema-registry: {condition: service_healthy}
+  cli:
+    image: materialize/cli:v0.16.0
