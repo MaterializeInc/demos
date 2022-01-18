@@ -133,15 +133,15 @@ CREATE MATERIALIZED VIEW aggregated_logs AS
 
 A quick rundown of the statement itself:
 
-* First we start with the `CREATE MATERIALIZED VIEW aggregated_logs` which identifies that we want to create a new Materialized view. The `aggregated_logs` part is the name of our Materialized view.
-* Then we specify the `SELECT` statement used to build the output. In this case we are aggregating by `ip`, `path` and `statuscode`, and we are counting the total instances of each combo with a `COUNT(*)`
+- First we start with the `CREATE MATERIALIZED VIEW aggregated_logs` which identifies that we want to create a new Materialized view. The `aggregated_logs` part is the name of our Materialized view.
+- Then we specify the `SELECT` statement used to build the output. In this case we are aggregating by `ip`, `path` and `statuscode`, and we are counting the total instances of each combo with a `COUNT(*)`
 
 Let's run a `SELECT` query to check out the results
 
 ```sql
 SELECT * FROM unique_visitors ORDER BY count DESC LIMIT 100;
 // Output:
-       ip       |      path      | code | count 
+       ip       |      path      | code | count
 ----------------+----------------+------+-------
  18.120.103.2   | GET / HTTP/1.1 |  200 |    15
  2.65.37.39     | GET / HTTP/1.1 |  200 |    13
@@ -157,16 +157,17 @@ SELECT * FROM unique_visitors ORDER BY count DESC LIMIT 100;
 When creating a Materialized View, it could be based on multiple sources like your Kafka Stream, a raw data file that you have on an S3 bucket, and your PostgreSQL database. This single view will give you the power to analyze your data in real-time.
 
 # Recap
+
 In this demo, we saw:
 
-* How to create a source from dynamic file
-* How Materialize can structure log files
-* How to define sources and views within Materialize
-* How to query views to extract data from your logs
+- How to create a source from dynamic file
+- How Materialize can structure log files
+- How to define sources and views within Materialize
+- How to query views to extract data from your logs
 
 ## Related pages
 
-* [Microservice demo](https://materialize.com/docs/demos/microservice)
-* [Business intelligence demo](https://materialize.com/docs/demos/business-intelligence)
-* [`CREATE SOURCE`](https://materialize.com/docs/sql/create-source)
-* [Functions + Operators](https://materialize.com/docs/sql/functions)
+- [Microservice demo](https://materialize.com/docs/demos/microservice)
+- [Business intelligence demo](https://materialize.com/docs/demos/business-intelligence)
+- [`CREATE SOURCE`](https://materialize.com/docs/sql/create-source)
+- [Functions + Operators](https://materialize.com/docs/sql/functions)
