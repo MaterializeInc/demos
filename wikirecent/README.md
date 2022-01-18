@@ -14,7 +14,7 @@ value for `counter` and a visualization of the `top10` view. To get the updated
 results as the underlying data changes, we're making use of Materialize's
 [`TAIL`] command.
 
-## Setup
+## Running the demo
 
 To spin up this demo locally, run:
 
@@ -22,14 +22,79 @@ To spin up this demo locally, run:
 docker-compose up -d
 ```
 
+To check if the demo is running, run:
+
+```
+docker-compose ps
+```
+
 To view the web app in your local browser, visit <http://localhost:8875>.
 
-Once you're done, stop all the running services and delete the
-associated volumes:
+![wikirecent-demo](https://user-images.githubusercontent.com/21223421/149947818-01a89070-a6f6-42ee-a199-c31af09f8791.gif)
+
+### Connect to `materialized`
+
+To open a Postgres shell connected to the `materialized` instance running as
+part of this demo, run:
 
 ```
-docker-compose down -v
+docker-compose run cli
 ```
+
+- Show the created views:
+
+To view the `recentchanges` file, run:
+
+```sql
+SHOW VIEWS;
+
+-- Output
+     name
+---------------
+ counter
+ recentchanges
+ top10
+ user_edits
+```
+
+- Query the `counter` view:
+
+```sql
+SELECT * FROM counter;
+
+-- Output
+ count
+-------
+  1893
+(1 row)
+
+```
+
+### Use `TAIL` to watch for changes
+
+Rather than running `SELECT * FROM top10;` to get the latest results, we can stream the `top10` updates to your console you can use `TAIL`:
+
+```sql
+COPY (TAIL top10) TO STDOUT;
+```
+
+This will output the current value of the `top10` materialized view as the data changes:
+
+![Use TAIL to watch for changes](https://user-images.githubusercontent.com/21223421/149956101-aef8ad16-f563-4201-a10d-68c8c7c23e5d.gif)
+
+### Streaming a view from the Python web server to your console
+
+You can use `curl` to stream the contents of the `top10` view via the Python web server,
+rather than from Materialize directly:
+
+```
+curl --no-buffer --output - \
+  -H "Sec-WebSocket-Key: +" -H "Sec-WebSocket-Version: 13" -H "Connection: Upgrade" -H "Upgrade: websocket" \
+  "http://localhost:8875/api/stream/top10"
+```
+
+The output corresponds to the JSON results returned by the web server to the
+JavaScript client.
 
 ## How it works
 
@@ -70,39 +135,19 @@ repeated requests to upstream systems:
 
     Wikimedia <-- stream --> database <-- app <-- browser
 
-## Debugging
+## Stopping the demo
 
-### Connect to `materialized`
-
-To open a Postgres shell connected to the `materialized` instance running as
-part of this demo, run:
+Once you're done, stop all the running services and delete the
+associated volumes:
 
 ```
-docker-compose run cli
+docker-compose down -v
 ```
 
-To then stream the `top10` updates to your console:
+## Usefull Resources
 
-```
-materialize=> COPY (TAIL top10) TO STDOUT;
-```
-
-### Streaming a view from the Python web server to your console
-
-You can use `curl` to stream the contents of the `top10` view via the Python web server,
-rather than from Materialize directly:
-
-```
-curl --no-buffer --output - \
-  -H "Sec-WebSocket-Key: +" -H "Sec-WebSocket-Version: 13" -H "Connection: Upgrade" -H "Upgrade: websocket" \
-  "http://localhost:8875/api/stream/top10"
-```
-
-The output corresponds to the JSON results returned by the web server to the
-JavaScript client.
-
-[tail]: https://materialize.com/docs/sql/tail/
-[wikimedia's recent change stream]: https://stream.wikimedia.org/v2/stream/recentchange
-[tornado-web]: https://www.tornadoweb.org/en/stable/
-[psycopg3]: https://www.psycopg.org/psycopg3/
-[asyncpg]: https://github.com/MagicStack/asyncpg
+- [`TAIL`](https://materialize.com/docs/sql/tail/)
+- [wikimedia's recent change stream](https://stream.wikimedia.org/v2/stream/recentchange)
+- [tornado-web](https://www.tornadoweb.org/en/stable/)
+- [psycopg3](https://www.psycopg.org/psycopg3/)
+- [asyncpg](https://github.com/MagicStack/asyncpg)
