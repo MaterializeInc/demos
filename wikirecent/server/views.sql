@@ -2,7 +2,7 @@ CREATE SOURCE IF NOT EXISTS wikirecent
 FROM FILE '/tmp/wikidata/recentchanges' WITH (tail = true)
 FORMAT REGEX '^data: (?P<data>.*)';
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS recentchanges AS
+CREATE VIEW IF NOT EXISTS recentchanges AS
     SELECT
         val->>'$schema' AS r_schema,
         (val->'bot')::bool AS bot,
