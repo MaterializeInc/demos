@@ -35,8 +35,8 @@ jobs:
       - name: Bump Materialize
         run: |
           pip install -r .github/tools/requirements.txt
-          .github/tools/bump.py materialize ${{ github.events.inputs.version || 'unstable' }}
-        if: github.event.schedule || github.events.inputs.version
+          .github/tools/bump.py materialize ${{ github.event.inputs.version || 'unstable' }}
+        if: github.event.schedule || github.event.inputs.version
       - name: Run and test demo
         run: |
           cd ${{ matrix.demo }}
@@ -69,7 +69,7 @@ jobs:
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
           message: |
-            Demos failed against Materialize version "${{ github.events.inputs.version || 'unstable' }}".
+            Demos failed against Materialize version "${{ github.event.inputs.version || 'unstable' }}".
           channel: engineering
           color: red
           verbose: true
