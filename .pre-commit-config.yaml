@@ -18,10 +18,11 @@ repos:
     rev: v0.931
     hooks:
       - id: mypy
-        additional_dependencies:
+        additional_dependencies: &dependencies
           - colored==1.4.3
-          - types-requests==2.27.7
+          - dockerfile-parse==1.2.0
           - ruamel.yaml==0.17.20
+          - types-requests==2.27.7
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1
     hooks:
@@ -36,12 +37,15 @@ repos:
       - id: shellcheck
   - repo: local
     hooks:
-      - id: local
-        name: local
+      - id: lint
+        name: Lint
         entry: .github/tools/lint.py
         language: python
-        files: (/(docker-)?compose.ya?ml$|Dockerfile)
-        additional_dependencies:
-          - colored==1.4.3
-          - dockerfile-parse==1.2.0
-          - ruamel.yaml==0.17.20
+        files: (/(docker-)?compose\.ya?ml$|/Dockerfile$)
+        additional_dependencies: *dependencies
+      - id: lint-requirements
+        name: Lint requirements
+        entry: .github/tools/lint_requirements.py
+        language: python
+        files: ^(\.pre-commit-config\.yaml|.github/tools/requirements\.txt)$
+        additional_dependencies: *dependencies
