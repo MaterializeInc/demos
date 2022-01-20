@@ -13,10 +13,9 @@ import sys
 from pathlib import Path
 from typing import List, cast
 
+from config import PRECOMMIT_CONFIG_PATH, REQUIREMENTS_TXT_PATH
 from ruamel.yaml import YAML
 
-PRECOMMIT_CONFIG_PATH = Path(".pre-commit-config.yaml")
-REQUIREMENTS_TXT_PATH = Path(".github/tools/requirements.txt")
 KNOWN_PYTHON_HOOKS = ["mypy"]
 
 
