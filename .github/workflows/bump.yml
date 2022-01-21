@@ -1,5 +1,6 @@
 name: Create version bump PR
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       image_group:
