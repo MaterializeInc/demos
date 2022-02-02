@@ -1,6 +1,6 @@
 services:
   materialized:
-    image: materialize/materialized:v0.17.0
+    image: materialize/materialized:v0.18.0
     ports: [6875:6875]
     volumes: [wikidata:/tmp/wikidata]
     healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
@@ -19,7 +19,7 @@ services:
     volumes: [wikidata:/tmp/wikidata]
 
   cli:
-    image: materialize/cli:v0.17.0
+    image: materialize/cli:v0.18.0
 
 volumes:
   wikidata:
