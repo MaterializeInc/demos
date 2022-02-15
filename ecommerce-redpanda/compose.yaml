@@ -1,6 +1,6 @@
 services:
   materialized:
-    image: materialize/materialized:v0.18.0
+    image: materialize/materialized:v0.20.0
     command: -w2 --disable-telemetry
     ports:
       - 6875:6875
@@ -60,4 +60,4 @@ services:
       debezium: {condition: service_healthy}
       redpanda: {condition: service_healthy}
   cli:
-    image: materialize/cli:v0.18.0
+    image: materialize/cli:v0.20.0

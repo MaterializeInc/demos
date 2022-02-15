@@ -1,6 +1,6 @@
 services:
   materialized:
-    image: materialize/materialized:v0.18.0
+    image: materialize/materialized:v0.20.0
     ports: [6875:6875]
     volumes: [logfile:/log]
     healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
@@ -21,14 +21,14 @@ services:
       server: {condition: service_healthy}
 
   setup:
-    image: materialize/cli:v0.18.0
+    image: materialize/cli:v0.20.0
     command: -f /mnt/setup.sql
     volumes: [.:/mnt]
     depends_on:
       materialized: {condition: service_healthy}
 
   cli:
-    image: materialize/cli:v0.18.0
+    image: materialize/cli:v0.20.0
 
 volumes:
   logfile:
