@@ -70,6 +70,6 @@ jobs:
           slack_token: ${{ secrets.SLACK_TOKEN }}
           message: |
             Demos failed against Materialize version "${{ github.event.inputs.version || 'unstable' }}".
-          channel: engineering
+          channel: eng-notifications
           color: red
           verbose: true
