@@ -38,7 +38,7 @@ services:
     depends_on:
       zookeeper: {condition: service_healthy}
       kafka: {condition: service_healthy}
-    healthcheck: {test: curl -f localhost:8081, interval: 1s, start_period: 120s}
+    healthcheck: {test: curl -f localhost:8081, interval: 1s, start_period: 180s}
   debezium:
     image: debezium/connect:1.8
     environment:
@@ -52,9 +52,10 @@ services:
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
     ports:
       - 8083:8083
-    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 240s}
     depends_on:
       kafka: {condition: service_healthy}
+      schema-registry: {condition: service_healthy}
   metabase:
     image: metabase/metabase:v0.41.5
     depends_on: [materialized]
