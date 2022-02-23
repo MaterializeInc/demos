@@ -33,7 +33,7 @@ services:
       - 9092:9092
       - 8081:8081
       - 8082:8082
-    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
+    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 120s}
   debezium:
     image: debezium/connect:1.8
     environment:
@@ -47,9 +47,10 @@ services:
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
     ports:
       - 8083:8083
-    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 240s}
     depends_on:
       redpanda: {condition: service_healthy}
+      mysql: {condition: service_healthy}
   loadgen:
     build: ../ecommerce/loadgen
     init: true
