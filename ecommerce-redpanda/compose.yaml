@@ -47,10 +47,9 @@ services:
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
     ports:
       - 8083:8083
-    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 240s}
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 280s}
     depends_on:
       redpanda: {condition: service_healthy}
-      mysql: {condition: service_healthy}
   loadgen:
     build: ../ecommerce/loadgen
     init: true

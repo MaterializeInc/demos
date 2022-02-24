@@ -52,7 +52,7 @@ services:
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
     ports:
       - 8083:8083
-    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 240s}
+    healthcheck: {test: curl -f localhost:8083/connectors, interval: 1s, start_period: 280s}
     depends_on:
       kafka: {condition: service_healthy}
       schema-registry: {condition: service_healthy}
@@ -65,9 +65,9 @@ services:
     build: loadgen
     init: true
     depends_on:
-      mysql: {condition: service_healthy}
       debezium: {condition: service_healthy}
       kafka: {condition: service_healthy}
       schema-registry: {condition: service_healthy}
+      mysql: {condition: service_healthy}
   cli:
     image: materialize/cli:v0.20.0
