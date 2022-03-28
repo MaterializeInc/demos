@@ -42,3 +42,7 @@ redpanda:
   tag: v21.11.2
   images:
     - docker.vectorized.io/vectorized/redpanda
+dbt:
+  tag: 1.0.4-materialize
+  images:
+    - xemuliam/dbt
