@@ -20,6 +20,10 @@ debezium:
   images:
     - debezium/connect
     - debezium/example-mysql
+mysql:
+  tag: '8.0'
+  images:
+    - mysql/mysql-server
 python:
   tag: 3.9.9-bullseye
   images:

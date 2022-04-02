@@ -5,13 +5,16 @@ services:
     ports:
       - 6875:6875
   mysql:
-    image: debezium/example-mysql:1.8
+    image: mysql/mysql-server:8.0
     ports:
       - 3306:3306
     environment:
       - MYSQL_ROOT_PASSWORD=debezium
       - MYSQL_USER=mysqluser
       - MYSQL_PASSWORD=mysqlpw
+    volumes:
+      - ${PWD}/mysql/mysql.cnf:/etc/mysql/conf.d
+      - ${PWD}/mysql:/docker-entrypoint-initdb.d
     healthcheck: {test: mysql -pdebezium -e 'select 1', interval: 1s, start_period: 60s}
   redpanda:
     image: docker.vectorized.io/vectorized/redpanda:v21.11.2
@@ -45,6 +48,8 @@ services:
       VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
+    volumes:
+      - ${PWD}/mysql:/data
     ports:
       - 8083:8083
     healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
