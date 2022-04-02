@@ -6,6 +6,7 @@ services:
       - 6875:6875
   mysql:
     image: mysql/mysql-server:8.0.27
+    image: mysql/mysql-server:8.0
     ports:
       - 3306:3306
     environment:
@@ -48,6 +49,8 @@ services:
       VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
+    volumes:
+      - ${PWD}/mysql:/data
     ports:
       - 8083:8083
     healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}

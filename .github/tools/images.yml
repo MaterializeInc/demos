@@ -25,6 +25,7 @@ debezium:
     - debezium/example-mysql
 mysql:
   tag: '8.0.27'
+  tag: '8.0'
   images:
     - mysql/mysql-server
 python:
