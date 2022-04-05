@@ -15,7 +15,7 @@ services:
     volumes:
       - ${PWD}/mysql/mysql.cnf:/etc/mysql/conf.d
       - ${PWD}/mysql/mysql_bootstrap.sql:/docker-entrypoint-initdb.d/mysql_bootstrap.sql
-    healthcheck: {test: mysql -pdebezium -e 'select 1', interval: 1s, start_period: 60s}
+    healthcheck: {test: mysql -udebezium -pdbz -e 'select 1', interval: 1s, start_period: 60s}
   redpanda:
     image: docker.vectorized.io/vectorized/redpanda:v21.11.2
     command:
