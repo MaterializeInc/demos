@@ -21,11 +21,10 @@ itemPriceMin = 5
 itemPriceMax = 500
 mysqlHost = "mysql"
 mysqlPort = "3306"
-mysqlUser = "root"
-mysqlPass = "debezium"
+mysqlUser = "mysqluser"
+mysqlPass = "mysqlpw"
 kafkaHostPort = os.getenv("KAFKA_ADDR", "kafka:9092")
 kafkaTopic = "pageviews"
-debeziumHostPort = "debezium:8083"
 channels = ["organic search", "paid search", "referral", "social", "display"]
 categories = ["widgets", "gadgets", "doodads", "clearance"]
 
@@ -52,11 +51,7 @@ def generatePageview(viewer_id, target_id, page_type):
 
 
 try:
-    with connect(
-        host=mysqlHost,
-        user=mysqlUser,
-        password=mysqlPass,
-    ) as connection:
+    with connect(host=mysqlHost, user=mysqlUser, password=mysqlPass) as connection:
         with connection.cursor() as cursor:
             print("Seeding data...")
             cursor.executemany(

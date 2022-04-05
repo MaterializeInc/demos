@@ -9,12 +9,12 @@ services:
     ports:
       - 3306:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=debezium
+      - MYSQL_ROOT_PASSWORD=mysqlrootpw
       - MYSQL_USER=mysqluser
       - MYSQL_PASSWORD=mysqlpw
     volumes:
       - ${PWD}/mysql/mysql.cnf:/etc/mysql/conf.d
-      - ${PWD}/mysql:/docker-entrypoint-initdb.d
+      - ${PWD}/mysql/mysql_bootstrap.sql:/docker-entrypoint-initdb.d/mysql_bootstrap.sql
     healthcheck: {test: mysql -pdebezium -e 'select 1', interval: 1s, start_period: 60s}
   redpanda:
     image: docker.vectorized.io/vectorized/redpanda:v21.11.2
