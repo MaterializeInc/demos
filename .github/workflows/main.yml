@@ -25,6 +25,7 @@ jobs:
         demo:
           - ecommerce
           - ecommerce-redpanda
+          - feature-store
           - http-logs
           - wikirecent
           - dbt-get-started

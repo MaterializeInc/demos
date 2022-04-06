@@ -44,3 +44,7 @@ redpanda:
   tag: v21.11.2
   images:
     - docker.vectorized.io/vectorized/redpanda
+postgres:
+  tag: '14.2'
+  images:
+    - postgres:alpine
