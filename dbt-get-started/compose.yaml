@@ -11,7 +11,7 @@ services:
     image: materialize/cli:v0.20.0
     container_name: mzcli
   dbt:
-    image: xemuliam/dbt:1.0.4-materialize
+    image: materialize/dbt-materialize:v0.20.0
     container_name: dbt
     init: true
     entrypoint: /bin/bash
