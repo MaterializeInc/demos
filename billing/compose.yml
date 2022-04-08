@@ -1,0 +1,68 @@
+services:
+  materialized:
+    image: materialize/materialized:v0.25.0
+    command: -w2
+    init: true
+    volumes:
+      - db-data:/share/billing-demo/data
+    ports:
+      - 6875:6875
+    healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    init: true
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+    healthcheck: {test: nc -z localhost 2181, interval: 1s, start_period: 120s}
+
+  kafka:
+    image: confluentinc/cp-enterprise-kafka:7.0.1
+    init: true
+    ports: [9092]
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+    depends_on:
+      zookeeper: {condition: service_healthy}
+    healthcheck: {test: nc -z localhost 9092, interval: 1s, start_period: 120s}
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.0.1
+    init: true
+    ports: [8081]
+    environment:
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://kafka:9092
+      - SCHEMA_REGISTRY_HOST_NAME=localhost
+    depends_on:
+      zookeeper: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+    healthcheck: {test: curl -f localhost:8081, interval: 1s, start_period: 120s}
+
+  billing-demo:
+    image: materialize/billing-demo
+    init: true
+    environment:
+      - RUST_LOG=billing-demo=debug,info
+    command:
+      - '--materialized-host=materialized'
+      - '--kafka-host=kafka'
+      - '--schema-registry-url=http://schema-registry:8081'
+      - '--csv-file-name=/share/billing-demo/data/prices.csv'
+      - '--create-topic'
+      - '--replication-factor=1'
+      - '--message-count=1000'
+      - '--partitions=1'
+    volumes:
+      - db-data:/share/billing-demo/data
+    depends_on:
+      kafka: {condition: service_healthy}
+      schema-registry: {condition: service_healthy}
+      materialized: {condition: service_healthy}
+
+  cli:
+    image: materialize/cli:v0.25.0
+
+volumes:
+  db-data:
