@@ -1,0 +1,16 @@
+## Generally, the profiles.yml file never be included in your dbt project but rather
+## locally in a .dbt folder. For the purpose of this demo, we have included it here!
+
+materialize_get_started:
+  outputs:
+    dev:
+      type: materialize
+      threads: 1
+      host: materialized
+      port: 6875
+      user: materialize
+      pass: password
+      dbname: materialize
+      schema: public
+
+  target: dev

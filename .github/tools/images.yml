@@ -15,6 +15,7 @@ materialize:
   images:
     - materialize/cli
     - materialize/materialized
+    - materialize/dbt-materialize
 debezium:
   tag: '1.8'
   images:
