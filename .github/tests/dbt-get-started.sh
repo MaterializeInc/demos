@@ -10,6 +10,7 @@ sleep 5
 
 # Run the dbt models
 docker-compose exec -T dbt dbt run
+sleep 5
 
 # Check that there's data making it's way to the avg_bid materialized view
 record_count=$(docker-compose run -T mzcli -Atc 'SELECT COUNT(*) FROM avg_bid;')
