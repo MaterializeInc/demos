@@ -16,6 +16,7 @@ materialize:
     - materialize/cli
     - materialize/materialized
     - materialize/dbt-materialize
+    - materialize/billing-demo
 debezium:
   tag: '1.8'
   images:
