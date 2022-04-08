@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+find . \( -name '*.cc' -o -name '*.h' \) -print0 | xargs -0 clang-format -i

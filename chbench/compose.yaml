@@ -1,0 +1,91 @@
+services:
+  materialized:
+    image: materialize/materialized:v0.20.0
+    command: -w2 --disable-telemetry
+    ports:
+      - 6875:6875
+    environment:
+      - MZ_DEV=1
+    healthcheck: { test: curl -f localhost:6875, interval: 1s, start_period: 30s }
+
+  mysql:
+    build: mysql
+    ports:
+      - 3306:3306
+    environment:
+     - MYSQL_ROOT_HOST=%
+     - MYSQL_ROOT_PASSWORD=rootpw
+     - MYSQL_USER=mysqluser
+     - MYSQL_PASSWORD=mysqlpw
+    volumes:
+      - chbench-gen:/var/lib/mysql-files
+    healthcheck: {test: mysql -prootpw -e 'select 1', interval: 1s, start_period: 60s}
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.5.4
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+    healthcheck: {test: nc -z localhost 2181, interval: 1s, start_period: 120s}
+
+  kafka:
+    image: confluentinc/cp-enterprise-kafka:5.5.4
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+    ports:
+      - 9092:9092
+    depends_on:
+      zookeeper: {condition: service_healthy}
+    healthcheck: {test: nc -z localhost 9092, interval: 1s, start_period: 120s}
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:5.5.4
+    environment:
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://kafka:9092
+      - SCHEMA_REGISTRY_HOST_NAME=localhost
+    ports:
+      - 8081:8081
+    depends_on:
+      kafka: {condition: service_healthy}
+    healthcheck: {test: curl -f localhost:8081, interval: 1s, start_period: 120s}
+
+  connect:
+    image: debezium/connect:1.4
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=connect_configs
+      - OFFSET_STORAGE_TOPIC=connect_offsets
+      - KEY_CONVERTER=io.confluent.connect.avro.AvroConverter
+      - VALUE_CONVERTER=io.confluent.connect.avro.AvroConverter
+      - CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL=http://schema-registry:8081
+    ports:
+      - 8083:8083
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
+    depends_on:
+      kafka: {condition: service_healthy}
+      schema-registry: {condition: service_healthy}
+      mysql: {condition: service_healthy}
+
+  metabase:
+    image: metabase/metabase:v0.41.4
+    depends_on: [materialized]
+    ports:
+      - 3030:3000
+
+  chbench:
+    build: chbench
+    init: true
+    volumes:
+      - chbench-gen:/gen
+    depends_on:
+      mysql: {condition: service_healthy}
+      materialized: {condition: service_healthy}
+
+  cli:
+    image: materialize/cli:v0.20.0
+
+volumes:
+  chbench-gen:
