@@ -1,6 +1,6 @@
 services:
   materialized:
-    image: materialize/materialized:v0.20.0
+    image: materialize/materialized:v0.25.0
     container_name: materialized
     init: true
     command: -w1
@@ -8,10 +8,10 @@ services:
       - 6875:6875
     healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
   mzcli:
-    image: materialize/cli:v0.20.0
+    image: materialize/cli:v0.25.0
     container_name: mzcli
   dbt:
-    image: materialize/dbt-materialize:v0.20.0
+    image: materialize/dbt-materialize:v0.25.0
     container_name: dbt
     init: true
     entrypoint: /bin/bash
