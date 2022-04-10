@@ -1,7 +1,7 @@
 services:
   materialized:
     image: materialize/materialized:v0.25.0
-    command: -w2 --disable-telemetry
+    command: -w2
     ports:
       - 6875:6875
   mysql:
@@ -9,7 +9,7 @@ services:
     ports:
       - 3306:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=mysqlrootpw
+      - MYSQL_ROOT_PASSWORD=debezium
       - MYSQL_USER=mysqluser
       - MYSQL_PASSWORD=mysqlpw
     volumes:
@@ -48,15 +48,21 @@ services:
       VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
-    volumes:
-      - ${PWD}/mysql:/data
     ports:
       - 8083:8083
     healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
     depends_on:
       redpanda: {condition: service_healthy}
+  debezium_deploy:
+    image: debezium/connect:1.8
+    depends_on:
+      debezium: {condition: service_healthy}
+    restart: 'no'
+    volumes:
+      - ${PWD}/mysql/mysql_dbz.sh:/mysql_dbz.sh
+    entrypoint: ['bash', '-c', '/mysql_dbz.sh']
   loadgen:
-    build: ../ecommerce/loadgen
+    build: ../ecommerce-redpanda/loadgen
     init: true
     environment:
       KAFKA_ADDR: redpanda:9092

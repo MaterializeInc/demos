@@ -3,8 +3,7 @@ USE shop;
 
 GRANT ALL PRIVILEGES ON shop.* TO 'mysqluser';
 
-# Replication user
-CREATE USER 'debezium' IDENTIFIED BY 'dbz';
+CREATE USER 'debezium' IDENTIFIED WITH mysql_native_password BY 'dbz';
 
 GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'debezium';
 

@@ -5,7 +5,6 @@ import random
 import time
 
 import barnum
-import requests
 from kafka import KafkaProducer
 from mysql.connector import Error, connect
 
@@ -25,6 +24,7 @@ mysqlUser = "mysqluser"
 mysqlPass = "mysqlpw"
 kafkaHostPort = os.getenv("KAFKA_ADDR", "kafka:9092")
 kafkaTopic = "pageviews"
+debeziumHostPort = "debezium:8083"
 channels = ["organic search", "paid search", "referral", "social", "display"]
 categories = ["widgets", "gadgets", "doodads", "clearance"]
 
@@ -51,7 +51,11 @@ def generatePageview(viewer_id, target_id, page_type):
 
 
 try:
-    with connect(host=mysqlHost, user=mysqlUser, password=mysqlPass) as connection:
+    with connect(
+        host=mysqlHost,
+        user=mysqlUser,
+        password=mysqlPass,
+    ) as connection:
         with connection.cursor() as cursor:
             print("Seeding data...")
             cursor.executemany(
