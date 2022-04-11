@@ -108,3 +108,4 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s')
     logger.setLevel(logging.DEBUG)
     web.run_app(app, port=8100)
+

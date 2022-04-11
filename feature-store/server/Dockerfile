@@ -4,7 +4,7 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY requirements.txt /app
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY server.py /app
 CMD ["python3", "/app/server.py"]
