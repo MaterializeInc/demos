@@ -50,3 +50,4 @@ SELECT left.account_id, SUM(right.fraud_count) AS fraud_count
 FROM confirmed_fraudulent_transactions AS left 
 INNER JOIN confirmed_fraudulent_transactions AS right ON left.account_owner = right.account_owner
 GROUP BY left.account_id;
+

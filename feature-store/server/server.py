@@ -7,7 +7,7 @@ import random
 from typing import Optional
 
 
-logger = logging.getLogger('feature-store')
+logger = logging.getLogger("feature-store")
 dsn = "postgresql://materialize@materialized:6875/materialize?sslmode=disable"
 conn = psycopg2.connect(dsn)
 conn.autocommit = True
@@ -46,18 +46,22 @@ def query_feature_vector(account_id) -> Optional[FeatureVector]:
     querying the view is not because the computation is already completed.
     """
     with conn.cursor() as cur:
-        cur.execute(f"""SELECT fraud_count
+        cur.execute(
+            f"""SELECT fraud_count
                         FROM fraud_count_feature
-                        WHERE account_id = {account_id}""")
+                        WHERE account_id = {account_id}"""
+        )
 
         for row in cur:
             fraud_count = int(row[0])
             logger.info(
-                f"Materialize says {account_id} has a fraud count of {fraud_count}")
+                f"Materialize says {account_id} has a fraud count of {fraud_count}"
+            )
             return FeatureVector(fraud_count)
 
         logger.info(
-            f"Account {account_id} was not found in Materialize. This means it is not an active account.")
+            f"Account {account_id} was not found in Materialize. This means it is not an active account."
+        )
         return None
 
 
@@ -69,7 +73,7 @@ async def score_handle(request):
     have any information on a given accout it will return -1
     to signal unknown.
     """
-    account_id = int(request.match_info.get('account_id', "0"))
+    account_id = int(request.match_info.get("account_id", "0"))
     logger.info(f"Calculating fraud score for account {account_id}")
 
     vector = query_feature_vector(account_id)
@@ -77,11 +81,12 @@ async def score_handle(request):
     if vector is not None:
         score = sophisticated_ds_model(vector)
         logger.info(
-            f"Transaction for account {account_id} has been scored {score}% likely as fraudulent")
+            f"Transaction for account {account_id} has been scored {score}% likely as fraudulent"
+        )
     else:
         score = -1
 
-    return web.json_response({'score': score})
+    return web.json_response({"score": score})
 
 
 async def feature_handle(request):
@@ -89,7 +94,7 @@ async def feature_handle(request):
     An http endpoint that returns a feature vector from the
     real-time feature store powered by Materialize.
     """
-    account_id = int(request.match_info.get('account_id', "0"))
+    account_id = int(request.match_info.get("account_id", "0"))
     logger.info(f"Retrieving feature vector for account {account_id}")
 
     vector = query_feature_vector(account_id)
@@ -101,11 +106,10 @@ async def feature_handle(request):
 
 
 app = web.Application()
-app.add_routes([web.get('/score/{account_id}', score_handle)])
-app.add_routes([web.get('/vector/{account_id}', feature_handle)])
+app.add_routes([web.get("/score/{account_id}", score_handle)])
+app.add_routes([web.get("/vector/{account_id}", feature_handle)])
 
-if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s %(message)s')
+if __name__ == "__main__":
+    logging.basicConfig(format="%(asctime)s %(message)s")
     logger.setLevel(logging.DEBUG)
     web.run_app(app, port=8100)
-
