@@ -1,6 +1,6 @@
 services:
   materialized:
-    image: materialize/materialized:v0.20.0
+    image: materialize/materialized:v0.25.0
     ports:
       - 6875:6875
     healthcheck:
@@ -66,7 +66,7 @@ services:
       - materialized
       - boot
   boot:
-    image: materialize/cli:v0.20.0
+    image: materialize/cli:v0.25.0
     command: -f /mnt/mz_views.sql
     volumes: [ .:/mnt ]
     depends_on:
