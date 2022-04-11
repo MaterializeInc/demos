@@ -5,7 +5,6 @@ import random
 import time
 
 import barnum
-import requests
 from kafka import KafkaProducer
 from mysql.connector import Error, connect
 
@@ -21,8 +20,8 @@ itemPriceMin = 5
 itemPriceMax = 500
 mysqlHost = "mysql"
 mysqlPort = "3306"
-mysqlUser = "root"
-mysqlPass = "debezium"
+mysqlUser = "mysqluser"
+mysqlPass = "mysqlpw"
 kafkaHostPort = os.getenv("KAFKA_ADDR", "kafka:9092")
 kafkaTopic = "pageviews"
 debeziumHostPort = "debezium:8083"
@@ -34,25 +33,6 @@ item_insert = "INSERT INTO shop.items (name, category, price, inventory) VALUES 
 user_insert = "INSERT INTO shop.users (email, is_vip) VALUES ( %s, %s )"
 purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purchase_price) VALUES ( %s, %s, %s, %s )"
 
-# Initialize Debezium (Kafka Connect Component)
-requests.post(
-    ("http://%s/connectors" % debeziumHostPort),
-    json={
-        "name": "mysql-connector",
-        "config": {
-            "connector.class": "io.debezium.connector.mysql.MySqlConnector",
-            "database.hostname": mysqlHost,
-            "database.port": mysqlPort,
-            "database.user": mysqlUser,
-            "database.password": mysqlPass,
-            "database.server.name": mysqlHost,
-            "database.server.id": "1234",
-            "database.history.kafka.bootstrap.servers": kafkaHostPort,
-            "database.history.kafka.topic": "mysql-history",
-            "time.precision.mode": "connect",
-        },
-    },
-)
 
 # Initialize Kafka
 producer = KafkaProducer(
@@ -77,45 +57,6 @@ try:
         password=mysqlPass,
     ) as connection:
         with connection.cursor() as cursor:
-            print("Initializing shop database...")
-            cursor.execute("CREATE DATABASE IF NOT EXISTS shop;")
-            cursor.execute(
-                """CREATE TABLE IF NOT EXISTS shop.users
-                    (
-                        id SERIAL PRIMARY KEY,
-                        email VARCHAR(255),
-                        is_vip BOOLEAN DEFAULT FALSE,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                );"""
-            )
-            cursor.execute(
-                """CREATE TABLE IF NOT EXISTS shop.items
-                    (
-                        id SERIAL PRIMARY KEY,
-                        name VARCHAR(100),
-                        category VARCHAR(100),
-                        price DECIMAL(7,2),
-                        inventory INT,
-                        inventory_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                );"""
-            )
-            cursor.execute(
-                """CREATE TABLE IF NOT EXISTS shop.purchases
-                    (
-                        id SERIAL PRIMARY KEY,
-                        user_id BIGINT UNSIGNED REFERENCES user(id),
-                        item_id BIGINT UNSIGNED REFERENCES item(id),
-                        status TINYINT UNSIGNED DEFAULT 1,
-                        quantity INT UNSIGNED DEFAULT 1,
-                        purchase_price DECIMAL(12,2),
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                );"""
-            )
-            connection.commit()
             print("Seeding data...")
             cursor.executemany(
                 item_insert,

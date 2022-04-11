@@ -12,7 +12,7 @@ curl -s -X PUT -H  "Content-Type:application/json" http://debezium:8083/connecto
     "database.server.name": "mysql",
     "database.server.id": "223344",
     "database.allowPublicKeyRetrieval": true,
-    "database.history.kafka.bootstrap.servers": "redpanda:9092",
+    "database.history.kafka.bootstrap.servers":"'"$KAFKA_ADDR"'",
     "database.history.kafka.topic": "mysql-history",
     "database.include.list": "shop",
     "time.precision.mode": "connect",

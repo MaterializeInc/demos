@@ -13,8 +13,8 @@ services:
       - MYSQL_USER=mysqluser
       - MYSQL_PASSWORD=mysqlpw
     volumes:
-      - ${PWD}/mysql/mysql.cnf:/etc/mysql/conf.d
-      - ${PWD}/mysql/mysql_bootstrap.sql:/docker-entrypoint-initdb.d/mysql_bootstrap.sql
+      - ../mysql/mysql.cnf:/etc/mysql/conf.d
+      - ../mysql/mysql_bootstrap.sql:/docker-entrypoint-initdb.d/mysql_bootstrap.sql
     healthcheck: {test: mysql -pdebezium -e 'select 1', interval: 1s, start_period: 60s}
   redpanda:
     image: docker.vectorized.io/vectorized/redpanda:v21.11.2
@@ -57,12 +57,19 @@ services:
     image: debezium/connect:1.8
     depends_on:
       debezium: {condition: service_healthy}
+    environment:
+      KAFKA_ADDR: redpanda:9092
     restart: 'no'
     volumes:
-      - ${PWD}/mysql/mysql_dbz.sh:/mysql_dbz.sh
+      - ../mysql/mysql_dbz.sh:/mysql_dbz.sh
     entrypoint: ['bash', '-c', '/mysql_dbz.sh']
+  metabase:
+    image: metabase/metabase:v0.41.5
+    depends_on: [materialized]
+    ports:
+      - 3030:3000
   loadgen:
-    build: ../ecommerce-redpanda/loadgen
+    build: ../loadgen
     init: true
     environment:
       KAFKA_ADDR: redpanda:9092
