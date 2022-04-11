@@ -41,25 +41,17 @@ services:
       - POSTGRES_DB=default
       - POSTGRES_HOST_AUTH_METHOD=trust
     healthcheck:
-      test:
-        [
-          "CMD",
-          "pg_isready",
-          "-q",
-          "-d",
-          "postgres",
-          "-U",
-          "postgres"
-        ]
-      interval: 10s
-      timeout: 30s
-      retries: 5
-      start_period: 30s
+      {
+        test: pg_isready -q -d postgres -U postgres,
+        interval: 5s,
+        timeout: 60s,
+        start_period: 10s
+      }
     command: -c wal_level=logical
     ports:
       - 5433:5432
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./pg_tables.sql:/docker-entrypoint-initdb.d/init.sql
   loadgen:
     build: ./loadgen
     init: true
@@ -75,7 +67,7 @@ services:
       - boot
   boot:
     image: materialize/cli:v0.20.0
-    command: -f /mnt/queries.sql
+    command: -f /mnt/mz_views.sql
     volumes: [ .:/mnt ]
     depends_on:
       materialized:
