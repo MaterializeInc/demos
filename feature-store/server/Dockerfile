@@ -7,4 +7,4 @@ COPY requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY server.py /app
-CMD ["python3", "/app/server.py"]
+CMD ["python3", "/app/main.py"]
