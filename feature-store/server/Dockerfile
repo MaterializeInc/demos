@@ -6,5 +6,5 @@ WORKDIR /app
 COPY requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY server.py /app
-CMD ["python3", "/app/main.py"]
+COPY feature_store_server.py /app
+CMD ["python3", "/app/feature_store_server.py"]

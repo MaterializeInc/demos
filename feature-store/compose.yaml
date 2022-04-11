@@ -25,7 +25,7 @@ services:
       - 8081:8081
     healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
   postgres:
-    image: postgres:alpine
+    image: postgres:14.2-alpine
     restart: unless-stopped
     environment:
       - POSTGRES_DB=default
