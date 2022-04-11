@@ -4,10 +4,9 @@
 $ docker-compose up -d
 ```
 
-
 ## Clean Up
 
-When finished, you can quickly spin down the demo. 
+When finished, you can quickly spin down the demo.
 
 ```bash
 $ docker-compose down

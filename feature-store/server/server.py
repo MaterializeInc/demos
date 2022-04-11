@@ -1,11 +1,11 @@
-from aiohttp import web
 import dataclasses
-from dataclasses import dataclass
 import logging
-import psycopg2
 import random
+from dataclasses import dataclass
 from typing import Optional
 
+import psycopg2
+from aiohttp import web
 
 logger = logging.getLogger("feature-store")
 dsn = "postgresql://materialize@materialized:6875/materialize?sslmode=disable"

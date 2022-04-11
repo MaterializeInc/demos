@@ -5,8 +5,8 @@ import signal
 import sys
 import time
 
-from kafka.errors import NoBrokersAvailable
 from kafka import KafkaProducer
+from kafka.errors import NoBrokersAvailable
 
 KAFKA_BROKER = "redpanda:9092"
 

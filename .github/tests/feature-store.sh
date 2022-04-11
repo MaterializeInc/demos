@@ -9,5 +9,5 @@ docker-compose up -d
 sleep 15
 
 # Ensure that we can successfully query the server for an account
-curl localhost:8100/score/1 > /dev/null 
+curl localhost:8100/score/1 > /dev/null
 docker-compose logs server
