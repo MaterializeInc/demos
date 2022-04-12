@@ -24,7 +24,6 @@ jobs:
         docker-compose: [1.29.2, v2.1.1]
         demo:
           - ecommerce
-          - ecommerce-redpanda
           - http-logs
           - wikirecent
           - dbt-get-started
