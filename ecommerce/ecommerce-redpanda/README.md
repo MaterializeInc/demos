@@ -28,15 +28,13 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
 3. Confirm that everything is running as expected:
 
    ```shell session
-   docker stats
+   docker-compose ps
    ```
 
 4. Log in to MySQL to confirm that tables are created and seeded:
 
    ```shell session
-   docker-compose exec mysql /bin/bash
-
-   mysql -u root -pdebezium -h 127.0.0.1 shop
+   docker-compose exec mysql bash -c 'mysql -umysqluser -pmysqlpw shop'
 
    SHOW TABLES;
 
