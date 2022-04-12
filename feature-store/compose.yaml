@@ -1,0 +1,61 @@
+services:
+  materialized:
+    image: materialize/materialized:v0.25.0
+    ports:
+      - 6875:6875
+    healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
+  redpanda:
+    image: docker.vectorized.io/vectorized/redpanda:v21.11.2
+    command:
+      - redpanda start
+      - --overprovisioned
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --node-id 0
+      - --check=false
+      - --kafka-addr 0.0.0.0:9092
+      - --advertise-kafka-addr redpanda:9092
+      - --pandaproxy-addr 0.0.0.0:8082
+      - --advertise-pandaproxy-addr redpanda:8082
+      - --set redpanda.enable_transactions=true
+      - --set redpanda.enable_idempotence=true
+    ports:
+      - 9092:9092
+      - 8081:8081
+    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
+  postgres:
+    image: postgres:14.2-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=default
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    healthcheck:
+      {test: pg_isready -q -d postgres -U postgres, interval: 5s, timeout: 60s, start_period: 10s}
+    command: -c wal_level=logical
+    ports:
+      - 5433:5432
+    volumes:
+      - ./pg_tables.sql:/docker-entrypoint-initdb.d/init.sql
+  loadgen:
+    build: ./loadgen
+    init: true
+    depends_on:
+      - redpanda
+  server:
+    build: ./server
+    init: true
+    ports:
+      - 8100:8100
+    depends_on:
+      - materialized
+      - boot
+  boot:
+    image: materialize/cli:v0.25.0
+    command: -f /mnt/mz_views.sql
+    volumes: [.:/mnt]
+    depends_on:
+      materialized:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy

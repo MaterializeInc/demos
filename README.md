@@ -22,6 +22,7 @@ Try one out now:
 [dbt-jaffle-shop]: ./dbt-jaffle-shop
 [ecommerce-redpanda]: ./ecommerce-redpanda
 [ecommerce]: ./ecommerce
+[feature-store]: ./feature-store
 [http-logs]: ./http-logs
 [materialize]: https://github.com/MaterializeInc/materialize
 [wikirecent]: ./wikirecent
