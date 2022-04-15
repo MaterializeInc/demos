@@ -94,7 +94,7 @@ services:
 
   chbench_run:
     init: true
-    image: materialize/chbenchmark:v0.17.0
+    image: materialize/chbenchmark:v0.25.0
     command:
       - run
       - --config-file-path=/etc/chbenchmark/mz-default-mysql.cfg
