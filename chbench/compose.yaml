@@ -82,7 +82,7 @@ services:
 
   chbench_gen:
     init: true
-    image: materialize/chbenchmark:v0.20.0
+    image: materialize/chbenchmark:v0.17.0
     command:
       - gen
       - --config-file-path=/etc/chbenchmark/mz-default-mysql.cfg
@@ -93,7 +93,7 @@ services:
 
   chbench_run:
     init: true
-    image: materialize/chbenchmark:v0.20.0
+    image: materialize/chbenchmark:v0.17.0
     command:
       - run
       - --config-file-path=/etc/chbenchmark/mz-default-mysql.cfg
