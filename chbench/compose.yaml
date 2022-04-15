@@ -1,6 +1,6 @@
 services:
   materialized:
-    image: materialize/materialized:v0.20.0
+    image: materialize/materialized:v0.25.0
     command: -w2 --disable-telemetry
     ports:
       - 6875:6875
@@ -9,6 +9,7 @@ services:
     healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
 
   mysql:
+    init: true
     build: mysql
     ports:
       - 3306:3306
@@ -110,7 +111,7 @@ services:
     volumes: [chbench-gen:/gen]
 
   cli:
-    image: materialize/cli:v0.20.0
+    image: materialize/cli:v0.25.0
 
   metabase:
     image: metabase/metabase:v0.41.5
