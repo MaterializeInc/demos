@@ -11,11 +11,14 @@
 # compose.yaml file across the repository.
 
 materialize:
-  tag: v0.18.0
+  tag: v0.25.0
   images:
     - materialize/cli
     - materialize/materialized
     - materialize/chbenchmark
+    - materialize/dbt-materialize
+    - materialize/billing-demo
+
 debezium:
   tag: '1.8'
   images:
@@ -47,3 +50,7 @@ redpanda:
   tag: v21.11.2
   images:
     - docker.vectorized.io/vectorized/redpanda
+postgres:
+  tag: '14.2-alpine'
+  images:
+    - postgres

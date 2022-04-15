@@ -6,7 +6,7 @@ set -euxo pipefail
 
 # Turn on the demo and give it a few seconds to spin up.
 docker-compose up -d
-sleep 5
+sleep 15
 
 # Ensure that the items table is imported with the correct number of items.
 docker-compose run -T cli -c "
