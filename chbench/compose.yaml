@@ -6,29 +6,29 @@ services:
       - 6875:6875
     environment:
       - MZ_DEV=1
-    healthcheck: { test: curl -f localhost:6875, interval: 1s, start_period: 30s }
+    healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
 
   mysql:
     build: mysql
     ports:
       - 3306:3306
     environment:
-     - MYSQL_ROOT_HOST=%
-     - MYSQL_ROOT_PASSWORD=rootpw
-     - MYSQL_USER=mysqluser
-     - MYSQL_PASSWORD=mysqlpw
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_ROOT_PASSWORD=rootpw
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=mysqlpw
     volumes:
       - chbench-gen:/var/lib/mysql-files
     healthcheck: {test: mysql -prootpw -e 'select 1', interval: 1s, start_period: 60s}
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.5.4
+    image: confluentinc/cp-zookeeper:7.0.1
     environment:
       - ZOOKEEPER_CLIENT_PORT=2181
     healthcheck: {test: nc -z localhost 2181, interval: 1s, start_period: 120s}
 
   kafka:
-    image: confluentinc/cp-enterprise-kafka:5.5.4
+    image: confluentinc/cp-enterprise-kafka:7.0.1
     environment:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
@@ -40,18 +40,21 @@ services:
     healthcheck: {test: nc -z localhost 9092, interval: 1s, start_period: 120s}
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:5.5.4
+    image: confluentinc/cp-schema-registry:7.0.1
+    init: true
     environment:
-      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://kafka:9092
-      - SCHEMA_REGISTRY_HOST_NAME=localhost
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=kafka:9092
+      - SCHEMA_REGISTRY_HOST_NAME=schema-registry
+      - SCHEMA_REGISTRY_LISTENERS=http://schema-registry:8081,http://localhost:8081
     ports:
       - 8081:8081
     depends_on:
+      zookeeper: {condition: service_healthy}
       kafka: {condition: service_healthy}
     healthcheck: {test: curl -f localhost:8081, interval: 1s, start_period: 120s}
 
-  connect:
-    image: debezium/connect:1.4
+  debezium:
+    image: debezium/connect:1.8
     environment:
       - BOOTSTRAP_SERVERS=kafka:9092
       - GROUP_ID=1
@@ -67,25 +70,53 @@ services:
     depends_on:
       kafka: {condition: service_healthy}
       schema-registry: {condition: service_healthy}
-      mysql: {condition: service_healthy}
 
-  metabase:
-    image: metabase/metabase:v0.41.4
-    depends_on: [materialized]
-    ports:
-      - 3030:3000
-
-  chbench:
-    build: chbench
-    init: true
+  debezium_deploy:
+    image: debezium/connect:1.8
+    depends_on:
+      debezium: {condition: service_healthy}
+    restart: 'no'
     volumes:
-      - chbench-gen:/gen
+      - ${PWD}/mysql-connector.sh:/mysql-connector.sh
+    entrypoint: ['bash', '-c', '/mysql-connector.sh']
+
+  chbench_gen:
+    init: true
+    image: materialize/chbenchmark:v0.20.0
+    command:
+      - gen
+      - --config-file-path=/etc/chbenchmark/mz-default-mysql.cfg
+      - --warehouses=1
     depends_on:
       mysql: {condition: service_healthy}
-      materialized: {condition: service_healthy}
+    volumes: [chbench-gen:/gen]
+
+  chbench_run:
+    init: true
+    image: materialize/chbenchmark:v0.20.0
+    command:
+      - run
+      - --config-file-path=/etc/chbenchmark/mz-default-mysql.cfg
+      - --dsn=mysql
+      - --gen-dir=/var/lib/mysql-files
+      - --analytic-threads=0
+      - --transactional-threads=1
+      - --run-seconds=86400
+      - --mz-sources
+    depends_on:
+      debezium_deploy: {condition: service_completed_successfully}
+      debezium: {condition: service_healthy}
+      mysql: {condition: service_healthy}
+    volumes: [chbench-gen:/gen]
 
   cli:
     image: materialize/cli:v0.20.0
+
+  metabase:
+    image: metabase/metabase:v0.41.5
+    depends_on: [materialized]
+    ports:
+      - 3030:3000
 
 volumes:
   chbench-gen:
