@@ -119,11 +119,17 @@ def lint_composition(ctx: Context, path: Path):
         if "image" in service:
             lint_image(ctx, service["image"], path, service.lc.key("image"))
 
-    if path.parent.name not in ctx.tested_dirs:
+    # In some cases, a different version of the same demo might exist
+    # as a sub-directory (e.g. ecommerce, ecommerce-redpanda). To deal
+    # with it, check for both paths against the matrix.
+    if (
+        path.parents[1].name
+        and (path.parents[1].name + "/" + path.parents[0].name) not in ctx.tested_dirs
+    ):
         ctx.errors.append(
             LintError(
-                f"demo {path.parent.name!r} is not tested by CI",
-                f"add {path.parent.name!r} to the test step matrix",
+                f"demo {path.parents[1].name!r} is not tested by CI",
+                f"add {path.parents[1].name!r} to the test step matrix",
                 WORKFLOW_PATH,
                 ctx.tested_dirs.lc,
             )
