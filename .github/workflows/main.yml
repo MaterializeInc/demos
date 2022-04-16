@@ -40,7 +40,7 @@ jobs:
           pip install -r .github/tools/requirements.txt
           .github/tools/bump.py materialize ${{ github.event.inputs.version || 'unstable' }}
         if: github.event.schedule || github.event.inputs.version
-      - name:
+      - name: Pre-process demo matrix
         run: |
           # In some cases, a different version of the same demo might exist
           # as a sub-directory (e.g. ecommerce, ecommerce-redpanda). To deal
