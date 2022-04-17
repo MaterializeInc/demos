@@ -17,5 +17,3 @@ curl -s -X PUT -H  "Content-Type:application/json" http://debezium:8083/connecto
     "database.include.list": "tpcch",
     "time.precision.mode": "connect"
  }'
-
-sleep 1m
