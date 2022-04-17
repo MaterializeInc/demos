@@ -90,7 +90,6 @@ services:
       - --warehouses=1
     depends_on:
       mysql: {condition: service_healthy}
-      debezium_deploy: {condition: service_completed_successfully}
     volumes: [chbench-gen:/gen]
 
   chbench_run:
@@ -106,6 +105,7 @@ services:
       - --run-seconds=86400
       - --mz-sources
     depends_on:
+      debezium_deploy: {condition: service_completed_successfully}
       debezium: {condition: service_healthy}
       mysql: {condition: service_healthy}
     volumes: [chbench-gen:/gen]
