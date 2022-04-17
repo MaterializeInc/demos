@@ -24,7 +24,7 @@ jobs:
         docker-compose: [1.29.2, v2.1.1]
         demo:
           - ecommerce
-          - ecommerce/ecommerce-redpanda
+          - ecommerce-redpanda
           - feature-store
           - http-logs
           - wikirecent
@@ -40,18 +40,10 @@ jobs:
           pip install -r .github/tools/requirements.txt
           .github/tools/bump.py materialize ${{ github.event.inputs.version || 'unstable' }}
         if: github.event.schedule || github.event.inputs.version
-      - name: Pre-process demo matrix
-        run: |
-          # In some cases, a different version of the same demo might exist
-          # as a sub-directory (e.g. ecommerce, ecommerce-redpanda). To deal
-          # with it, strip the parent directory from the name in the matrix.
-          demo=${{ matrix.demo }}
-          demo_strip=${demo#*/}
-          echo "DEMO=$demo_strip" >> $GITHUB_ENV
       - name: Run and test demo
         run: |
           cd ${{ matrix.demo }}
-          $GITHUB_WORKSPACE/.github/tests/${{ env.DEMO }}.sh
+          $GITHUB_WORKSPACE/.github/tests/${{ matrix.demo }}.sh
       - name: Dump logs
         run: |
           cd ${{ matrix.demo }}
@@ -60,7 +52,7 @@ jobs:
       - name: Upload logs
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.DEMO }}-docker-compose.log
+          name: ${{ matrix.demo }}-docker-compose.log
           path: docker-compose.log
         if: always()
 
