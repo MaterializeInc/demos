@@ -18,7 +18,6 @@ materialize:
     - materialize/chbenchmark
     - materialize/dbt-materialize
     - materialize/billing-demo
-    - materialize/chbenchmark
 debezium:
   tag: '1.8'
   images:
