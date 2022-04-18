@@ -15,6 +15,7 @@ materialize:
   images:
     - materialize/cli
     - materialize/materialized
+    - materialize/chbenchmark
     - materialize/dbt-materialize
     - materialize/billing-demo
 debezium:
@@ -23,7 +24,7 @@ debezium:
     - debezium/connect
     - debezium/example-mysql
 mysql:
-  tag: '8.0'
+  tag: '8.0.27'
   images:
     - mysql/mysql-server
 python:

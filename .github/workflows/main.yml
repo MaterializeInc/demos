@@ -30,6 +30,7 @@ jobs:
           - wikirecent
           - dbt-get-started
           - billing
+          - chbench
     steps:
       - uses: actions/checkout@v1
       - uses: KengoTODA/actions-setup-docker-compose@v1.0.4
