@@ -6,7 +6,6 @@ services:
       - 6875:6875
   mysql:
     image: mysql/mysql-server:8.0.27
-    image: mysql/mysql-server:8.0
     ports:
       - 3306:3306
     environment:

@@ -9,5 +9,5 @@ docker-compose up -d
 sleep 5
 
 # Ensure that one of the views is basically functional.
-record_count=$(docker-compose run -T cli -Atc 'SELECT count(*) FROM billing_raw_data;')
+record_count=$(docker-compose run -T cli -Atc 'SELECT count(*) FROM billing_raw_data')
 [[ "$record_count" -eq 1000 ]]
