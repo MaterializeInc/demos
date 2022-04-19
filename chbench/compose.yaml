@@ -76,7 +76,7 @@ services:
     image: debezium/connect:1.8
     depends_on:
       debezium: {condition: service_healthy}
-    restart: 'no'
+    restart: "no"
     volumes:
       - ${PWD}/mysql/mysql-connector.sh:/mysql-connector.sh
     entrypoint: ['bash', '-c', '/mysql-connector.sh']

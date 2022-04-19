@@ -64,7 +64,7 @@ services:
       debezium: {condition: service_healthy}
     environment:
       KAFKA_ADDR: kafka:9092
-    restart: 'no'
+    restart: "no"
     volumes:
       - ${PWD}/mysql/mysql_dbz.sh:/mysql_dbz.sh
     entrypoint: ['bash', '-c', '/mysql_dbz.sh']
