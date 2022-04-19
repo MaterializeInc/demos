@@ -61,7 +61,6 @@ services:
       debezium: {condition: service_healthy}
     environment:
       KAFKA_ADDR: redpanda:9092
-    restart: "no"
     volumes:
       - ../ecommerce/mysql/mysql_dbz.sh:/mysql_dbz.sh
     entrypoint: ['bash', '-c', '/mysql_dbz.sh']
