@@ -45,7 +45,7 @@ Materialize. The more extensive the test, the better, but even a simple test
 will smoke out more problems than you think, e.g., a service failing to boot
 because of a mistyped environment variable.
 
-> :warning: **Make sure permissions are set correct:** chmod 755 DEMONAME.sh
+> :warning: **Make sure permissions are set correctly:** `chmod 755 DEMONAME.sh`
 
 ## Updating to the latest Materialize
 
