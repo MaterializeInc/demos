@@ -18,6 +18,7 @@ materialize:
     - materialize/chbenchmark
     - materialize/dbt-materialize
     - materialize/billing-demo
+    - materialize/dashboard
 debezium:
   tag: '1.8'
   images:
@@ -53,3 +54,7 @@ postgres:
   tag: '14.2-alpine'
   images:
     - postgres
+node:
+  tag: '16'
+  images:
+    - node
