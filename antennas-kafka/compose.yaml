@@ -69,7 +69,7 @@ services:
   frontend:
     container_name: frontend
     build:
-      context: ./frontend
+      context: ../antennas-postgres/frontend
     init: true
     ports:
       - 3000:3000
