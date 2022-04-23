@@ -4,6 +4,7 @@ services:
     command: -w2
     ports:
       - 6875:6875
+    healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
   mysql:
     image: mysql/mysql-server:8.0.27
     ports:
