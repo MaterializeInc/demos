@@ -1,6 +1,7 @@
 # Real-Time Feature Store with Materialize
 
 This is a self-contained demo using [Materialize](https://materialize.com) to build a real-time feature store.
+You can learn more about this demo by reading the corresponding [blog post](https://materialize.com/real-time-feature-store-with-materialize/).
 
 ![Materialize Real-Time Feature Store](feature-store-architecture.svg)
 
