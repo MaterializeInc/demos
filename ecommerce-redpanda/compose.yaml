@@ -1,7 +1,6 @@
 services:
   materialized:
     image: materialize/materialized:v0.25.0
-    command: -w2
     ports:
       - 6875:6875
     healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}

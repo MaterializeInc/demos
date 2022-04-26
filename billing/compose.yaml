@@ -1,7 +1,6 @@
 services:
   materialized:
     image: materialize/materialized:v0.25.0
-    command: -w2
     init: true
     volumes:
       - db-data:/share/billing-demo/data
