@@ -12,13 +12,13 @@ services:
     ports:
       # To learn about configuring Kafka for access across networks see
       # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
-      - '9092:9092'
-      - '29092:29092'
+      - 9092:9092
+      - 29092:29092
     depends_on:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -26,14 +26,14 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
   materialized:
-    image: materialize/materialized:v0.25.0
+    image: materialize/materialized:v0.26.0
     container_name: materialized
     restart: always
     ports:
       - 6875:6875
 
   grafana_dashboard:
-    image: materialize/dashboard:v0.25.0
+    image: materialize/dashboard:v0.26.0
     container_name: grafana_dashboard
     restart: always
     ports:
@@ -50,13 +50,15 @@ services:
     init: true
     depends_on:
       - materialized
-    command: sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://broker:29092 -wait tcp://materialized:6875 -timeout 80s npm start"
+    command: sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://broker:29092
+      -wait tcp://materialized:6875 -timeout 80s npm start"
     environment:
       KAFKA_BROKER: broker:29092
 
   backend:
     container_name: backend
-    command: sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://broker:29092 -wait tcp://materialized:6875 -timeout 80s npm start"
+    command: sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://broker:29092
+      -wait tcp://materialized:6875 -timeout 80s npm start"
     build:
       context: ./backend
     init: true
@@ -84,6 +86,7 @@ services:
     depends_on:
       - helper
       - backend
-    command: sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://broker:29092 -wait tcp://materialized:6875 -timeout 80s npm start"
+    command: sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://broker:29092
+      -wait tcp://materialized:6875 -timeout 80s npm start"
     environment:
       KAFKA_BROKER: broker:29092

@@ -10,11 +10,11 @@ services:
     environment:
       POSTGRES_PASSWORD: pg_password
     command:
-      - 'postgres'
-      - '-c'
-      - 'wal_level=logical'
+      - postgres
+      - -c
+      - wal_level=logical
   materialized:
-    image: materialize/materialized:v0.25.0
+    image: materialize/materialized:v0.26.0
     container_name: materialized
     restart: always
     ports:
@@ -22,7 +22,7 @@ services:
     depends_on:
       - postgres
   grafana_dashboard:
-    image: materialize/dashboard:v0.25.0
+    image: materialize/dashboard:v0.26.0
     container_name: grafana_dashboard
     restart: always
     ports:
