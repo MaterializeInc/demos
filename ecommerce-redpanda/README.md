@@ -75,6 +75,8 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    ```
 
    _(This is just a shortcut to a docker container with postgres-client pre-installed, if you already have psql you could run `psql -U materialize -h localhost -p 6875 materialize`)_
+   
+   > :zap: If you want to skip the schema creation steps and load everything at once, you can run `psql -U materialize -h localhost -p 6875 -f schema.sql`
 
 7. Now that you're in the Materialize CLI, define all of the tables in `mysql.shop` as Kafka sources:
 
