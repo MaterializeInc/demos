@@ -11,7 +11,7 @@
 # compose.yaml file across the repository.
 
 materialize:
-  tag: v0.25.0
+  tag: v0.26.0
   images:
     - materialize/cli
     - materialize/materialized
@@ -25,7 +25,7 @@ debezium:
     - debezium/connect
     - debezium/example-mysql
 mysql:
-  tag: '8.0.27'
+  tag: 8.0.27
   images:
     - mysql/mysql-server
 python:
@@ -51,7 +51,7 @@ redpanda:
   images:
     - docker.vectorized.io/vectorized/redpanda
 postgres:
-  tag: '14.2-alpine'
+  tag: 14.2-alpine
   images:
     - postgres
 node:

@@ -1,6 +1,6 @@
 services:
   materialized:
-    image: materialize/materialized:v0.25.0
+    image: materialize/materialized:v0.26.0
     init: true
     volumes:
       - db-data:/share/billing-demo/data
@@ -40,19 +40,19 @@ services:
     healthcheck: {test: curl -f localhost:8081, interval: 1s, start_period: 120s}
 
   billing-demo:
-    image: materialize/billing-demo:v0.25.0
+    image: materialize/billing-demo:v0.26.0
     init: true
     environment:
       - RUST_LOG=billing-demo=debug,info
     command:
-      - '--materialized-host=materialized'
-      - '--kafka-host=kafka'
-      - '--schema-registry-url=http://schema-registry:8081'
-      - '--csv-file-name=/share/billing-demo/data/prices.csv'
-      - '--create-topic'
-      - '--replication-factor=1'
-      - '--message-count=1000'
-      - '--partitions=1'
+      - --materialized-host=materialized
+      - --kafka-host=kafka
+      - --schema-registry-url=http://schema-registry:8081
+      - --csv-file-name=/share/billing-demo/data/prices.csv
+      - --create-topic
+      - --replication-factor=1
+      - --message-count=1000
+      - --partitions=1
     volumes:
       - db-data:/share/billing-demo/data
     depends_on:
@@ -61,7 +61,7 @@ services:
       materialized: {condition: service_healthy}
 
   cli:
-    image: materialize/cli:v0.25.0
+    image: materialize/cli:v0.26.0
 
 volumes:
   db-data:

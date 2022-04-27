@@ -1,6 +1,6 @@
 services:
   materialized:
-    image: materialize/materialized:v0.25.0
+    image: materialize/materialized:v0.26.0
     ports:
       - 6875:6875
     healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
@@ -77,11 +77,11 @@ services:
       debezium: {condition: service_healthy}
     volumes:
       - ${PWD}/mysql/mysql-connector.sh:/mysql-connector.sh
-    entrypoint: ['bash', '-c', '/mysql-connector.sh']
+    entrypoint: [bash, -c, /mysql-connector.sh]
 
   chbench_gen:
     init: true
-    image: materialize/chbenchmark:v0.25.0
+    image: materialize/chbenchmark:v0.26.0
     command:
       - gen
       - --config-file-path=/etc/chbenchmark/mz-default-mysql.cfg
@@ -92,7 +92,7 @@ services:
 
   chbench_run:
     init: true
-    image: materialize/chbenchmark:v0.25.0
+    image: materialize/chbenchmark:v0.26.0
     command:
       - run
       - --config-file-path=/etc/chbenchmark/mz-default-mysql.cfg
@@ -109,7 +109,7 @@ services:
     volumes: [chbench-gen:/gen]
 
   cli:
-    image: materialize/cli:v0.25.0
+    image: materialize/cli:v0.26.0
 
   metabase:
     image: metabase/metabase:v0.41.5
