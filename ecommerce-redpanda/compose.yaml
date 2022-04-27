@@ -55,6 +55,7 @@ services:
     healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
     depends_on:
       redpanda: {condition: service_healthy}
+      mysql: {condition: service_healthy}
   debezium_deploy:
     image: debezium/connect:1.8
     depends_on:
