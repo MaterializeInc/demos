@@ -30,8 +30,8 @@ services:
     environment:
       - POSTGRES_DB=default
       - POSTGRES_HOST_AUTH_METHOD=trust
-    healthcheck: {test: pg_isready -q -d postgres -U postgres, interval: 5s, timeout: 60s,
-      start_period: 10s}
+    healthcheck:
+      {test: pg_isready -q -d postgres -U postgres, interval: 5s, timeout: 60s, start_period: 10s}
     command: -c wal_level=logical
     ports:
       - 5433:5432
