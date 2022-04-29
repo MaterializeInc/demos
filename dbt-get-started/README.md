@@ -105,4 +105,4 @@ To set up dbt and Materialize in your local environment instead of using Docker,
 
 <hr>
 
-If you run into issues with the `dbt-materialize adapter, please [open a GitHub issue](https://github.com/MaterializeInc/materialize/issues/new/choose) so we can look into it!
+If you run into issues with the `dbt-materialize` adapter, please [open a GitHub issue](https://github.com/MaterializeInc/materialize/issues/new/choose) so we can look into it!
