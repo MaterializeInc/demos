@@ -13,8 +13,8 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
 1. Clone this repo and navigate to the directory by running:
 
    ```shell session
-   git clone https://github.com/MaterializeInc/ecommerce-demo.git
-   cd ecommerce-demo
+   git clone https://github.com/MaterializeInc/demos.git
+   cd demos/ecommerce-redpanda
    ```
 
 2. Bring up the Docker Compose containers in the background.
