@@ -19,5 +19,4 @@ tests:
   mz_get_started:
     marts:
       +store_failures: true
-      +materialized: materializedtest
       +schema: 'etl_failure'
