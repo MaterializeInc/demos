@@ -20,4 +20,4 @@ tests:
     marts:
       +store_failures: true
       +materialized: materializedtest
-      +schema: "etl_failure"
+      +schema: 'etl_failure'

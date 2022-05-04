@@ -1,7 +1,6 @@
 version: 2
 
 models:
-
   - name: avg_bid
     description: 'Computes the average bid price'
     columns:
@@ -14,8 +13,8 @@ models:
         description: 'The average bid price'
         tests:
           - dbt_utils.expression_is_true:
-              expression: ">= 200"
+              expression: '>= 200'
               config:
-                schema: "bid_alert"
-                alias: "avg_bid_threshold_200"
+                schema: 'bid_alert'
+                alias: 'avg_bid_threshold_200'
                 severity: warn
