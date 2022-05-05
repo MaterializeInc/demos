@@ -58,7 +58,7 @@ const performanceMapCounter = new Map<string, number>();
 const alreadyImprovingSet = new Set<string>();
 
 /**
- * Build a custom Postgres insert with a random performance and clients connected
+ * Build a custom Kafka event with a random performance and clients connected
  * @param antennaId Antenna Identifier
  * @returns
  */

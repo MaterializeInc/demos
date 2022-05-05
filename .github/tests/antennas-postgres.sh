@@ -13,7 +13,7 @@ docker-compose up -d
 sleep 20
 
 # Run a SQL using the sql endpoint
-count="$(curl -X POST 'localhost:6875/sql' -d 'sql=SELECT COUNT(1) FROM last_half_minute_updates' | jq -r '.results[0].rows[0][0]')"
+count="$(curl -X POST 'localhost:6875/sql' -d 'sql=SELECT COUNT(1) FROM last_half_minute_performance_per_antenna' | jq -r '.results[0].rows[0][0]')"
 
 if [ "$count" -le 0 ];
 then

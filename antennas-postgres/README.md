@@ -1,6 +1,6 @@
 # Manhattan Antennas Performance
 
-https://user-images.githubusercontent.com/11491779/152449609-a943678f-b90d-4ff8-8294-96a2b459f6bc.mp4
+https://user-images.githubusercontent.com/11491779/166932582-e5a9fd47-e397-4419-b221-e8f38c6f06f5.mp4
 
 If you want to try it right now, clone the project and run:
 
@@ -110,18 +110,12 @@ GRANT SELECT ON antennas, antennas_performance TO materialize;
   CREATE MATERIALIZED VIEWS FROM SOURCE antennas_publication_source;
 
 
-  -- Filter last half minute updates
-  CREATE MATERIALIZED VIEW IF NOT EXISTS last_half_minute_updates AS
-  SELECT A.antenna_id, A.geojson, performance, AP.updated_at, ((CAST(EXTRACT( epoch from AP.updated_at) AS NUMERIC) * 1000) + 30000)
-  FROM antennas A JOIN antennas_performance AP ON (A.antenna_id = AP.antenna_id)
-  WHERE ((CAST(EXTRACT( epoch from AP.updated_at) AS NUMERIC) * 1000) + 30000) > mz_logical_timestamp();
-
-
-  -- Aggregate by anntena ID and GeoJSON to obtain the average performance in the last half minute.
+  -- Filter last half minute updates and aggregate by anntena ID and GeoJSON to obtain the average performance in the last half minute.
   CREATE MATERIALIZED VIEW IF NOT EXISTS last_half_minute_performance_per_antenna AS
-  SELECT antenna_id, geojson, AVG(performance) as performance
-  FROM last_half_minute_updates
-  GROUP BY antenna_id, geojson;
+  SELECT A.antenna_id, A.geojson, AVG(AP.performance) as performance
+  FROM antennas A JOIN antennas_performance AP ON (A.antenna_id = AP.antenna_id)
+  WHERE ((CAST(EXTRACT( epoch from AP.updated_at) AS NUMERIC) * 1000) + 30000) > mz_logical_timestamp()
+  GROUP BY A.antenna_id, A.geojson;
 ```
 
 Antennas data generation statement:
