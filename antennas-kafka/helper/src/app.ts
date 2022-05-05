@@ -84,17 +84,11 @@ async function setUpMaterialize() {
     `);
 
     await poolClient.query(`
-      CREATE MATERIALIZED VIEW IF NOT EXISTS last_half_minute_updates AS
-      SELECT A.antenna_id, A.geojson, performance, AP.updated_at, AP.updated_at + 30000
-      FROM parsed_antennas A JOIN last_minute_antennas_performance AP ON (A.antenna_id = AP.antenna_id)
-      WHERE (AP.updated_at + 30000) > mz_logical_timestamp();
-    `);
-
-    await poolClient.query(`
       CREATE MATERIALIZED VIEW IF NOT EXISTS last_half_minute_performance_per_antenna AS
-      SELECT antenna_id, geojson, AVG(performance) as performance
-      FROM last_half_minute_updates
-      GROUP BY antenna_id, geojson;
+      SELECT A.antenna_id, A.geojson, AVG(performance) as performance
+      FROM parsed_antennas A JOIN last_minute_antennas_performance AP ON (A.antenna_id = AP.antenna_id)
+      WHERE (AP.updated_at + 30000) > mz_logical_timestamp()
+      GROUP BY A.antenna_id, A.geojson;
     `);
   }
 
