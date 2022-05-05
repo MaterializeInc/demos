@@ -4,7 +4,7 @@ import {Extra, useServer} from 'graphql-ws/lib/use/ws';
 import {buildSchema, parse, validate} from 'graphql';
 import MaterializeClient from './MaterializeClient';
 import EventEmitter from 'events';
-import {Pool} from 'pg';
+import {Kafka} from 'kafkajs';
 import {Context, SubscribeMessage} from 'graphql-ws';
 
 /**
@@ -21,15 +21,19 @@ const materializeClient = new MaterializeClient({
 });
 
 /**
- * Postgres Client
+ * Kafka Client
  */
-const postgresPool = new Pool({
-  // host: "localhost",
-  host: 'postgres',
-  port: 5432,
-  user: 'postgres',
-  password: 'pg_password',
-  database: 'postgres',
+const antennasEventsTopicName = 'antennas_performance';
+
+const brokers = [process.env.KAFKA_BROKER || 'localhost:9092'];
+
+const kafka = new Kafka({
+  clientId: 'backendKafkaClient',
+  brokers,
+});
+const producer = kafka.producer();
+producer.connect().catch((err) => {
+  console.log(err);
 });
 
 /**
@@ -63,20 +67,18 @@ const schema = buildSchema(`
 const connectionEventEmitter = new EventEmitter();
 
 /**
- * Build a custom Postgres insert with a low performance value to crash antenna
+ * Build a custom Kafka event with a random performance and clients connected
  * @param antennaId Antenna Identifier
  * @returns
  */
-function buildQuery(antennaId: number) {
-  return `
-      INSERT INTO antennas_performance (antenna_id, clients_connected, performance, updated_at) VALUES (
-        ${antennaId},
-        ${Math.ceil(Math.random() * 100)},
-        -100,
-        now()
-      );
-    `;
-}
+const buildEvent = (antennaId: number, value: number) => {
+  return {
+    antenna_id: antennaId,
+    clients_connected: Math.ceil(Math.random() * 100),
+    performance: value,
+    updated_at: new Date().getTime(),
+  };
+};
 
 /**
  * Queries
@@ -107,25 +109,18 @@ const getAntennas = async () => {
 const crashAntenna = async (context) => {
   const {antenna_id: antennaId} = context;
 
-  postgresPool.connect(async (err, client, done) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
+  const events = [buildEvent(Number(antennaId), -100)].map((event) => ({
+    value: JSON.stringify(event),
+  }));
 
-    try {
-      /**
-       * Smash the performance
-       */
-      const query = buildQuery(antennaId);
-
-      await client.query(query);
-    } catch (clientErr) {
-      console.error(clientErr);
-    } finally {
-      done();
-    }
-  });
+  try {
+    await producer.send({
+      topic: antennasEventsTopicName,
+      messages: events,
+    });
+  } catch (clientErr) {
+    console.log(clientErr);
+  }
 
   return {
     antenna_id: antennaId,

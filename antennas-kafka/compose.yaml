@@ -67,6 +67,8 @@ services:
     depends_on:
       - materialized
       - helper
+    environment:
+      KAFKA_BROKER: broker:29092
 
   frontend:
     container_name: frontend
