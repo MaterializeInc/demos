@@ -9,12 +9,3 @@ models:
         tests:
           - not_null
           - unique
-      - name: avg_bid
-        description: 'The average bid price'
-        tests:
-          - dbt_utils.expression_is_true:
-              expression: '>= 200'
-              config:
-                schema: 'bid_alert'
-                alias: 'avg_bid_threshold_200'
-                severity: warn
