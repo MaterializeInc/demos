@@ -59,7 +59,7 @@ dbt run
 
 > :crab: As an exercise, you can add models for the queries demonstrating [joins](https://materialize.com/docs/get-started/#joins) and [temporal filters](https://materialize.com/docs/get-started/#temporal-filters).
 
-To run the tests (warnings are ok and are explained in more detail below):
+To run the tests:
 
 ```bash
 dbt test
@@ -168,7 +168,7 @@ SHOW VIEWS FROM public_etl_failure;
 (2 rows)
 ```
 
-dbt took care of naming these materailized view for us based on the type of test and the columms being tested. No rows in these! Data pipeline looks good.
+dbt took care of naming these materailized views for us based on the type of test and the columms being tested. No rows in these! Data pipeline looks good.
 
 ## Local installation
 
