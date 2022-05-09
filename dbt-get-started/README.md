@@ -27,7 +27,7 @@ To access the [dbt CLI](https://docs.getdbt.com/dbt-cli/cli-overview), run:
 ```bash
 docker exec -it dbt bash
 
-#we are continously upgrading our dbt-adapter package, grab the latest!
+#TODO: the dbt-materialize:v0.26.1 release doesnt have the latest dbt test code. Use the newest image and remove this line on the next release.
 pip install dbt-materialize --upgrade
 ```
 

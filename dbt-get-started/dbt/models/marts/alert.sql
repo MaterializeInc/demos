@@ -13,4 +13,3 @@ SELECT
         avg_bid as alert_value
 FROM {{ ref('avg_bid') }}
 WHERE avg_bid >= 250
-
