@@ -119,47 +119,53 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    materialize=>
    ```
 
-6. Next we will create our first Materialized View, summarizing pageviews by item and channel:
+6. Next, we will create our first (non-materialized) view:
+
+   ```sql
+   CREATE VIEW v_pageviews AS
+    SELECT
+        (data->'user_id')::int AS user_id,
+        -- Extract pageview type and target ID from URL
+        regexp_match(data->>'url', '/(products|profiles)/')[1] AS pageview_type,
+        (regexp_match(data->>'url', '/(?:products|profiles)/(\d+)')[1])::int AS target_id,
+        data->>'channel' AS channel,
+        (data->>'received_at')::bigint AS received_at
+    FROM (SELECT CONVERT_FROM(data, 'utf8')::jsonb AS data FROM json_pageviews);
+   ```
+
+   This view doesn’t store the results of the query, but simply provides an alias for the embedded `SELECT` statement and allows us to shape the pageview data into the format we need:
+
+   1. We are converting the incoming data from raw bytes to [jsonb](https://materialize.com/docs/sql/types/jsonb/#main):
+
+      ```sql
+      SELECT CONVERT_FROM(data, 'utf8')::jsonb AS data FROM json_pageviews
+      ```
+
+   2. We are using postgres JSON notation (`data->'url'`), type casts (`::string`) and [regexp_match](https://materialize.com/docs/sql/functions/#string-func:~:text=regexp_match(haystack) function to extract only the item_id from the raw pageview URL.
+
+      ```sql
+      (regexp_match((data->'url')::string, '/products/(\d+)')[1])::int AS target_id,
+      ```
+
+7. Then, we can use this view as a base to create a materialized view summarizing pageviews by item and channel:
 
    ```sql
    CREATE MATERIALIZED VIEW item_pageviews AS
-       SELECT
-       (regexp_match((data->'url')::STRING, '/products/(\d+)')[1])::INT AS item_id,
-       data->>'channel' as channel,
-       COUNT(*) as pageviews
-       FROM (
-       SELECT CAST(data AS jsonb) AS data
-       FROM (
-           SELECT convert_from(data, 'utf8') AS data
-           FROM json_pageviews
-       )) GROUP BY 1, 2;
+    SELECT target_id AS item_id,
+           channel,
+           COUNT(*) as pageviews
+    FROM v_pageviews
+    WHERE pageview_type = 'products'
+    GROUP BY item_id, channel;
    ```
 
-   As you can see here, we are doing a couple extra steps to get the pageview data into the format we need:
-
-   1. We are converting from raw bytes to utf8 encoded text to [jsonb](https://materialize.com/docs/sql/types/jsonb/#main):
-
-      ```sql
-      SELECT CAST(data AS jsonb) AS data
-       FROM (
-           SELECT convert_from(data, 'utf8') AS data
-           FROM json_pageviews
-       )
-      ```
-
-   2. We are using postgres JSON notation (`data->'url'`), type casts (`::STRING`) and [regexp_match](https://materialize.com/docs/sql/functions/#string-func:~:text=regexp_match(haystack) function to extract only the item_id from the raw pageview URL.
-
-      ```sql
-      (regexp_match((data->'url')::STRING, '/products/(\d+)')[1])::INT AS item_id,
-      ```
-
-7. Now if you select results from the view, you should see data populating:
+   Nowm if you select from this materialized view, you should see data populating:
 
    ```sql
    SELECT * FROM item_pageviews ORDER BY pageviews DESC LIMIT 10;
    ```
 
-   If you re-run it a few times you should see the pageview counts changing as new data comes in and gets materialized in real time.
+   If you re-run this statement a few times, you should see the pageview counts changing as new data comes in and results get computed on the fly.
 
 8. Let's create some more materialized views:
 
@@ -172,7 +178,8 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
            SUM(purchase_price) as revenue,
            COUNT(id) AS orders,
            SUM(quantity) AS items_sold
-       FROM purchases GROUP BY 1;
+       FROM purchases 
+       GROUP BY item_id;
    ```
 
    **Item Summary:** _(Using purchase summary and pageview summary internally)_
@@ -180,17 +187,17 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    ```sql
    CREATE MATERIALIZED VIEW item_summary AS
        SELECT
-           items.name,
-           items.category,
+           items.name AS item_name,
+           items.category AS item_category,
            SUM(purchase_summary.items_sold) as items_sold,
            SUM(purchase_summary.orders) as orders,
            SUM(purchase_summary.revenue) as revenue,
            SUM(item_pageviews.pageviews) as pageviews,
-           SUM(purchase_summary.orders) / SUM(item_pageviews.pageviews)::FLOAT AS conversion_rate
+           SUM(purchase_summary.orders) / SUM(item_pageviews.pageviews)::double AS conversion_rate
        FROM items
        JOIN purchase_summary ON purchase_summary.item_id = items.id
        JOIN item_pageviews ON item_pageviews.item_id = items.id
-       GROUP BY 1, 2;
+       GROUP BY item_name, item_category;
    ```
 
    This view shows some of the JOIN capabilities of Materialize, we're joining our two previous views with items to create a summary of purchases, pageviews, and conversion rates.
@@ -201,19 +208,21 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    SELECT * FROM item_summary ORDER BY conversion_rate DESC LIMIT 10;
    ```
 
-   **Remaining Stock:** This view joins items and (all purchases created _after_ an item's inventory was updated) and creates a column that subtracts quantity_sold from inventory to get a live in-stock count.
+   **Remaining Stock:** This view joins items and all purchases created _after_ an item's inventory was updated, and creates a column that subtracts `quantity_sold` from the total `inventory` to get a live in-stock count.
 
    ```sql
    CREATE MATERIALIZED VIEW remaining_stock AS
        SELECT
-         items.id as item_id,
+         items.id AS item_id,
          MAX(items.inventory) - SUM(purchases.quantity) AS remaining_stock
        FROM items
-       JOIN purchases ON purchases.item_id = items.id AND purchases.created_at > items.inventory_updated_at
+       JOIN purchases ON purchases.item_id = items.id 
+        AND purchases.created_at > items.inventory_updated_at
        GROUP BY items.id;
    ```
 
-   **Trending Items:** Here we are doing a bit of a hack because Materialize doesn't yet support window functions like `RANK`. So instead we are doing a self join on `purchase_summary` and counting up the items with _more purchases than the current item_ to get a basic "trending" rank datapoint.
+   [//]: # "TODO(morsapaes) Materialize supports dense_rank() in unstable builds, revisit this query later on"
+   **Trending Items:** Here, we are doing a bit of a hack because Materialize doesn't yet support window functions like `RANK`. So instead we are doing a self join on `purchase_summary` and counting up the items with _more purchases than the current item_ to get a basic "trending" rank datapoint.
 
    ```sql
    CREATE MATERIALIZED VIEW trending_items AS
@@ -252,7 +261,7 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    (6 rows)
    ```
 
-9. Now you've materialized some views that we can use in a business intelligence tool, metabase, to read and display them in pretty charts. Close out of the Materialize CLI (<kbd>Ctrl</kbd> + <kbd>D</kbd>).
+9. Now, you've materialized some views that you can visualize in a BI tool like Metabase. Close out of the Materialize CLI (<kbd>Ctrl</kbd> + <kbd>D</kbd>).
 
 ## Business Intelligence: Metabase
 
