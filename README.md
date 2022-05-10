@@ -77,12 +77,12 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
     <tbody>
         <tr>
           <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/dbt-get-started">dbt-get-started</a></code></b></td>
-            <td></td>
+            <td>dbt</td>
             <td>The dbt version of the Materialize <a href="https://materialize.com/docs/get-started/">get started guide</a></td>
         </tr>
         <tr>
           <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/dbt-jaffle-shop">dbt-jaffle-shop</a></code></b></td>
-            <td></td>
+            <td>dbt</td>
             <td>An adapted version of the dbt Jaffle Shop using <a href="https://docs.getdbt.com/reference/warehouse-profiles/materialize-profile"</a><code>dbt-materialize</code></a></td>
         </tr>
     </tbody>
