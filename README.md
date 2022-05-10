@@ -10,8 +10,8 @@ This repo is a collection of runnable demos that walk you through using Material
 
 To get started, make sure you have installed:
 
-* [Docker](https://docs.docker.com/get-docker/)
-* [Docker Compose](https://docs.docker.com/compose/install/)
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
 We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so double check your [resource preferences](https://docs.docker.com/desktop/mac/#preferences) before getting to it!
 
@@ -86,7 +86,7 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
             <td>An adapted version of the dbt Jaffle Shop using <a href="https://docs.getdbt.com/reference/warehouse-profiles/materialize-profile"</a><code>dbt-materialize</code></a></td>
         </tr>
     </tbody>
-</table> 
+</table>
 
 ## Other
 

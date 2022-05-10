@@ -178,7 +178,7 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
            SUM(purchase_price) as revenue,
            COUNT(id) AS orders,
            SUM(quantity) AS items_sold
-       FROM purchases 
+       FROM purchases
        GROUP BY item_id;
    ```
 
@@ -216,12 +216,13 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
          items.id AS item_id,
          MAX(items.inventory) - SUM(purchases.quantity) AS remaining_stock
        FROM items
-       JOIN purchases ON purchases.item_id = items.id 
+       JOIN purchases ON purchases.item_id = items.id
         AND purchases.created_at > items.inventory_updated_at
        GROUP BY items.id;
    ```
 
-   [//]: # "TODO(morsapaes) Materialize supports dense_rank() in unstable builds, revisit this query later on"
+   [//]: # 'TODO(morsapaes) Materialize supports dense_rank() in unstable builds, revisit this query later on'
+
    **Trending Items:** Here, we are doing a bit of a hack because Materialize doesn't yet support window functions like `RANK`. So instead we are doing a self join on `purchase_summary` and counting up the items with _more purchases than the current item_ to get a basic "trending" rank datapoint.
 
    ```sql
