@@ -1,3 +1,3 @@
-FROM python:3.8.6
+FROM python:3.9.9-bullseye
 
 RUN pip install dbt-materialize

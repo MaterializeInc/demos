@@ -2,7 +2,7 @@
 
 [dbt](https://docs.getdbt.com/docs/introduction) has become the standard for data transformation (“the T in ELT”). It combines the accessibility of SQL with software engineering best practices, allowing you to not only build reliable data pipelines, but also document, test and version-control them.
 
-This demo recreates the Materialize [getting started guide](https://materialize.com/docs/get-started/) using dbt as the transformation layer. 
+This demo recreates the Materialize [getting started guide](https://materialize.com/docs/get-started/) using dbt as the transformation layer.
 
 ## Docker
 
@@ -53,6 +53,7 @@ To run the models:
 ```bash
 dbt run
 ```
+
 > :crab: As an exercise, you can add models for the queries demonstrating [joins](https://materialize.com/docs/get-started/#joins) and [temporal filters](https://materialize.com/docs/get-started/#temporal-filters).
 
 ## Materialize
@@ -111,7 +112,7 @@ dbt test
 Under the hood, dbt creates a `SELECT` query for each test that returns the rows where this assertion is _not_ true; if the test returns zero rows, the assertion passes.
 
 If you set the optional `--store-failures` flag or create a [`store_failures` config](https://docs.getdbt.com/reference/resource-configs/store_failures), dbt will create a materialized view using the test query.
-This view is a continuously updating representation of failures. It allows you to examine failing records *both* as they happen while you are developing your data model, and later in production if an upstream change causes an assertion to fail.
+This view is a continuously updating representation of failures. It allows you to examine failing records _both_ as they happen while you are developing your data model, and later in production if an upstream change causes an assertion to fail.
 
 We've configured our [project](dbt/dbt_project.yml) to `store-failures` from these tests in the `etl_failures` schema.
 
