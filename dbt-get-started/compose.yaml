@@ -10,7 +10,7 @@ services:
     image: materialize/cli:v0.26.0
     container_name: mzcli
   dbt:
-    image: materialize/dbt-materialize:v0.26.0
+    build: ./
     container_name: dbt
     init: true
     entrypoint: /bin/bash

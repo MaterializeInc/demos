@@ -2,7 +2,7 @@
 
 [dbt](https://docs.getdbt.com/docs/introduction) has become the standard for data transformation (“the T in ELT”). It combines the accessibility of SQL with software engineering best practices, allowing you to not only build reliable data pipelines, but also document, test and version-control them.
 
-While dbt is a great fit for **batch** transformations, it can only **approximate** transforming streaming data. This demo recreates the Materialize [getting started guide](https://materialize.com/docs/get-started/) using dbt as the transformation layer.
+This demo recreates the Materialize [getting started guide](https://materialize.com/docs/get-started/) using dbt as the transformation layer. 
 
 ## Docker
 
@@ -26,9 +26,6 @@ To access the [dbt CLI](https://docs.getdbt.com/dbt-cli/cli-overview), run:
 
 ```bash
 docker exec -it dbt bash
-
-#TODO: the dbt-materialize:v0.26.1 release doesnt have the latest dbt test code. Use the newest image and remove this line on the next release.
-pip install dbt-materialize --upgrade
 ```
 
 From here, you can run dbt commands as usual. To check that the [`dbt-materialize`](https://pypi.org/project/dbt-materialize/) plugin has been installed:
@@ -41,29 +38,22 @@ dbt --version
 
 We've created a few core models that take care of defining the building blocks of a dbt+Materialize project, including a streaming [source](https://materialize.com/docs/overview/api-components/#sources):
 
-- `market_orders_raw.sql`
+- `sources/market_orders_raw.sql`
 
 , as well as a staging [view](https://materialize.com/docs/overview/api-components/#non-materialized-views) to transform the source data:
 
-- `market_orders.sql`
+- `staging/stg_market__orders.sql`
 
-and a [materialized view](https://materialize.com/docs/overview/api-components/#materialized-views) that continuously updates as the underlying data changes:
+, and a [materialized view](https://materialize.com/docs/overview/api-components/#materialized-views) that continuously updates as the underlying data changes:
 
-- `avg_bid.sql`
+- `marts/avg_bid.sql`
 
 To run the models:
 
 ```bash
 dbt run
 ```
-
 > :crab: As an exercise, you can add models for the queries demonstrating [joins](https://materialize.com/docs/get-started/#joins) and [temporal filters](https://materialize.com/docs/get-started/#temporal-filters).
-
-To run the tests:
-
-```bash
-dbt test
-```
 
 ## Materialize
 
@@ -92,7 +82,6 @@ SHOW VIEWS;
 
      name
 ---------------
- alert
  avg_bid
  market_orders
 ```
@@ -105,49 +94,26 @@ SHOW MATERIALIZED VIEWS;
   name
 ---------
  avg_bid
- alert
 ```
 
-You'll notice that you're only able to `SELECT` from `avg_bid` and `alert` — this is because these are the only materialized views. They are incrementally updated as new data streams in, so you get fresh and correct results with low latency. Behind the scenes, Materialize is indexing the results of the embedded query in memory.
+You'll notice that you're only able to `SELECT` from `avg_bid` — this is because this is the only materialized view. It is incrementally updated as new data streams in, so you get fresh and correct results with low latency. Behind the scenes, Materialize is indexing the results of the embedded query in memory.
 
-**Materialize for Alerting**
-We've included an `alert` materialized view to demonstrate how materialize can be used to know, in real time, when a condition has been met.
+### Run the tests
 
-Peeking our avg_bid data:
+We've included the generic `non_null` and `unique` out of the box tests in our project to help demonstrate the power of dbt test.
 
-```sql
-SELECT * FROM public.avg_bid;
+To run the tests:
 
-   symbol    |      avg_bid
--------------+--------------------
- Apple       | 201.24148328101487
- Google      | 303.28957100720896
- Elerium     | 155.55304908133022
- Bespin Gas  |  200.0016677106204
- Linen Cloth | 254.67073061687503
-(5 rows)
+```bash
+dbt test
 ```
 
-And our alert view:
+Under the hood, dbt creates a `SELECT` query for each test that returns the rows where this assertion is _not_ true; if the test returns zero rows, the assertion passes.
 
-```sql
-SELECT * FROM alert;
+If you set the optional `--store-failures` flag or create a [`store_failures` config](https://docs.getdbt.com/reference/resource-configs/store_failures), dbt will create a materialized view using the test query.
+This view is a continuously updating representation of failures. It allows you to examine failing records *both* as they happen while you are developing your data model, and later in production if an upstream change causes an assertion to fail.
 
-alert_condition  |       alert_labels       |    alert_value
--------------------+--------------------------+--------------------
- avg_bid_above_250 | {"symbol":"Google"}      | 304.86277762009547
- avg_bid_above_250 | {"symbol":"Linen Cloth"} | 258.85895801455746
- avg_bid_below_200 | {"symbol":"Elerium"}     | 154.27114038864772
-(3 rows)
-```
-
-**Materialized tests**
-
-dbt provides a framework to test assumptions about the results generated by a model, and, even better, allows you to store the results of these tests.
-Because Materialize is a continuously updating datasource, we can expand on dbt's existing functionality and create _materialized tests_, which will update in real time.
-
-We've included the generic `non_null` and `unique` out of the box tests in our project to help demonstrate.
-We've configured our [project](dbt/dbt_project.yml) to materialize all of our tests in the `etl_failures` schema.
+We've configured our [project](dbt/dbt_project.yml) to `store-failures` from these tests in the `etl_failures` schema.
 
 ```sql
 SHOW SCHEMAS;
