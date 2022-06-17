@@ -1,3 +1,8 @@
 FROM python:3.9.9-bullseye
 
-RUN pip install dbt-materialize
+WORKDIR /usr/app/dbt
+
+RUN set -ex; \
+    pip install --no-cache-dir dbt-materialize==1.0.5
+
+ENTRYPOINT ["/bin/bash"]
