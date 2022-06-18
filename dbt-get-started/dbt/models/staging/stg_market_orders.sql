@@ -6,4 +6,4 @@ SELECT
     (text::jsonb)->>'symbol' AS symbol,
     (text::jsonb)->>'trade_type' AS trade_type,
     to_timestamp(((text::jsonb)->'timestamp')::bigint) AS ts
-FROM {{ ref('market_orders_raw') }}
+FROM {{ source('market_orders', 'market_orders_raw') }}

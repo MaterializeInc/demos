@@ -6,11 +6,11 @@ services:
     ports:
       - 6875:6875
     healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
-  mzcli:
+  cli:
     image: materialize/cli:v0.26.0
-    container_name: mzcli
+    container_name: cli
   dbt:
-    image: materialize/dbt-materialize:v0.26.0
+    build: ./
     container_name: dbt
     init: true
     entrypoint: /bin/bash

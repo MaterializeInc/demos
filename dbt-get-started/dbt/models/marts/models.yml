@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: avg_bid
+    description: 'Computes the average bid price'
+    columns:
+      - name: symbol
+        description: 'The stock ticker'
+        tests:
+          - not_null
+          - unique
