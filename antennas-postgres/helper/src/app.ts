@@ -76,11 +76,21 @@ async function dataGenerator() {
   }, 1000);
 }
 
-setUpMaterialize()
-  .then(() => {
-    console.log('Generating data.');
-    dataGenerator();
-  })
-  .catch((err) => {
-    console.error(err);
-  });
+const {PLAY} = process.env;
+
+/**
+ * If PLAY = true then let the user play with the source creation and etc..
+ */
+if (PLAY) {
+  console.log('Generating data.');
+  dataGenerator();
+} else {
+  setUpMaterialize()
+    .then(() => {
+      console.log('Generating data.');
+      dataGenerator();
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}

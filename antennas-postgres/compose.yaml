@@ -35,6 +35,8 @@ services:
     container_name: helper
     build:
       context: ./helper
+    environment:
+      - PLAY=${PLAY}
     init: true
     depends_on:
       - materialized
