@@ -27,7 +27,7 @@ async function setUpMaterialize() {
 
   if (!rowCount) {
     await poolClient.query(`
-    CREATE MATERIALIZED VIEWS FROM SOURCE antennas_publication_source;
+    CREATE VIEWS FROM SOURCE antennas_publication_source;
   `);
 
     await poolClient.query(`
@@ -76,11 +76,21 @@ async function dataGenerator() {
   }, 1000);
 }
 
-setUpMaterialize()
-  .then(() => {
-    console.log('Generating data.');
-    dataGenerator();
-  })
-  .catch((err) => {
-    console.error(err);
-  });
+const {AUTOSETUP} = process.env;
+
+/**
+ * If AUTOSETUP = true then run automatically the source creation, etc..
+ */
+if (AUTOSETUP) {
+  setUpMaterialize()
+    .then(() => {
+      console.log('Generating data.');
+      dataGenerator();
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+} else {
+  console.log('Generating data.');
+  dataGenerator();
+}

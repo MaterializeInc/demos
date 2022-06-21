@@ -4,8 +4,9 @@ https://user-images.githubusercontent.com/11491779/166932582-e5a9fd47-e397-4419-
 
 If you want to try it right now, clone the project and run:
 
-```
-docker-compose up
+```bash
+ # Run `export AUTOSETUP = 1` to run steps 2-3 automatically
+ docker-compose up
 ```
 
 After a successful build:
@@ -107,7 +108,7 @@ GRANT SELECT ON antennas, antennas_performance TO materialize;
 
 
   -- Turn the Postgres tables into Materialized Views
-  CREATE MATERIALIZED VIEWS FROM SOURCE antennas_publication_source;
+  CREATE VIEWS FROM SOURCE antennas_publication_source;
 
 
   -- Filter last half minute updates and aggregate by anntena ID and GeoJSON to obtain the average performance in the last half minute.

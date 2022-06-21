@@ -156,19 +156,31 @@ const antennasPerformanceListener = (data) => {
 
 const onError = (err) => {
   console.error('Ouch. Some error: ', err);
+
+  setTimeout(() => {
+    subscribe();
+  }, 10000);
 };
 
 const onComplete = () => {
   console.log('Finished.');
+
+  setTimeout(() => {
+    subscribe();
+  }, 10000);
 };
 
-graphqlClient.subscribe(
-  {
-    query: 'subscription { antennasUpdates { antenna_id, geojson, performance } }',
-  },
-  {
-    next: antennasPerformanceListener,
-    error: onError,
-    complete: onComplete,
-  }
-);
+const subscribe = () => {
+  graphqlClient.subscribe(
+    {
+      query: 'subscription { antennasUpdates { antenna_id, geojson, performance } }',
+    },
+    {
+      next: antennasPerformanceListener,
+      error: onError,
+      complete: onComplete,
+    }
+  );
+};
+
+subscribe();
