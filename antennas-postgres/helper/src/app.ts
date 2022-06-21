@@ -79,12 +79,9 @@ async function dataGenerator() {
 const {PLAY} = process.env;
 
 /**
- * If PLAY = true then let the user play with the source creation and etc..
+ * If PLAY = true then run automatically the source creation, etc..
  */
 if (PLAY) {
-  console.log('Generating data.');
-  dataGenerator();
-} else {
   setUpMaterialize()
     .then(() => {
       console.log('Generating data.');
@@ -93,4 +90,7 @@ if (PLAY) {
     .catch((err) => {
       console.error(err);
     });
+} else {
+  console.log('Generating data.');
+  dataGenerator();
 }
