@@ -9,7 +9,7 @@ curl -fsSL http://stedolan.github.io/jq/download/linux64/jq > /usr/local/bin/jq
 chmod +x /usr/local/bin/jq
 
 # Turn on the demo and give it a few (good) seconds to spin up.
-docker-compose up -d
+AUTOSETUP=1 docker-compose up -d
 sleep 20
 
 # Run a SQL using the sql endpoint

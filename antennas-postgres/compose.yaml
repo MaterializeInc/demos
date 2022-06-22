@@ -35,6 +35,8 @@ services:
     container_name: helper
     build:
       context: ./helper
+    environment:
+      - AUTOSETUP=${AUTOSETUP}
     init: true
     depends_on:
       - materialized

@@ -15,7 +15,7 @@ async function setUpMaterialize() {
   const poolClient = await pool.connect();
 
   await poolClient.query(`
-    CREATE MATERIALIZED SOURCE IF NOT EXISTS antennas_publication_source
+    CREATE SOURCE IF NOT EXISTS antennas_publication_source
     FROM POSTGRES
     CONNECTION 'host=postgres port=5432 user=materialize password=materialize dbname=postgres'
     PUBLICATION 'antennas_publication_source';
@@ -27,7 +27,7 @@ async function setUpMaterialize() {
 
   if (!rowCount) {
     await poolClient.query(`
-    CREATE MATERIALIZED VIEWS FROM SOURCE antennas_publication_source;
+    CREATE VIEWS FROM SOURCE antennas_publication_source;
   `);
 
     await poolClient.query(`
@@ -76,11 +76,21 @@ async function dataGenerator() {
   }, 1000);
 }
 
-setUpMaterialize()
-  .then(() => {
-    console.log('Generating data.');
-    dataGenerator();
-  })
-  .catch((err) => {
-    console.error(err);
-  });
+const {AUTOSETUP} = process.env;
+
+/**
+ * If AUTOSETUP = true then run automatically the source creation, etc..
+ */
+if (AUTOSETUP) {
+  setUpMaterialize()
+    .then(() => {
+      console.log('Generating data.');
+      dataGenerator();
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+} else {
+  console.log('Generating data.');
+  dataGenerator();
+}

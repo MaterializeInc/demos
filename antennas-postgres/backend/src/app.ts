@@ -172,6 +172,7 @@ async function* antennasUpdates(_, ctxVars) {
       .finally(() => {
         console.log('Finished tail.');
         done = true;
+        resolve([]);
       });
 
     connectionEventEmitter.on('disconnect', (unsubscriptionId) => {
