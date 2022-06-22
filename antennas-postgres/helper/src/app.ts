@@ -15,7 +15,7 @@ async function setUpMaterialize() {
   const poolClient = await pool.connect();
 
   await poolClient.query(`
-    CREATE MATERIALIZED SOURCE IF NOT EXISTS antennas_publication_source
+    CREATE SOURCE IF NOT EXISTS antennas_publication_source
     FROM POSTGRES
     CONNECTION 'host=postgres port=5432 user=materialize password=materialize dbname=postgres'
     PUBLICATION 'antennas_publication_source';

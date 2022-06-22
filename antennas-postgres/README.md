@@ -5,7 +5,7 @@ https://user-images.githubusercontent.com/11491779/166932582-e5a9fd47-e397-4419-
 If you want to try it right now, clone the project and run:
 
 ```bash
- # Run `export AUTOSETUP = 1` to run steps 2-3 automatically
+ # Run `AUTOSETUP=1 docker-compose up` to run steps 2-3 automatically
  docker-compose up
 ```
 
@@ -101,7 +101,7 @@ GRANT SELECT ON antennas, antennas_performance TO materialize;
 
 
   -- Create the Postgres Source
-  CREATE MATERIALIZED SOURCE IF NOT EXISTS antennas_publication_source
+  CREATE SOURCE IF NOT EXISTS antennas_publication_source
   FROM POSTGRES
   CONNECTION 'host=postgres port=5432 user=materialize password=materialize dbname=postgres'
   PUBLICATION 'antennas_publication_source';
