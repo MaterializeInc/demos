@@ -8,6 +8,8 @@ This repo is a collection of runnable demos that walk you through using Material
 
 ## Setup
 
+> **Warning:** Demos marked with ✋ use Docker images that are **not compatible** with ARM architectures (_e.g._ M1 MacBooks).
+
 To get started, make sure you have installed:
 
 - [Docker](https://docs.docker.com/get-docker/)
@@ -27,7 +29,7 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
     </thead>
     <tbody>
         <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/antennas-kafka">antennas-kafka</a></code></b></td>
+          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/antennas-kafka">antennas-kafka</a> ✋</code></b></td>
             <td>Node.js, GraphQL, Kafka</td>
             <td rowspan=2>Tracking key performance indicators for infrastructure monitoring</td>
         </tr>
@@ -36,7 +38,7 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
             <td>Node.js, GraphQL, Postgres</td>
         </tr>
         <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/ecommerce">ecommerce</a></code></b></td>
+          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/ecommerce">ecommerce</a> ✋</code></b></td>
             <td>MySQL, Debezium, Kafka, Metabase</td>
             <td rowspan=2>Building a streaming ETL pipeline for e-commerce analytics</td>
         </tr>
@@ -100,7 +102,7 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
     </thead>
     <tbody>
         <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/chbench">chbench</a></code></b></td>
+          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/chbench">chbench</a> ✋</code></b></td>
             <td>MySQL, Debezium, Kafka, Metabase</td>
             <td>Benchmarking the speed of analytics queries on a streaming dataset</td>
         </tr>
