@@ -14,7 +14,7 @@ services:
       - -c
       - wal_level=logical
   materialized:
-    image: materialize/materialized:v0.26.0
+    image: materialize/materialized:v0.26.4
     container_name: materialized
     restart: always
     ports:
@@ -22,7 +22,7 @@ services:
     depends_on:
       - postgres
   grafana_dashboard:
-    image: materialize/dashboard:v0.26.0
+    image: materialize/dashboard:v0.26.4
     container_name: grafana_dashboard
     restart: always
     ports:

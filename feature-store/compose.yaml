@@ -1,6 +1,6 @@
 services:
   materialized:
-    image: materialize/materialized:v0.26.0
+    image: materialize/materialized:v0.26.4
     ports:
       - 6875:6875
     healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
@@ -30,8 +30,8 @@ services:
     environment:
       - POSTGRES_DB=default
       - POSTGRES_HOST_AUTH_METHOD=trust
-    healthcheck:
-      {test: pg_isready -q -d postgres -U postgres, interval: 5s, timeout: 60s, start_period: 10s}
+    healthcheck: {test: pg_isready -q -d postgres -U postgres, interval: 5s, timeout: 60s,
+      start_period: 10s}
     command: -c wal_level=logical
     ports:
       - 5433:5432
@@ -51,7 +51,7 @@ services:
       - materialized
       - boot
   boot:
-    image: materialize/cli:v0.26.0
+    image: materialize/cli:v0.26.4
     command: -f /mnt/mz_views.sql
     volumes: [.:/mnt]
     depends_on:
