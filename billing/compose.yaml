@@ -1,6 +1,6 @@
 services:
   materialized:
-    image: materialize/materialized:v0.26.0
+    image: materialize/materialized:v0.26.4
     init: true
     volumes:
       - db-data:/share/billing-demo/data
@@ -43,7 +43,7 @@ services:
     healthcheck: {test: curl -f localhost:8081, interval: 1s, start_period: 120s}
 
   billing-demo:
-    image: materialize/billing-demo:v0.26.0
+    image: materialize/billing-demo:v0.26.4
     init: true
     environment:
       - RUST_LOG=billing-demo=debug,info
@@ -64,7 +64,7 @@ services:
       materialized: {condition: service_healthy}
 
   cli:
-    image: materialize/cli:v0.26.0
+    image: materialize/cli:v0.26.4
 
 volumes:
   db-data:

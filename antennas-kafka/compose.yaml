@@ -26,14 +26,14 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
   materialized:
-    image: materialize/materialized:v0.26.0
+    image: materialize/materialized:v0.26.4
     container_name: materialized
     restart: always
     ports:
       - 6875:6875
 
   grafana_dashboard:
-    image: materialize/dashboard:v0.26.0
+    image: materialize/dashboard:v0.26.4
     container_name: grafana_dashboard
     restart: always
     ports:

@@ -1,13 +1,13 @@
 services:
   materialized:
-    image: materialize/materialized:v0.26.0
+    image: materialize/materialized:v0.26.4
     container_name: materialized
     init: true
     ports:
       - 6875:6875
     healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
   cli:
-    image: materialize/cli:v0.26.0
+    image: materialize/cli:v0.26.4
     container_name: cli
   dbt:
     build: ./
