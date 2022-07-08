@@ -43,7 +43,7 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
             <td rowspan=2>Building a streaming ETL pipeline for e-commerce analytics</td>
         </tr>
         <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/ecommerce-redpanda">ecommerce-redpanda</a></code></b></td>
+          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/ecommerce-redpanda">ecommerce-redpanda ✋</a></code></b></td>
             <td>MySQL, Debezium, Redpanda, Metabase</td>
         </tr>
         <tr>
