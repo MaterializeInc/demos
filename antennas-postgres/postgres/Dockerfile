@@ -1,6 +1,6 @@
 FROM postgres:14.2-alpine
 
-# Automatically runned by Postgres
+# Automatically run by Postgres
 COPY ./create.sh /docker-entrypoint-initdb.d/
 COPY ./seed.sh /docker-entrypoint-initdb.d/
 
