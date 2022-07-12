@@ -14,7 +14,7 @@ conn.exec("DECLARE c CURSOR FOR #{sql} WITH (SNAPSHOT, PROGRESS)")
 while true
   conn.exec("FETCH 100 c WITH (TIMEOUT='1s')") do |result|
     result.each do |row|
-      puts row
+      ActionCable.server.broadcast("tail", row)
     end
   end
 end
