@@ -29,7 +29,7 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
     </thead>
     <tbody>
         <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/antennas-kafka">antennas-kafka</a> ✋</code></b></td>
+          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/antennas-kafka">antennas-kafka</a></code></b></td>
             <td>Node.js, GraphQL, Kafka</td>
             <td rowspan=2>Tracking key performance indicators for infrastructure monitoring</td>
         </tr>
