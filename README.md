@@ -51,16 +51,6 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
             <td>Postgres, Redpanda</td>
             <td>Calculating and serving features in real-time for fraud detection</td>
         </tr>
-        <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/http-logs">http-logs</a></code></b></td>
-            <td>Python, Flask</td>
-            <td>Parsing web server logs for business and operational analytics</td>
-        </tr>
-        <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/wikirecent">wikirecent</a></code></b></td>
-            <td>Python, Tornado</td>
-            <td>Tracking recent edits in Wikipedia using an event-driven web app</td>
-        </tr>
     </tbody>
 </table>
 

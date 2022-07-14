@@ -1,3 +1,0 @@
-psycopg==3.0.7
-sqlparse==0.4.2
-tornado==6.1
