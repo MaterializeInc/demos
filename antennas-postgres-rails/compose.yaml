@@ -38,28 +38,13 @@ services:
     init: true
     depends_on:
       - materialized
-  backend:
-    container_name: backend
+  rails:
+    container_name: rails
     build:
-      context: ./backend
-    init: true
-    ports:
-      - 4000:4000
-    depends_on:
-      - materialized
-  frontend:
-    container_name: frontend
-    build:
-      context: ./frontend
+      context: ./rails
     init: true
     ports:
       - 3000:3000
     depends_on:
-      - backend
-  microservice:
-    container_name: microservice
-    build:
-      context: ./microservice
-    init: true
-    depends_on:
-      - backend
+      - postgres
+      - materialized
