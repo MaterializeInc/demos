@@ -3,17 +3,25 @@
 
 require_relative "../materialize_tail"
 
-client = MaterializeTail.new(sql: "SELECT * FROM last_half_minute_performance_per_antenna")
-client.run do |result|
-  rows = result.map do |row|
-    {
-      antenna_id: row["antenna_id"],
-      geojson: row["geojson"].to_json,
-      performance: row["performance"],
-      diff: row["mz_diff"],
-      timestamp: row["mz_timestamp"]
-    }
-  end
+begin
+  client = MaterializeTail.new(sql: "SELECT * FROM last_half_minute_performance_per_antenna")
+  client.run do |result|
+    puts "New updates from tail..."
 
-  ActionCable.server.broadcast("tail", { data: { antennasUpdates: rows }})
+    rows = result.map do |row|
+      {
+        antenna_id: row["antenna_id"],
+        geojson: row["geojson"].to_json,
+        performance: row["performance"],
+        diff: row["mz_diff"],
+        timestamp: row["mz_timestamp"]
+      }
+    end
+
+    ActionCable.server.broadcast("tail", { data: { antennasUpdates: rows }})
+  end
+rescue PG::Error => e
+  puts "View is not initialized yet. Retrying..."
+  sleep(5)
+  retry
 end

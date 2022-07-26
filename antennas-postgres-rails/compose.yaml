@@ -1,6 +1,6 @@
 services:
   postgres:
-    container_name: postgres
+    container_name: mtz_demo_rails_postgres
     build:
       context: ./postgres
     init: true
@@ -13,6 +13,9 @@ services:
       - postgres
       - -c
       - wal_level=logical
+  redis:
+    container_name: mtz_demo_rails_redis
+    image: redis:5.0.7
   materialized:
     image: materialize/materialized:v0.26.0
     container_name: materialized
@@ -21,16 +24,6 @@ services:
       - 6875:6875
     depends_on:
       - postgres
-  grafana_dashboard:
-    image: materialize/dashboard:v0.26.0
-    container_name: grafana_dashboard
-    restart: always
-    ports:
-      - 3001:3000
-    depends_on:
-      - materialized
-    environment:
-      MATERIALIZED_URL: materialized:6875
   helper:
     container_name: helper
     build:
@@ -39,12 +32,50 @@ services:
     depends_on:
       - materialized
   rails:
-    container_name: rails
+    container_name: mtz_demo_rails_rails
     build:
       context: ./rails
-    init: true
     ports:
-      - 3000:3000
+      - "3000:3000"
     depends_on:
       - postgres
       - materialized
+      - redis
+      - helper
+    environment:
+      RAILS_ENV: development
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: pg_password
+      DATABASE_NAME: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      MATERIALIZE_DATABASE_USERNAME: materialize
+      MATERIALIZE_DATABASE_PASSWORD: materialize
+      MATERIALIZE_DATABASE_NAME: materialize
+      MATERIALIZE_DATABASE_HOST: materialized
+      MATERIALIZE_DATABASE_PORT: 6875
+      REDIS_URL: redis://redis:6379/1
+  rails_tail_runner:
+    container_name: mtz_demo_rails_runner
+    build:
+      context: ./rails
+    depends_on:
+      - postgres
+      - materialized
+      - redis
+      - helper
+    environment:
+      RAILS_ENV: development
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: pg_password
+      DATABASE_NAME: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      MATERIALIZE_DATABASE_USERNAME: materialize
+      MATERIALIZE_DATABASE_PASSWORD: materialize
+      MATERIALIZE_DATABASE_NAME: materialize
+      MATERIALIZE_DATABASE_HOST: materialized
+      MATERIALIZE_DATABASE_PORT: 6875
+      REDIS_URL: redis://redis:6379/1
+    entrypoint: ./runner-entrypoint.sh
+

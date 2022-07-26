@@ -1,42 +1,16 @@
-FROM ruby:3.0.0-alpine
-ENV BUNDLER_VERSION=2.2.3
+FROM ruby:3.0.0
 
-RUN apk add --update --no-cache \
-      binutils-gold \
-      build-base \
-      curl \
-      file \
-      g++ \
-      gcc \
-      git \
-      less \
-      libstdc++ \
-      libffi-dev \
-      libc-dev \
-      linux-headers \
-      libxml2-dev \
-      libxslt-dev \
-      libgcrypt-dev \
-      make \
-      netcat-openbsd \
-      nodejs \
-      openssl \
-      pkgconfig \
-      postgresql-dev \
-      python \
-      tzdata \
-      yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
-RUN gem install bundler -v 2.2.3
+RUN apt-get update -qq && apt-get install -y nodejs yarn
 
+RUN mkdir /app
 WORKDIR /app
 
 COPY Gemfile Gemfile.lock ./
-RUN bundle config build.nokogiri --use-system-libraries
-RUN bundle check || bundle install
-COPY package.json yarn.lock ./
-RUN yarn install --check-files
+RUN bundle install
 
 COPY . ./
-ENTRYPOINT ["docker-entrypoint.sh"]
 
+ENTRYPOINT [ "./rails-entrypoint.sh" ]
