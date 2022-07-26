@@ -1,11 +1,11 @@
 class MaterializeTail
   def self.materialize_db_config
     {
-	    :host=>"localhost",
-	    :port=>6875,
-	    :user=>"materialize",
-	    :password=>"materialize",
-	    :dbname=>"materialize"
+	    :host => ENV.fetch("MATERIALIZE_DATABASE_HOST"),
+	    :port => ENV.fetch("MATERIALIZE_DATABASE_PORT"),
+	    :user => ENV.fetch("MATERIALIZE_DATABASE_USERNAME"),
+	    :password => ENV.fetch("MATERIALIZE_DATABASE_PASSWORD"),
+	    :dbname => ENV.fetch("MATERIALIZE_DATABASE_NAME")
     }
   end
 
