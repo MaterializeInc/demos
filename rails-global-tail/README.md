@@ -7,7 +7,7 @@ This demo reuses the schema of `postgres` and `materialized` databases. It also 
   - setting up the schemas for `postgres` and `materialized` databases
   - injects updates to `postgres` which is ingested by `materialized` providing a stream of changes which is used by this demo
 
-This demo has the same architecture as the `antennas-postgres` app except the Graphql, frontend and microservice has been replaced by Rails.
+This demo has the same architecture as the `antennas-postgres` app except the Graphql, React and Service have been replaced by Rails.
 
 ![Architecture](https://user-images.githubusercontent.com/11491779/155920578-7984244a-6382-4628-a87b-00e1f6ad1acd.png)
 
@@ -24,8 +24,7 @@ localhost:3000
 ```
 
 You should see the following page with a stream of updates from Materialized
-
-![demo](./demo.png)
+<img width="1792" alt="demo" src="https://user-images.githubusercontent.com/423102/181230608-2bc4f958-5fa4-4a83-b651-21ab3ec790b1.png">
 
 ## What is happening here?
 As mentioned above the data in `materialized` and `postgres` is being setup and updated constantly by the [helper]()./helper/src/app.ts) script. Showing the updates in a Rails view involves two steps:
