@@ -9,7 +9,7 @@ This demo reuses the schema of `postgres` and `materialized` databases. It also 
 
 This demo has the same architecture as the `antennas-postgres` app except the Graphql, frontend and microservice has been replaced by Rails.
 
-![Architecture](../Architecture.png)
+![Architecture](https://user-images.githubusercontent.com/11491779/155920578-7984244a-6382-4628-a87b-00e1f6ad1acd.png)
 
 This README focuses on how to consume the stream of updates from `materialized` and show the updates in a view using Ruby on Rails.
 
