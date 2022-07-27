@@ -9,7 +9,7 @@ This demo reuses the schema of `postgres` and `materialized` databases. It also 
 
 This demo has the same architecture as the `antennas-postgres` app except the Graphql, frontend and microservice has been replaced by Rails.
 
-![Architecture](../antennas-postgres/Architecture.png)
+![Architecture](../Architecture.png)
 
 This README focuses on how to consume the stream of updates from `materialized` and show the updates in a view using Ruby on Rails.
 
@@ -154,13 +154,7 @@ These usecases would require us to run multiple runner scripts like the one in t
 
 ## Conclusion
 To sum up
-- The schema and data that this demo uses is the same as [antennas-postgres](../antennas-postgres/) demo
-- The updates from materialize is read by a script running `TAIL` in a long running process. This process passes on the updates to an ActionCable broadcast called "tail"
+- The schema and data that this demo uses is the same as [antennas-postgres](../antennas-postgres/)
+- The updates from `materialized` is read by a script running `TAIL` in a long running process. This process passes on the updates to an ActionCable broadcast called "tail"
 - The ActionCable channel called `TailChannel` streams from "tail" broadcast
 - A Rails view initiates a ActionCable consumer subscribes to `TailChannel` and receives the updates which are displayed as a log.
-
-
-
-
-
-
