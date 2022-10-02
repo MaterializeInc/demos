@@ -1,3 +1,5 @@
+> :warning: **This branch includes examples for an unsupported version of Materialize (0.26.4).**
+
 # Materialize Demos
 
 [![Slack Badge](https://img.shields.io/badge/Join%20us%20on%20Slack!-blueviolet?style=flat&logo=slack&link=https://materialize.com/s/chat)](https://materialize.com/s/chat)
