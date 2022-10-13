@@ -18,9 +18,9 @@ Test the connection by running:
 bin/dbt debug
 ```
 
-### Clusters
+### Create a cluster
 
-In Materialize, clusters are logical components dataflow-powered objects, e.g. indexes and materialized views. They rely on cluster replicas to run dataflows. We'll create a `auction_house` cluster (logical compute) and cluster replica (physical compute) to isolate the work we will do when we run our dbt models in the next step.
+In Materialize, [clusters](https://materialize.com/docs/overview/key-concepts/#clusters) are logical components that let you express resource isolation for all dataflow-powered objects, e.g. indexes. They rely on cluster replicas to run dataflows. We'll create a `auction_house` cluster (logical compute) and cluster replica (physical compute) to isolate the work we will do when we run our dbt models in the next step.
 
 To connect to Materialize, you can use a PostgreSQL-compatible [client](https://materialize.com/docs/integrations/sql-clients/) like `psql`:
 
