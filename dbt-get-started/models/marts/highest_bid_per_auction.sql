@@ -1,6 +1,6 @@
 {{ config(materialized='view') }}
 
-SELECT grp.auction_id, bid_id, buyer_id, seller_id, item, amount, bid_time, end_time 
+SELECT grp.auction_id, bid_id, buyer_id, seller_id, item, amount, bid_time, end_time
 FROM
     (SELECT DISTINCT auction_id FROM {{ ref('on_time_bids') }}) grp,
 LATERAL (

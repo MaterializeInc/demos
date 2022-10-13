@@ -6,9 +6,7 @@ This demo recreates the Materialize [getting started guide](https://materialize.
 
 ## Configuration
 
-To get started, make sure you have a Materialize account. Log into your account and generate an [app password](https://cloud.materialize.com/access) to use in your dbt connection.
-
-Update [`profiles.yml`](profiles.yml) to replace the `Host`, `Password` and `User` connection parameters.
+To get started, make sure you have a Materialize account. Log into your account and generate an [app password](https://cloud.materialize.com/access) to use in your dbt connection. Update [`profiles.yml`](profiles.yml) to replace the `Host`, `Password` and `User` connection parameters.
 
 We've bundled everything you'll need to create a development environment in a wrapper script, in `bin/dbt`. It installs the dbt-materialize adapter for you, and sets your profile path. Alternatively, [install](https://materialize.com/docs/integrations/dbt/#setup) the dbt-materialize plugin locally.
 
@@ -34,29 +32,31 @@ and then run:
 CREATE CLUSTER auction_house REPLICAS (xsmall_replica (SIZE 'xsmall'));
 ```
 
-### Build and run the models
+### Define the models
 
-We've created a few core models that take care of defining the building blocks of a dbt+Materialize project, including a streaming [source](https://materialize.com/docs/overview/api-components/#sources). In this demo, we'll use Materialize's built in [Auction](https://materialize.com/docs/sql/create-source/load-generator/#auction) LOAD GENERATOR source to simulate an auction house where different users are bidding on an ongoing series of auctions.
+We've created a few core models that take care of defining the building blocks of a dbt+Materialize project, including a streaming [source](https://materialize.com/docs/overview/api-components/#sources). In this demo, we'll use Materialize's built in [Auction](https://materialize.com/docs/sql/create-source/load-generator/#auction) load generator source to simulate an auction house where different users are bidding on an ongoing series of auctions:
 
-- `sources/auction_house.sql`
+- [`sources/auction_house.sql`](models/sources/auction_house.sql)
 
-We'll create a [view](https://materialize.com/docs/overview/api-components/#non-materialized-views) to join together our `bids` and `auction` sources.
+We'll create a [view](https://materialize.com/docs/overview/api-components/#non-materialized-views) to join together our `bids` and `auction` sources:
 
-- `marts/on_time_bids.sql`
+- [`marts/on_time_bids.sql`](marts/on_time_bids.sql)
 
-We'll aggregate our `on_time_bids` by creating a view that utilizes an [index](https://materialize.com/docs/overview/key-concepts/#indexes) to assemble and incrementally maintain the average bid amount in memory. These are especially useful in cases where you need to speed up complex queries or filter on literal values or expressions.
+We'll aggregate `on_time_bids` by creating a view that utilizes an [index](https://materialize.com/docs/overview/key-concepts/#indexes) to assemble and incrementally maintain the average bid amount in memory. These are especially useful in cases where you need to speed up complex queries or filter on literal values or expressions:
 
-- `marts/avg_bids.sql`
+- [`marts/avg_bids.sql`](marts/avg_bids.sql)
 
 We'll demonstrate how to go beyond the reporting use case to power a downstream alerting pipeline, used to inform the winners of each auction immediately after it closes. To do so, we'll need to create a view that tells us the highest bid for each auction:
 
-- `marts/highest_bid_per_auction.sql`
+- [`marts/highest_bid_per_auction.sql`](marts/highest_bid_per_auction.sql)
 
 and contain that result set to only include bids that came in before each auction closed:
 
-- `marts/winning_bids.sql`
+- [`marts/winning_bids.sql`](marts/winning_bids.sql)
 
-The final result is a [materialized view](https://materialize.com/docs/overview/key-concepts/#materialized-views) that is persisted in durable storage and incrementally updated as new data arrives. We can SUBSCRIBE to our `winning_bids` view to see immediately when winners are announced.
+The final result is a [materialized view](https://materialize.com/docs/overview/key-concepts/#materialized-views) that is persisted in durable storage and incrementally updated as new data arrives.
+
+### Build and run the models
 
 To step through building this auction house pipeline, run one model at a time by directly [selecting](https://docs.getdbt.com/reference/node-selection/syntax) it:
 

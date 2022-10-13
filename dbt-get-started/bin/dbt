@@ -11,13 +11,17 @@ if [[ ! -f venv/bin/activate ]]; then
     python3 -m venv venv
 fi
 
-. venv/bin/activate
+# shellcheck source=/dev/null
+source venv/bin/activate
 
 if [[ ! -x venv/bin/dbt ]]; then
     pip install -r requirements.txt
 fi
 
-export DBT_PROFILES_DIR=$(pwd)
-export DBT_ARTIFACT_STATE_PATH=$(pwd)
+DBT_PROFILES_DIR=$(pwd)
+DBT_ARTIFACT_STATE_PATH=$(pwd)
+
+export DBT_PROFILES_DIR
+export DBT_ARTIFACT_STATE_PATH
 
 exec venv/bin/dbt "$@"

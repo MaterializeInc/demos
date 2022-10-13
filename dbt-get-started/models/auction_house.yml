@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: auction_house
-    schema: "{{ target.schema }}"
+    schema: '{{ target.schema }}'
     description: Auction Load Generator Source
     tables:
       - name: auctions
