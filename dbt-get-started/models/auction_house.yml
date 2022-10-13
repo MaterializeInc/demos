@@ -1,0 +1,39 @@
+version: 2
+
+sources:
+  - name: auction_house
+    schema: "{{ target.schema }}"
+    description: Auction Load Generator Source
+    tables:
+      - name: auctions
+        description: All past and ongoing auctions
+      - name: bids
+        description: All bids placed in each auction
+
+models:
+  - name: on_time_bids
+    description: On time auction bids
+    columns:
+      - name: bid_id
+        description: Unique ID for each bid
+        tests:
+          - not_null
+          - unique
+      - name: seller_id
+        description: ID of the seller
+      - name: buyer_id
+        description: ID of the buyer
+      - name: item
+        description: The item that was bid on
+      - name: bid_time
+        description: Time of the bid
+      - name: end_time
+        description: Time each auction ends
+      - name: amount
+        description: Bid amount
+  - name: avg_bids
+    description: Average bid per auction
+  - name: highest_bid_per_auction
+    description: Highest bid per auction
+  - name: winning_bids
+    description: Winning bids per auction

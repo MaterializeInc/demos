@@ -4,69 +4,85 @@
 
 This demo recreates the Materialize [getting started guide](https://materialize.com/docs/get-started/) using dbt as the transformation layer.
 
-## Docker
+## Configuration
 
-```bash
-# Start the setup
-docker-compose up -d
+To get started, make sure you have a Materialize account. Log into your account and generate an [app password](https://cloud.materialize.com/access) to use in your dbt connection.
 
-# Check if everything is up and running!
-docker-compose ps
+Update [`profiles.yml`](profiles.yml) to replace the `Host`, `Password` and `User` connection parameters.
+
+We've bundled everything you'll need to create a development environment in a wrapper script, in `bin/dbt`. It installs the dbt-materialize adapter for you, and sets your profile path. Alternatively, [install](https://materialize.com/docs/integrations/dbt/#setup) the dbt-materialize plugin locally.
+
+Test the connection by running:
+
+```shell
+bin/dbt debug
 ```
 
-Once you're done playing with the setup, tear it down:
+### Clusters
+
+In Materialize, clusters are logical components dataflow-powered objects, e.g. indexes and materialized views. They rely on cluster replicas to run dataflows. We'll create a `auction_house` cluster (logical compute) and cluster replica (physical compute) to isolate the work we will do when we run our dbt models in the next step.
+
+To connect to Materialize, you can use a PostgreSQL-compatible [client](https://materialize.com/docs/integrations/sql-clients/) like `psql`:
 
 ```bash
-docker-compose down -v
+psql "postgres://<user>:<password>@<host>:6875/materialize"
 ```
 
-## dbt
+and then run:
 
-To access the [dbt CLI](https://docs.getdbt.com/dbt-cli/cli-overview), run:
-
-```bash
-docker exec -it dbt bash
-```
-
-From here, you can run dbt commands as usual. To check that the [`dbt-materialize`](https://pypi.org/project/dbt-materialize/) plugin has been installed:
-
-```bash
-dbt --version
+```sql
+CREATE CLUSTER auction_house REPLICAS (xsmall_replica (SIZE 'xsmall'));
 ```
 
 ### Build and run the models
 
-We've created a few core models that take care of defining the building blocks of a dbt+Materialize project, including a streaming [source](https://materialize.com/docs/overview/api-components/#sources):
+We've created a few core models that take care of defining the building blocks of a dbt+Materialize project, including a streaming [source](https://materialize.com/docs/overview/api-components/#sources). In this demo, we'll use Materialize's built in [Auction](https://materialize.com/docs/sql/create-source/load-generator/#auction) LOAD GENERATOR source to simulate an auction house where different users are bidding on an ongoing series of auctions.
 
-- `sources/market_orders_raw.sql`
+- `sources/auction_house.sql`
 
-, as well as a staging [view](https://materialize.com/docs/overview/api-components/#non-materialized-views) to transform the source data:
+We'll create a [view](https://materialize.com/docs/overview/api-components/#non-materialized-views) to join together our `bids` and `auction` sources.
 
-- `staging/stg_market__orders.sql`
+- `marts/on_time_bids.sql`
 
-, and a [materialized view](https://materialize.com/docs/overview/api-components/#materialized-views) that continuously updates as the underlying data changes:
+We'll aggregate our `on_time_bids` by creating a view that utilizes an [index](https://materialize.com/docs/overview/key-concepts/#indexes) to assemble and incrementally maintain the average bid amount in memory. These are especially useful in cases where you need to speed up complex queries or filter on literal values or expressions.
 
-- `marts/avg_bid.sql`
+- `marts/avg_bids.sql`
 
-To run the models:
+We'll demonstrate how to go beyond the reporting use case to power a downstream alerting pipeline, used to inform the winners of each auction immediately after it closes. To do so, we'll need to create a view that tells us the highest bid for each auction:
 
-```bash
-dbt run
+- `marts/highest_bid_per_auction.sql`
+
+and contain that result set to only include bids that came in before each auction closed:
+
+- `marts/winning_bids.sql`
+
+The final result is a [materialized view](https://materialize.com/docs/overview/key-concepts/#materialized-views) that is persisted in durable storage and incrementally updated as new data arrives. We can SUBSCRIBE to our `winning_bids` view to see immediately when winners are announced.
+
+To step through building this auction house pipeline, run one model at a time by directly [selecting](https://docs.getdbt.com/reference/node-selection/syntax) it:
+
+```shell
+bin/dbt run -s models/sources
+bin/dbt run -s models/marts/on_time_bids.sql
+bin/dbt run -s models/marts/avg_bids.sql
+bin/dbt run -s models/marts/highest_bid_per_auction.sql
+bin/dbt run -s models/marts/winning_bids.sql
 ```
 
-> :crab: As an exercise, you can add models for the queries demonstrating [joins](https://materialize.com/docs/get-started/#joins) and [temporal filters](https://materialize.com/docs/get-started/#temporal-filters).
+To run everything together, omit the selection and just use `bin/dbt run`.
+
+> :crab: As an exercise, connect to Materialize and [SUBSCRIBE](https://materialize.com/docs/sql/subscribe/) to `winning_bids` to see who is winning!
 
 ### Test the project
 
-To help demonstrate how `dbt test` works with Materialize for **continuous testing**, we've added some [generic tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests#generic-tests) to the [`avg_bid` model](dbt/models/marts/avg_bid.sql):
+To help demonstrate how `dbt test` works with Materialize for **continuous testing**, we've added some [generic tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests#generic-tests) to the [`on_time_bids` model](models/on_time_bids.sql):
 
 ```yaml
 models:
-  - name: avg_bid
-    description: 'Computes the average bid price'
+  - name: on_time_bids
+    description: 'On time auction bids'
     columns:
-      - name: symbol
-        description: 'The stock ticker'
+      - name: bid_id
+        description: 'Unique ID for each bid'
         tests:
           - not_null
           - unique
@@ -87,31 +103,27 @@ Note that tests are configured to [`store_failures`](https://docs.getdbt.com/ref
 To run the tests:
 
 ```bash
-dbt test
+bin/dbt test
 ```
 
-This creates two materialized views in a dedicated schema (`public_etl_failures`): `not_null_avg_bid_symbol` and `unique_avg_bid_symbol`. dbt takes care of naming the views based on the type of test (`not_null`, `unique`) and the columns being tested (`symbol`).
+This creates two materialized views in a dedicated schema (`public_etl_failures`): `not_null_on_time_bids_bid_id` and `unique_on_time_bids_bid_id`. dbt takes care of naming the views based on the type of test (`not_null`, `unique`) and the columns being tested (`bid_id`).
 
 These views are continuously updated as new data streams in, and allow you to monitor failing rows **as soon as** an assertion fails. You can use this feature for unit testing during the development of your dbt models, and later in production to trigger real-time alerts downstream.
 
 ## Materialize
 
-To connect to the running Materialize service, you can use a PostgreSQL-compatible client like `psql`, which is bundled in the `materialize/cli` image:
-
-```bash
-docker-compose run cli
-```
-
-and run a few commands to check the objects created through dbt:
+Run a few commands to check the objects created through dbt:
 
 **Sources**
 
 ```sql
 SHOW SOURCES;
 
-       name
--------------------
- market_orders_raw
+     name      |      type      |  size
+---------------+----------------+---------
+ auction_house | load-generator | 3xsmall
+ auctions      | subsource      | 3xsmall
+ bids          | subsource      | 3xsmall
 ```
 
 **Views**
@@ -119,10 +131,11 @@ SHOW SOURCES;
 ```sql
 SHOW VIEWS;
 
-     name
----------------
- avg_bid
- market_orders
+          name
+-------------------------
+ avg_bids
+ highest_bid_per_auction
+ on_time_bids
 ```
 
 **Materialized views**
@@ -130,12 +143,10 @@ SHOW VIEWS;
 ```sql
 SHOW MATERIALIZED VIEWS;
 
-  name
----------
- avg_bid
+     name     |    cluster
+--------------+---------------
+ winning_bids | auction_house
 ```
-
-You'll notice that you're only able to `SELECT` from `avg_bid` — this is because it is the only materialized view! This view is incrementally updated as new data streams in, so you get fresh and correct results with low latency. Behind the scenes, Materialize is indexing the results of the embedded query in memory.
 
 ### Continuous testing
 
@@ -150,20 +161,17 @@ SHOW SCHEMAS;
  public_etl_failure
 ```
 
-, and that the materialized views that continuously test the `avg_bid` view for failures are up and running:
+, and that the materialized views that continuously test the `on_time_bids` view for failures are up and running:
 
 ```sql
-SHOW VIEWS FROM public_etl_failure;
+SHOW MATERIALIZED VIEWS FROM public_etl_failure;
 
-          name
--------------------------
- not_null_avg_bid_symbol
- unique_avg_bid_symbol
+             name             |    cluster
+------------------------------+---------------
+ not_null_on_time_bids_bid_id | auction_house
+ unique_on_time_bids_bid_id   | auction_house
+
 ```
-
-## Local installation
-
-To set up dbt and Materialize in your local environment instead of using Docker, follow the instructions in the [documentation](https://materialize.com/docs/guides/dbt/).
 
 <hr>
 

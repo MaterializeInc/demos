@@ -6,11 +6,12 @@ materialize_get_started:
     dev:
       type: materialize
       threads: 1
-      host: materialized
+      host: <host>
       port: 6875
-      user: materialize
-      pass: password
-      dbname: materialize
+      user: <user@domain.com>
+      pass: <password>
+      database: materialize
+      cluster: auction_house
       schema: public
-
+      sslmode: require
   target: dev
