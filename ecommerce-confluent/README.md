@@ -216,7 +216,7 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
       SELECT CONVERT_FROM(data, 'utf8')::jsonb AS data FROM json_pageviews;
       ```
 
-   2. We are using postgres JSON notation (`data->'url'`), type casts (`::string`) and [regexp_match](https://materialize.com/docs/sql/functions/#string-func:~:text=regexp_match(haystack) function to extract only the item_id from the raw pageview URL.
+   2. We are using Postgres JSON notation (`data->'url'`), type casts (`::string`) and [regexp_match](https://materialize.com/docs/sql/functions/#string-func:~:text=regexp_match(haystack) function to extract only the item_id from the raw pageview URL.
 
       ```sql
       (regexp_match((data->'url')::string, '/products/(\d+)')[1])::int AS target_id,
@@ -351,6 +351,38 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
     ```
 
 16. Now, you've materialized some views that you can visualize in a BI tool like Metabase. Close out of the Materialize CLI (<kbd>Ctrl</kbd> + <kbd>D</kbd>).
+
+### Sink data back out to Kafka:
+
+    [Sinks](https://materialize.com/docs/sql/create-sink/) let you stream data out of Materialize, using either sources or views.
+
+    Let's create a view that flags "high-value" users that have spent $10k or more total.
+
+    ```sql
+    CREATE MATERIALIZED VIEW high_value_users AS
+      SELECT
+        users.id,
+        users.email,
+        SUM(purchase_price * quantity)::int AS lifetime_value,
+        COUNT(*) as purchases
+      FROM users
+      JOIN purchases ON purchases.user_id = users.id
+      GROUP BY 1,2
+      HAVING SUM(purchase_price * quantity) > 10000;
+    ```
+
+    and then a sink to stream updates to this view back out to Kafka:
+
+    ```sql
+    CREATE SINK high_value_users_sink
+        FROM high_value_users
+        INTO KAFKA CONNECTION confluent_cloud (TOPIC 'high-value-users-sink')
+        FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
+        ENVELOPE DEBEZIUM
+        WITH (SIZE = '3xsmall');
+    ```
+
+    Now if you go to the [Confluent Cloud UI](https://confluent.cloud/) and navigate to the `high-value-users-sink` topic, you should see data streaming in.
 
 ## Business Intelligence: Metabase
 

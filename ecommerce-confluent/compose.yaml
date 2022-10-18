@@ -12,7 +12,7 @@ services:
       - ./mysql/mysql_bootstrap.sql:/docker-entrypoint-initdb.d/mysql_bootstrap.sql
     healthcheck: {test: mysql -p$$MYSQL_PASSWORD -e 'select 1', interval: 1s, start_period: 60s}
   debezium:
-    image: debezium/connect:1.8
+    image: debezium/connect:1.9
     environment:
       BOOTSTRAP_SERVERS: "${CONFLUENT_BROKER_HOST}"
       GROUP_ID: 1
