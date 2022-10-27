@@ -358,29 +358,29 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
 
 Let's create a view that flags "high-value" users that have spent $10k or more total.
 
-    ```sql
-    CREATE MATERIALIZED VIEW high_value_users AS
-      SELECT
-        users.id,
-        users.email,
-        SUM(purchase_price * quantity)::int AS lifetime_value,
-        COUNT(*) as purchases
-      FROM users
-      JOIN purchases ON purchases.user_id = users.id
-      GROUP BY 1,2
-      HAVING SUM(purchase_price * quantity) > 10000;
-    ```
+```sql
+CREATE MATERIALIZED VIEW high_value_users AS
+  SELECT
+   users.id,
+   users.email,
+   SUM(purchase_price * quantity)::int AS lifetime_value,
+   COUNT(*) as purchases
+ FROM users
+ JOIN purchases ON purchases.user_id = users.id
+ GROUP BY 1,2
+ HAVING SUM(purchase_price * quantity) > 10000;
+```
 
-    and then a sink to stream updates to this view back out to Kafka:
+and then a sink to stream updates to this view back out to Kafka:
 
-    ```sql
-    CREATE SINK high_value_users_sink
-        FROM high_value_users
-        INTO KAFKA CONNECTION confluent_cloud (TOPIC 'high-value-users-sink')
-        FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
-        ENVELOPE DEBEZIUM
-        WITH (SIZE = '3xsmall');
-    ```
+```sql
+CREATE SINK high_value_users_sink
+   FROM high_value_users
+   INTO KAFKA CONNECTION confluent_cloud (TOPIC 'high-value-users-sink')
+   FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
+   ENVELOPE DEBEZIUM
+   WITH (SIZE = '3xsmall');
+```
 
 Now if you go to the [Confluent Cloud UI](https://confluent.cloud/) and navigate to the `high-value-users-sink` topic, you should see data streaming in.
 
