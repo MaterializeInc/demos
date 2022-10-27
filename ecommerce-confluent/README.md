@@ -354,9 +354,9 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
 
 ### Sink data back out to Kafka:
 
-    [Sinks](https://materialize.com/docs/sql/create-sink/) let you stream data out of Materialize, using either sources or views.
+[Sinks](https://materialize.com/docs/sql/create-sink/) let you stream data out of Materialize, using either sources or views.
 
-    Let's create a view that flags "high-value" users that have spent $10k or more total.
+Let's create a view that flags "high-value" users that have spent $10k or more total.
 
     ```sql
     CREATE MATERIALIZED VIEW high_value_users AS
@@ -382,7 +382,7 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
         WITH (SIZE = '3xsmall');
     ```
 
-    Now if you go to the [Confluent Cloud UI](https://confluent.cloud/) and navigate to the `high-value-users-sink` topic, you should see data streaming in.
+Now if you go to the [Confluent Cloud UI](https://confluent.cloud/) and navigate to the `high-value-users-sink` topic, you should see data streaming in.
 
 ## Business Intelligence: Metabase
 
