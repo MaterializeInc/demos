@@ -20,7 +20,6 @@ const postgresPool = new Pool({
  */
 const graphqlClient = createClient({
   url: 'ws://backend:4000/graphql',
-  // url: "ws://localhost:4000/graphql",
   webSocketImpl: ws,
   generateID: v4,
   on: {

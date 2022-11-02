@@ -1,6 +1,6 @@
 import {Pool, QueryResult, Client as PgClient, PoolConfig} from 'pg';
 import EventEmitter from 'events';
-import TailStream from './TailStream';
+import SubscribeStream from './SubscribeStream';
 import TransformStream from './TransformStream';
 import WriteStream from './WriteStream';
 
@@ -73,16 +73,16 @@ export default class MaterializeClient {
   }
 
   /**
-   * Run a tail in Materialize
+   * Run a subscribe in Materialize
    * @param statement
    * @param eventEmmiter
    * @returns
    */
-  async tail(statement: string, eventEmmiter: EventEmitter): Promise<void> {
+  async subscribe(statement: string, eventEmmiter: EventEmitter): Promise<void> {
     return new Promise((res, rej) => {
       const asyncStream = async () => {
         /**
-         * Create a single client per tail rather than re-using a pool's client
+         * Create a single client per subscribe rather than re-using a pool's client
          */
         const singleClient = new PgClient(this.config);
 
@@ -120,22 +120,22 @@ export default class MaterializeClient {
           );
 
           /**
-           * Listen to tail data updates
+           * Listen to subscribe data updates
            */
           const listener = (results: Array<any>) => {
             eventEmmiter.emit('data', results);
           };
 
           /**
-           * Listen to tail errors
+           * Listen to subscribe errors
            */
-          const handleTailError = (err) => {
-            console.error('Error inside tail: ', err);
+          const handleSubscribeError = (err) => {
+            console.error('Error inside subscribe: ', err);
             rej(err);
           };
 
-          const tailStream = new TailStream(singleClient, 'mz_cursor');
-          tailStream.on('error', handleTailError);
+          const subscribeStream = new SubscribeStream(singleClient, 'mz_cursor');
+          subscribeStream.on('error', handleSubscribeError);
 
           const transfromStream = new TransformStream();
           const writeStream = new WriteStream(listener);
@@ -144,8 +144,8 @@ export default class MaterializeClient {
            * Listen to disconnects from the client
            */
           eventEmmiter.on('disconnect', () => {
-            if (tailStream.destroyed === false) {
-              tailStream.destroy();
+            if (subscribeStream.destroyed === false) {
+              subscribeStream.destroy();
             }
             endClient();
           });
@@ -153,7 +153,7 @@ export default class MaterializeClient {
           /**
            * Listen to pipe closing due to success or failure
            */
-          const streamPipe = tailStream.pipe(transfromStream).pipe(writeStream);
+          const streamPipe = subscribeStream.pipe(transfromStream).pipe(writeStream);
           streamPipe.on('close', () => {
             console.log('Pipe closed');
             endClient();

@@ -1,24 +1,48 @@
 import {Pool} from 'pg';
 
 /**
+ * Materialize Client
+ */
+ const mzHost = process.env.MZ_HOST || 'materialized';
+ const mzPort = Number(process.env.MZ_PORT) || 6875;
+ const mzUser = process.env.MZ_USER || 'materialize';
+ const mzPassword = process.env.MZ_PASSWORD || 'materialize';
+ const mzDatabase = process.env.MZ_DATABASE || 'materialize';
+
+/**
  * Create Materialize sources and materialized views
  * Before creating the views it will check if they aren't created already.
  */
 async function setUpMaterialize() {
   const pool = await new Pool({
-    host: 'materialized',
-    port: 6875,
-    user: 'materialize',
-    password: 'materialize',
-    database: 'materialize',
+    host: mzHost,
+    port: mzPort,
+    user: mzUser,
+    password: mzPassword,
+    database: mzDatabase,
+    ssl: true,
   });
   const poolClient = await pool.connect();
 
   await poolClient.query(`
+    CREATE SECRET  IF NOT EXISTS postgres_password AS 'materialize';
+  `);
+
+  await poolClient.query(`
+    CREATE CONNECTION pg_connection TO POSTGRES (
+      HOST '${process.env.POSTGRES_HOST || 'postgres'}'}',
+      PORT 5432,
+      USER 'materialize',
+      PASSWORD SECRET pgpass,
+      DATABASE 'postgres'
+    );
+  `);
+
+  await poolClient.query(`
     CREATE SOURCE IF NOT EXISTS antennas_publication_source
-    FROM POSTGRES
-    CONNECTION 'host=postgres port=5432 user=materialize password=materialize dbname=postgres'
-    PUBLICATION 'antennas_publication_source';
+      FROM POSTGRES CONNECTION pg_connection (PUBLICATION 'antennas_publication_source')
+      FOR ALL TABLES
+      WITH (SIZE = '3xsmall');
   `);
 
   const {rowCount} = await pool.query(
