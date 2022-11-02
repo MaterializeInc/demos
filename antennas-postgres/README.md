@@ -99,24 +99,30 @@ GRANT SELECT ON antennas, antennas_performance TO materialize;
 ```sql
   -- All these queries run inside the helper process.
 
+  -- Create the Postgres secret
+  CREATE SECRET IF NOT EXISTS postgres_password AS 'materialize';
+
+   -- Create the Postgres connection
+  CREATE CONNECTION pg_connection TO POSTGRES (
+    HOST '${process.env.POSTGRES_HOST || 'postgres'}',
+    PORT 5432,
+    USER 'materialize',
+    PASSWORD SECRET postgres_password,
+    DATABASE 'postgres'
+  );
 
   -- Create the Postgres Source
   CREATE SOURCE IF NOT EXISTS antennas_publication_source
-  FROM POSTGRES
-  CONNECTION 'host=postgres port=5432 user=materialize password=materialize dbname=postgres'
-  PUBLICATION 'antennas_publication_source';
-
-
-  -- Turn the Postgres tables into Materialized Views
-  CREATE VIEWS FROM SOURCE antennas_publication_source;
-
+    FROM POSTGRES CONNECTION pg_connection (PUBLICATION 'antennas_publication_source')
+    FOR ALL TABLES
+    WITH (SIZE = '3xsmall');
 
   -- Filter last half minute updates and aggregate by anntena ID and GeoJSON to obtain the average performance in the last half minute.
   CREATE MATERIALIZED VIEW IF NOT EXISTS last_half_minute_performance_per_antenna AS
-  SELECT A.antenna_id, A.geojson, AVG(AP.performance) as performance
-  FROM antennas A JOIN antennas_performance AP ON (A.antenna_id = AP.antenna_id)
-  WHERE ((CAST(EXTRACT( epoch from AP.updated_at) AS NUMERIC) * 1000) + 30000) > mz_now()
-  GROUP BY A.antenna_id, A.geojson;
+    SELECT A.antenna_id, A.geojson, AVG(AP.performance) as performance
+    FROM antennas A JOIN antennas_performance AP ON (A.antenna_id = AP.antenna_id)
+    WHERE (cast("updated_at" as timestamp) + INTERVAL '1 HOUR' ) > mz_now()
+    GROUP BY A.antenna_id, A.geojson;
 ```
 
 Antennas data generation statement:

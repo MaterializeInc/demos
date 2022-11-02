@@ -25,7 +25,7 @@ async function setUpMaterialize() {
   const poolClient = await pool.connect();
 
   await poolClient.query(`
-    CREATE SECRET  IF NOT EXISTS postgres_password AS 'materialize';
+    CREATE SECRET IF NOT EXISTS postgres_password AS 'materialize';
   `);
 
   await poolClient.query(`
@@ -82,11 +82,12 @@ function buildQuery(antennaId: number) {
 /**
  * Generate data to Postgres indefinitely
  */
+const pgPass = process.env.POSTGRES_PASSWORD || 'pg_password';
 async function dataGenerator() {
   const pool = await new Pool({
     host: 'postgres',
     user: 'postgres',
-    password: 'pg_password',
+    password: pgPass,
   });
 
   const poolClient = await pool.connect();

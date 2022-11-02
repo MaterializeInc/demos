@@ -8,7 +8,7 @@ services:
       - 5432:5432
     restart: always
     environment:
-      POSTGRES_PASSWORD: pg_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pg_password}
       POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
     command:
       - postgres
@@ -25,7 +25,7 @@ services:
       MZ_USER: ${MZ_USER:-materialize}
       MZ_PASSWORD: ${MZ_PASSWORD:-materialize}
       MZ_DATABASE: ${MZ_DATABASE:-materialize}
-      POSTGRES_PASSWORD: pg_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pg_password}
       POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
     init: true
   backend:
@@ -39,7 +39,7 @@ services:
       MZ_USER: ${MZ_USER:-materialize}
       MZ_PASSWORD: ${MZ_PASSWORD:-materialize}
       MZ_DATABASE: ${MZ_DATABASE:-materialize}
-      POSTGRES_PASSWORD: pg_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pg_password}
       POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
     ports:
       - 4000:4000
@@ -65,7 +65,7 @@ services:
       MZ_USER: ${MZ_USER:-materialize}
       MZ_PASSWORD: ${MZ_PASSWORD:-materialize}
       MZ_DATABASE: ${MZ_DATABASE:-materialize}
-      POSTGRES_PASSWORD: pg_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pg_password}
       POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
     init: true
     depends_on:

@@ -6,12 +6,12 @@ import {createClient} from 'graphql-ws';
 /**
  * Postgres Client
  */
+const pgPass = process.env.POSTGRES_PASSWORD || 'pg_password';
 const postgresPool = new Pool({
   host: 'postgres',
-  // host: "localhost",
   port: 5432,
   user: 'postgres',
-  password: 'pg_password',
+  password: pgPass,
   database: 'postgres',
 });
 
