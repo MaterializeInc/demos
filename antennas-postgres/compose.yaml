@@ -43,6 +43,9 @@ services:
       POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
     ports:
       - 4000:4000
+    depends_on:
+      - postgres
+      - helper
   frontend:
     container_name: frontend
     build:

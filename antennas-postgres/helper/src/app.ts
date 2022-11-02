@@ -30,10 +30,10 @@ async function setUpMaterialize() {
 
   await poolClient.query(`
     CREATE CONNECTION pg_connection TO POSTGRES (
-      HOST '${process.env.POSTGRES_HOST || 'postgres'}'}',
+      HOST '${process.env.POSTGRES_HOST || 'postgres'}',
       PORT 5432,
       USER 'materialize',
-      PASSWORD SECRET pgpass,
+      PASSWORD SECRET postgres_password,
       DATABASE 'postgres'
     );
   `);

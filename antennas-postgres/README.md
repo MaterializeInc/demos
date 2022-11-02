@@ -115,7 +115,7 @@ GRANT SELECT ON antennas, antennas_performance TO materialize;
   CREATE MATERIALIZED VIEW IF NOT EXISTS last_half_minute_performance_per_antenna AS
   SELECT A.antenna_id, A.geojson, AVG(AP.performance) as performance
   FROM antennas A JOIN antennas_performance AP ON (A.antenna_id = AP.antenna_id)
-  WHERE ((CAST(EXTRACT( epoch from AP.updated_at) AS NUMERIC) * 1000) + 30000) > mz_logical_timestamp()
+  WHERE ((CAST(EXTRACT( epoch from AP.updated_at) AS NUMERIC) * 1000) + 30000) > mz_now()
   GROUP BY A.antenna_id, A.geojson;
 ```
 
