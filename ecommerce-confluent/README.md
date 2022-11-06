@@ -357,7 +357,7 @@ That's it! You've created some views that you can visualize in a BI tool like Me
 
 [Sinks](https://materialize.com/docs/sql/create-sink/) let you stream data out of Materialize, using either sources or views.
 
-Let's create a view that flags "high-value" users that have spent $10k or more total.
+Let's create a view that flags "high-value" users that have spent $10k or more in total.
 
 ```sql
 CREATE MATERIALIZED VIEW high_value_users AS
