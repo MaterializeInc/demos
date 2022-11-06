@@ -50,7 +50,7 @@ available to Docker Engine.
 
 - Sign up for [Materialize](https://materialize.com/register)
 - Create a Confluent Cloud account, you can sign up for a free account [here](https://www.confluent.io/confluent-cloud/tryfree/).
-- You'll need to have Docker and Docker Compose installed.
+- Make sure you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
   - [Docker](https://docs.docker.com/get-docker/)
   - [Docker Compose](https://docs.docker.com/compose/install/)
 
