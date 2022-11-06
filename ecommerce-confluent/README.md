@@ -276,7 +276,7 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
        GROUP BY item_name, item_category;
    ```
 
-   This view shows some of the JOIN capabilities of Materialize, we're joining our two previous views with items to create a summary of purchases, pageviews, and conversion rates.
+   This view shows some of the JOIN capabilities of Materialize. We're joining our two previous views with items to create a summary of purchases, pageviews, and conversion rates.
 
     Indexes assemble and incrementally maintain a query’s results updated in memory within a cluster, which speeds up query time:
 
