@@ -110,7 +110,7 @@ Example:
 
 Otherwise, you can find the steps to install and use your CLI of choice under [Supported tools](https://materialize.com/docs/integrations/sql-clients/#supported-tools).
 
-7. Now that you're in the Materialize CLI, start by creating the secrets for the Confluent Cloud Kafka cluster and Schema Registry:
+7. In `psql`, start by securely storing your Confluent Cloud credentials for the Kafka cluster and Schema Registry as secrets:
 
     ```sql
     CREATE SECRET confluent_username AS '<your-username>';
