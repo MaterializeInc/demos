@@ -59,7 +59,7 @@ available to Docker Engine.
 
    ```shell session
    git clone https://github.com/MaterializeInc/demos.git
-   cd demos/cloud-confluent
+   cd demos/ecommerce-confluent
    ```
 
 2. Copy the `.env.example` file to `.env` and fill in the following fields:
