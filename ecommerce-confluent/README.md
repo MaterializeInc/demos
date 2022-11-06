@@ -98,7 +98,7 @@ CONFLUENT_SCHEMA_REGISTRY_API_SECRET=
 
    **This may take several minutes to complete the first time you run it.** If all goes well, you'll have everything running in their own containers, with Debezium configured to ship changes from MySQL into Confluent Cloud.
 
-6. Connect to Materialize Cloud
+6. Connect to Materialize
 
 If you already have `psql` installed on your machine, use the provided connection string to connect:
 
