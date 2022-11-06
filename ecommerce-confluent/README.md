@@ -427,4 +427,4 @@ Now if you go to the [Confluent Cloud UI](https://confluent.cloud/) and navigate
 
 You now have Materialize doing real-time materialized views on a changefeed from a database and pageview events from Kafka. You have complex multi-layer views doing JOIN's and aggregations in order to distill the raw data into a form that's useful for downstream applications. In Metabase, you have the ability to create dashboards and reports based on this data.
 
-You have a lot of infrastructure running in docker containers, don't forget to run `docker-compose down` to shut everything down!
+You have som infrastructure running in Docker containers, so don't forget to run `docker-compose down` to shut everything down!
