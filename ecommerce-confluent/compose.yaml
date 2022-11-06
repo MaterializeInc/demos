@@ -58,7 +58,7 @@ services:
     depends_on:
       mysql: {condition: service_healthy}
   debezium_deploy:
-    image: debezium/connect:1.8
+    image: debezium/connect:1.9
     depends_on:
       debezium: {condition: service_healthy}
     environment:
