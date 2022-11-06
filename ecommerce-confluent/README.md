@@ -62,7 +62,7 @@ available to Docker Engine.
    cd demos/ecommerce-confluent
    ```
 
-2. Copy the `.env.example` file to `.env` and fill in the following fields:
+2. Copy the `.env.example` file to `.env`:
 
    ```shell
    cp .env.example .env
