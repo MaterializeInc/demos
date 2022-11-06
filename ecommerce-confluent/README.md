@@ -159,7 +159,7 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
         WITH (SIZE = '3xsmall');
     ```
 
-   Because these sources are pulling message schema data from the registry, materialize knows the column types to use for each attribute.
+   Because these sources are pulling message schema data from the registry, Materialize knows the column types to use for each attribute.
 
 10. We'll also want to create a JSON-formatted source for the `pageviews`:
 
