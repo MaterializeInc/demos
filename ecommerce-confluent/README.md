@@ -124,15 +124,15 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
     ```sql
     -- Create Kafka connection
     CREATE CONNECTION confluent_cloud
-      FOR KAFKA
+      TO KAFKA
       BROKER '<your_broker>',
       SASL MECHANISMS = 'PLAIN',
       SASL USERNAME = SECRET confluent_username,
-     SASL PASSWORD = SECRET confluent_password;
+      SASL PASSWORD = SECRET confluent_password;
 
     -- Create Registry connection
     CREATE CONNECTION schema_registry
-      FOR CONFLUENT SCHEMA REGISTRY
+      TO CONFLUENT SCHEMA REGISTRY
       URL '<your_schema_registry>',
       USERNAME = SECRET schema_registry_username,
       PASSWORD = SECRET schema_registry_password;
