@@ -400,7 +400,7 @@ Now if you go to the [Confluent Cloud UI](https://confluent.cloud/) and navigate
    | Port              | **6875**                        |
    | Database name     | **materialize**                 |
    | Database username | **user%40domain.com**           |
-   | Database password | Your Materialize App Passwords. |
+   | Database password | Your Materialize App Password. |
 
 5. Proceed past the screens until you reach your primary dashboard.
 
