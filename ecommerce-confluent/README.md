@@ -54,7 +54,6 @@ available to Docker Engine.
 
 ## Running the Demo
 
-You'll need to have [docker and docker-compose installed](https://materialize.com/docs/third-party/docker) before getting started.
 
 1. Clone this repo and navigate to the directory by running:
 
