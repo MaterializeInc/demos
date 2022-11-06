@@ -165,8 +165,9 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
 
    ```sql
    CREATE SOURCE json_pageviews
-    FROM KAFKA CONNECTION confluent_cloud TOPIC 'pageviews'
-    FORMAT BYTES;
+    FROM KAFKA CONNECTION confluent_cloud (TOPIC 'pageviews')
+    FORMAT BYTES
+    WITH (SIZE = '3xsmall');
    ```
 
    With JSON-formatted messages, we don't know the schema so the [JSON is pulled in as raw bytes](https://materialize.com/docs/sql/create-source/json-kafka/) and we still need to CAST data into the proper columns and types. We'll show that in the step below.
