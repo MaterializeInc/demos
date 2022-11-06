@@ -141,19 +141,22 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
 
     ```sql
     CREATE SOURCE purchases
-      FROM KAFKA CONNECTION confluent_cloud TOPIC 'mysql.shop.purchases'
+      FROM KAFKA CONNECTION confluent_cloud (TOPIC 'mysql.shop.purchases')
       FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
-      ENVELOPE DEBEZIUM;
+      ENVELOPE DEBEZIUM
+      WITH (SIZE = '3xsmall');
 
     CREATE SOURCE items
-        FROM KAFKA CONNECTION confluent_cloud TOPIC 'mysql.shop.items'
+        FROM KAFKA CONNECTION confluent_cloud (TOPIC 'mysql.shop.items')
         FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
-        ENVELOPE DEBEZIUM;
+        ENVELOPE DEBEZIUM
+        WITH (SIZE = '3xsmall');
 
     CREATE SOURCE users
-        FROM KAFKA CONNECTION confluent_cloud TOPIC 'mysql.shop.users'
+        FROM KAFKA CONNECTION confluent_cloud (TOPIC 'mysql.shop.users')
         FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
-        ENVELOPE DEBEZIUM;
+        ENVELOPE DEBEZIUM
+        WITH (SIZE = '3xsmall');
     ```
 
    Because these sources are pulling message schema data from the registry, materialize knows the column types to use for each attribute.
