@@ -351,7 +351,7 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
     )) TO STDOUT;
     ```
 
-16. Now, you've materialized some views that you can visualize in a BI tool like Metabase. Close out of the Materialize CLI (<kbd>Ctrl</kbd> + <kbd>D</kbd>).
+That's it! You've created some views that you can visualize in a BI tool like Metabase!
 
 ### Sink data back out to Kafka:
 
