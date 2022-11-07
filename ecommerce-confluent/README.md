@@ -90,6 +90,8 @@ CONFLUENT_SCHEMA_REGISTRY_API_SECRET=
 > **Note**: If you don't create the topics, the demo will not work, and you will see the following error in the Debezium logs:
 > `Error while fetching metadata with correlation id … : {<topic>=UNKNOWN_TOPIC_OR_PARTITION}`
 
+Alternatively, you can set the `auto.create.topics.enable` option for your cluster to `true`, as described in the [Confluent documentation](https://docs.confluent.io/cloud/current/clusters/broker-config.html#change-cluster-settings-for-dedicated-clusters). This option is disabled by default, but once enabled, it will allow you to automatically create topics when they are referenced in a Kafka producer or consumer.
+
 5. Bring up the Docker Compose containers in the background:
 
    ```shell session
