@@ -1,0 +1,94 @@
+services:
+  mysql:
+    image: mysql/mysql-server:8.0.27
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ./mysql/mysql.cnf:/etc/mysql/conf.d
+      - ./mysql/mysql_bootstrap.sql:/docker-entrypoint-initdb.d/mysql_bootstrap.sql
+    healthcheck: {test: mysql -p$$MYSQL_PASSWORD -e 'select 1', interval: 1s, start_period: 60s}
+  debezium:
+    image: debezium/connect:1.9
+    environment:
+      BOOTSTRAP_SERVERS: "${CONFLUENT_BROKER_HOST}"
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: "${CONFLUENT_SCHEMA_REGISTRY_URL}"
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "${CONFLUENT_SCHEMA_REGISTRY_URL}"
+      CONNECT_KEY_CONVERTER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: "${CONFLUENT_SCHEMA_REGISTRY_API_KEY}:${CONFLUENT_SCHEMA_REGISTRY_API_SECRET}"
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: "${CONFLUENT_SCHEMA_REGISTRY_API_KEY}:${CONFLUENT_SCHEMA_REGISTRY_API_SECRET}"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: '3'
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: '3'
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: '3'
+      CONNECT_REQUEST_TIMEOUT_MS: "20000"
+      CONNECT_RETRY_BACKOFF_MS: "500"
+      CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      CONNECT_SASL_MECHANISM: "PLAIN"
+      CONNECT_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${CONFLUENT_API_KEY}\" password=\"${CONFLUENT_API_SECRET}\";"
+      #
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      CONNECT_CONSUMER_SASL_MECHANISM: "PLAIN"
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${CONFLUENT_API_KEY}\" password=\"${CONFLUENT_API_SECRET}\";"
+      CONNECT_CONSUMER_REQUEST_TIMEOUT_MS: "20000"
+      CONNECT_CONSUMER_RETRY_BACKOFF_MS: "500"
+      #
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+      CONNECT_PRODUCER_SASL_MECHANISM: "PLAIN"
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${CONFLUENT_API_KEY}\" password=\"${CONFLUENT_API_SECRET}\";"
+      CONNECT_PRODUCER_REQUEST_TIMEOUT_MS: "20000"
+      CONNECT_PRODUCER_RETRY_BACKOFF_MS: "500"
+    volumes:
+      - ${PWD}/mysql:/data
+    ports:
+      - 8083:8083
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
+    depends_on:
+      mysql: {condition: service_healthy}
+  debezium_deploy:
+    image: debezium/connect:1.9
+    depends_on:
+      debezium: {condition: service_healthy}
+    environment:
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - CONFLUENT_BROKER_HOST=${CONFLUENT_BROKER_HOST}
+      - CONFLUENT_SCHEMA_REGISTRY_URL=${CONFLUENT_SCHEMA_REGISTRY_URL}
+      - CONFLUENT_SCHEMA_REGISTRY_API_KEY=${CONFLUENT_SCHEMA_REGISTRY_API_KEY}
+      - CONFLUENT_SCHEMA_REGISTRY_API_SECRET=${CONFLUENT_SCHEMA_REGISTRY_API_SECRET}
+      - CONFLUENT_API_KEY=${CONFLUENT_API_KEY}
+      - CONFLUENT_API_SECRET=${CONFLUENT_API_SECRET}
+    volumes:
+      - ./mysql/mysql_dbz.sh:/mysql_dbz.sh
+    entrypoint: [bash, -c, /mysql_dbz.sh]
+  loadgen:
+    build: loadgen
+    init: true
+    environment:
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - CONFLUENT_BROKER_HOST=${CONFLUENT_BROKER_HOST}
+      - CONFLUENT_SCHEMA_REGISTRY_URL=${CONFLUENT_SCHEMA_REGISTRY_URL}
+      - CONFLUENT_SCHEMA_REGISTRY_API_KEY=${CONFLUENT_SCHEMA_REGISTRY_API_KEY}
+      - CONFLUENT_SCHEMA_REGISTRY_API_SECRET=${CONFLUENT_SCHEMA_REGISTRY_API_SECRET}
+      - CONFLUENT_API_KEY=${CONFLUENT_API_KEY}
+      - CONFLUENT_API_SECRET=${CONFLUENT_API_SECRET}
+    depends_on:
+      mysql: {condition: service_healthy}
+      debezium: {condition: service_healthy}
+  metabase:
+    image: metabase/metabase:v0.41.5
+    depends_on:
+      debezium: {condition: service_healthy}
+    ports:
+      - 3030:3000
