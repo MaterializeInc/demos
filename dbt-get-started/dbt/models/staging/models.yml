@@ -1,5 +1,0 @@
-version: 2
-
-models:
-  - name: stg_market_orders
-    description: 'Converts market order data to proper data types'

@@ -1,7 +1,0 @@
-version: 2
-
-sources:
-  - name: market_orders
-    schema: public
-    tables:
-      - name: market_orders_raw
