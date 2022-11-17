@@ -26,13 +26,13 @@ dbt --version
 
   `materialize` should be listed under “Plugins”. If this is not the case, double-check that the virtual environment is activated!
 
-3. Locate the `profiles.yml` file in your machine:
+3. Export your Materialize credentials as environment variables:
 
 ```bash
-dbt debug --config-dir
+export MZ_HOST=<host> MZ_USER=<user> MZ_PASSWORD=<app_password>
 ```
 
-4. Open `profiles.yml` and adapt it to connect to your Materialize region using the following configuration as reference:
+These will be picked up in the `profiles.yml` file, where the connection configuration is defined:
 
 ```nofmt
 mz_get_started:
@@ -40,10 +40,10 @@ mz_get_started:
     dev:
       type: materialize
       threads: 1
-      host: <host>
+      host: "{{ env_var('MZ_HOST') }}"
       port: 6875
-      user: <user@domain.com>
-      pass: <password>
+      user: "{{ env_var('MZ_USER') }}"
+      pass: "{{ env_var('MZ_PASSWORD') }}"
       database: materialize
       schema: public
       cluster: auction_house
@@ -51,7 +51,7 @@ mz_get_started:
   target: dev
 ```
 
-5. To test the connection to Materialize, run:
+4. To test the connection to Materialize, run:
 
 ```bash
 dbt debug
@@ -63,7 +63,7 @@ dbt debug
 
 ### Connect
 
-Connect to Materialize using a PostgreSQL-compatible [client](https://materialize.com/docs/integrations/sql-clients/), like `psql`, and the credentials for your region:
+In a new terminal session, connect to Materialize using a PostgreSQL-compatible [client](https://materialize.com/docs/integrations/sql-clients/) (like `psql`), and the credentials for your region:
 
 ```bash
 psql "postgres://<user>:<password>@<host>:6875/materialize"
@@ -77,7 +77,7 @@ Set up a [cluster](https://materialize.com/docs/sql/create-cluster) (logical com
 CREATE CLUSTER auction_house REPLICAS (xsmall_replica (SIZE = 'xsmall'));
 ```
 
-Notice that the `auction_house` cluster you just created is configured as the default cluster in the dbt project configuration (`profiles.yml`). This means that dbt will run all models against this cluster (though you can override the default in the model configuration using the [`cluster` option](https://materialize.com/docs/integrations/dbt/#clusters)).
+Notice that the `auction_house` cluster you just created is configured as the default cluster in the connection configuration (`profiles.yml`). This means that dbt will run all models against this cluster (though you can override the default in the model configuration using the [`cluster` option](https://materialize.com/docs/integrations/dbt/#clusters)).
 
 ## dbt
 
@@ -121,8 +121,8 @@ SHOW SOURCES;
      name      |      type      |  size
 ---------------+----------------+---------
  auction_house | load-generator | 3xsmall
- auctions      | subsource      | 3xsmall
- bids          | subsource      | 3xsmall
+ auctions      | subsource      |
+ bids          | subsource      |
 ```
 
 **Views**
@@ -153,14 +153,13 @@ That’s it! From here on, Materialize makes sure that your models are **increme
 
 ### Test the project
 
-To help demonstrate how `dbt test` works with Materialize for **continuous testing**, you'll notice that testing is configured in the dbt project configuration (`profiles.yml`):
+To help demonstrate how `dbt test` works with Materialize for [**continuous testing**](https://materialize.com/docs/integrations/dbt/#configure-continuous-testing), you'll notice that testing is configured in the dbt project configuration (`dbt-project.yml`):
 
 ```yaml
 tests:
   mz_get_started:
-    marts:
-      +store_failures: true
-      +schema: 'etl_failure'
+    +store_failures: true
+    +schema: 'etl_failure'
 ```
 
 , and that we added some [generic tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests#generic-tests) to the `on_time_bids` model in `auction_house.yml`:
@@ -177,7 +176,7 @@ models:
           - unique
 ```
 
-Tests are configured to [`store_failures`](https://docs.getdbt.com/reference/resource-configs/store_failures), which instructs dbt to create a materialized view for each test using the respective `SELECT` statements.
+Tests are configured to `store_failures`, which instructs dbt to create a materialized view for each test using the respective `SELECT` statements.
 
 1. To run the tests:
 

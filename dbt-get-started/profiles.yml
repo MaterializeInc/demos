@@ -1,0 +1,12 @@
+mz_get_started:
+  outputs:
+    dev:
+      type: materialize
+      host: "{{ env_var('MZ_HOST') }}"
+      port: 6875
+      user: "{{ env_var('MZ_USER') }}"
+      password: "{{ env_var('MZ_PASSWORD') }}"
+      database: materialize
+      cluster: auction_house
+      schema: public
+  target: dev

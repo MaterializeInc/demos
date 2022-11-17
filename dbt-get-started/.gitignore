@@ -1,4 +1,4 @@
-dbt/target/
-dbt/dbt_modules/
-dbt/logs/
-dbt/dbt_packages
+target/
+dbt_modules/
+logs/
+dbt_packages

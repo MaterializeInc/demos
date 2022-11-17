@@ -1,0 +1,17 @@
+name: 'mz_get_started'
+version: '1.0.0'
+config-version: 2
+
+profile: 'mz_get_started'
+
+model-paths: ['models']
+
+target-path: 'target'
+clean-targets:
+  - 'target'
+  - 'dbt_modules'
+
+tests:
+  mz_get_started:
+    +store_failures: true
+    +schema: 'etl_failure'
