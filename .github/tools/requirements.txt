@@ -1,4 +1,0 @@
-colored==1.4.3
-dockerfile-parse==1.2.0
-ruamel.yaml==0.17.20
-types-requests==2.27.7
