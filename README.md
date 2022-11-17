@@ -1,3 +1,5 @@
+> 🚧👷 We're working on adapting the demos in this repository to the shiny, new [cloud-native version of Materialize](https://materialize.com/blog/next-generation/). In the meantime, you can take the self-contained demos in [the `lts` branch](https://github.com/MaterializeInc/demos/tree/lts) for a spin!
+
 # Materialize Demos
 
 [![Slack Badge](https://img.shields.io/badge/Join%20us%20on%20Slack!-blueviolet?style=flat&logo=slack&link=https://materialize.com/s/chat)](https://materialize.com/s/chat)
@@ -7,8 +9,6 @@
 This repo is a collection of runnable demos that walk you through using Materialize for different use cases, and with different stacks. All demos are containerized and should run end-to-end with no modifications.
 
 ## Setup
-
-> **Warning:** Demos marked with ✋ use Docker images that are **not compatible** with ARM architectures (_e.g._ M1 MacBooks).
 
 To get started, make sure you have installed:
 
@@ -38,12 +38,12 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
             <td>Node.js, GraphQL, Postgres</td>
         </tr>
         <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/ecommerce">ecommerce</a> ✋</code></b></td>
+          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/ecommerce">ecommerce</a></code></b></td>
             <td>MySQL, Debezium, Kafka, Metabase</td>
             <td rowspan=2>Building a streaming ETL pipeline for e-commerce analytics</td>
         </tr>
         <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/ecommerce-redpanda">ecommerce-redpanda ✋</a></code></b></td>
+          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/ecommerce-redpanda">ecommerce-redpanda</a></code></b></td>
             <td>MySQL, Debezium, Redpanda, Metabase</td>
         </tr>
         <tr>
@@ -92,7 +92,7 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
     </thead>
     <tbody>
         <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/chbench">chbench</a> ✋</code></b></td>
+          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/chbench">chbench</a></code></b></td>
             <td>MySQL, Debezium, Kafka, Metabase</td>
             <td>Benchmarking the speed of analytics queries on a streaming dataset</td>
         </tr>
