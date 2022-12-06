@@ -387,6 +387,72 @@ CREATE SINK high_value_users_sink
 
 Now if you go to the [Confluent Cloud UI](https://confluent.cloud/) and navigate to the `high-value-users-sink` topic, you should see data streaming in.
 
+## Abandoned cart example
+
+We can start simple with a materialized view that aggregates all users that have not completed a purchase:
+
+```sql
+CREATE MATERIALIZED VIEW incomplate_purchases AS
+    SELECT
+        users.id AS user_id,
+        users.email AS email,
+        users.is_vip AS is_vip,
+        purchases.item_id,
+        purchases.status,
+        purchases.quantity,
+        purchases.purchase_price,
+        purchases.created_at,
+        purchases.updated_at
+    FROM users
+    JOIN purchases ON purchases.user_id = users.id
+    WHERE purchases.status = 0;
+```
+
+Next create a materialized view that contains all users that are no longer browsing the site:
+
+> For the demo we would use 3 minutes as the idle time. But in a real world we could use a larger value like 30 minutes for example.
+
+```sql
+CREATE MATERIALIZED VIEW inactive_users_last_3_mins AS
+    SELECT
+        user_id,
+        date_trunc('minute', to_timestamp(received_at)) as visited_at_minute
+    FROM pageview_stg
+    WHERE
+    mz_now() >= (received_at*1000 + 180000)::numeric
+    GROUP BY 1,2;
+```
+
+We can check that it's working by querying the view:
+
+```sql
+SELECT * FROM inactive_users_last_3_mins LIMIT 5;
+```
+
+Finally, we can create a materialized view that contains all incomplete orders for the inactive users:
+
+```sql
+CREATE MATERIALIZED VIEW abandoned_cart AS
+    SELECT
+        incomplate_purchases.user_id,
+        incomplate_purchases.email,
+        incomplate_purchases.item_id,
+        incomplate_purchases.purchase_price,
+        incomplate_purchases.status
+    FROM incomplate_purchases
+    JOIN inactive_users_last_3_mins ON inactive_users_last_3_mins.user_id = incomplate_purchases.user_id
+    GROUP BY 1, 2, 3, 4, 5;
+```
+
+You can create a [Kafka SINK](https://materialize.com/docs/sql/create-sink/#kafka-sinks) or you can use [`SUBSCRIBE`](https://materialize.com/docs/sql/subscribe) to subscribe to the changes of the `abandoned_cart` view:
+
+```sql
+COPY (
+    SUBSCRIBE (
+        SELECT * FROM abandoned_cart
+    )
+) TO STDOUT;
+
 ## Business Intelligence: Metabase
 
 1. In a browser, go to <localhost:3030> _(or <IP_ADDRESS:3030> if running on a VM)._
