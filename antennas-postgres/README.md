@@ -2,11 +2,24 @@
 
 https://user-images.githubusercontent.com/11491779/166932582-e5a9fd47-e397-4419-b221-e8f38c6f06f5.mp4
 
-If you want to try it right now, clone the project and run:
+Before trying this out you will need the following:
+
+- [Materialize Cloud account](https://materialize.com/register/).
+- A publicly accessible Linux server with Docker installed.
+
+If you want to try it right now, clone the project on your Linux server and run:
+
+```
+cp .env.example .env
+```
+
+Then edit the `.env` file and add your Materialize Cloud credentials and Upstash credentials.
+
+Then run:
 
 ```bash
- # Run `AUTOSETUP=1 docker-compose up` to run steps 2-3 automatically
- docker-compose up
+# Run `AUTOSETUP=1 docker-compose up` to run steps 2-3 automatically
+docker-compose up
 ```
 
 After a successful build:
@@ -14,13 +27,6 @@ After a successful build:
 ```
 # Check in your browser
 localhost:3000
-
-# Alternatively connect to:
-# Materialize
-psql postgresql://materialize:materialize@localhost:6875/materialize
-
-# Postgres
-psql postgresql://postgres:pg_password@localhost:5432/postgres
 ```
 
 ---
@@ -49,7 +55,7 @@ There are different ways to achieve a result like this one using Materialize, bu
 1.  Postgres, where all the base data resides.
 2.  Materialize to process and serve the antenna's performance.
 3.  Helper process to generate the antennas random data and initialize Materialize
-4.  Node.js GraphQL API connects to Materialize using [tails](https://materialize.com/docs/sql/tail/#conceptual-framework).
+4.  Node.js GraphQL API connects to Materialize using [subscribe](https://materialize.com/docs/sql/subscribe/#conceptual-framework).
 5.  React front-end displaying the information using GraphQL subscriptions.
 6.  Microservice deploying and pushing helper antennas when performance is low
 
@@ -99,24 +105,30 @@ GRANT SELECT ON antennas, antennas_performance TO materialize;
 ```sql
   -- All these queries run inside the helper process.
 
+  -- Create the Postgres secret
+  CREATE SECRET IF NOT EXISTS postgres_password AS 'materialize';
+
+   -- Create the Postgres connection
+  CREATE CONNECTION pg_connection TO POSTGRES (
+    HOST '${process.env.POSTGRES_HOST || 'postgres'}',
+    PORT 5432,
+    USER 'materialize',
+    PASSWORD SECRET postgres_password,
+    DATABASE 'postgres'
+  );
 
   -- Create the Postgres Source
   CREATE SOURCE IF NOT EXISTS antennas_publication_source
-  FROM POSTGRES
-  CONNECTION 'host=postgres port=5432 user=materialize password=materialize dbname=postgres'
-  PUBLICATION 'antennas_publication_source';
-
-
-  -- Turn the Postgres tables into Materialized Views
-  CREATE VIEWS FROM SOURCE antennas_publication_source;
-
+    FROM POSTGRES CONNECTION pg_connection (PUBLICATION 'antennas_publication_source')
+    FOR ALL TABLES
+    WITH (SIZE = '3xsmall');
 
   -- Filter last half minute updates and aggregate by anntena ID and GeoJSON to obtain the average performance in the last half minute.
   CREATE MATERIALIZED VIEW IF NOT EXISTS last_half_minute_performance_per_antenna AS
-  SELECT A.antenna_id, A.geojson, AVG(AP.performance) as performance
-  FROM antennas A JOIN antennas_performance AP ON (A.antenna_id = AP.antenna_id)
-  WHERE ((CAST(EXTRACT( epoch from AP.updated_at) AS NUMERIC) * 1000) + 30000) > mz_logical_timestamp()
-  GROUP BY A.antenna_id, A.geojson;
+    SELECT A.antenna_id, A.geojson, AVG(AP.performance) as performance
+    FROM antennas A JOIN antennas_performance AP ON (A.antenna_id = AP.antenna_id)
+    WHERE (cast("updated_at" as timestamp) + INTERVAL '1 HOUR' ) > mz_now()
+    GROUP BY A.antenna_id, A.geojson;
 ```
 
 Antennas data generation statement:
@@ -132,8 +144,8 @@ Antennas data generation statement:
 ```
 
 4. Now, the information should be ready to consume. <br/><br/>
-   The back-end works with [Graphql-ws](https://github.com/enisdenjo/graphql-ws). Subscriptions and tails go together like Bonnie and Clyde. Multiple applications send ongoing events to the front-end with sockets or server-sent events (SSE), becoming super handy to use with `tails`. Rather than constantly sending queries back-and-forth, we can run a single `tail last_half_minute_performance_per_antenna with (snapshot)` and send the results more efficiently. <br/><br/>
-   The back-end will use a modified client to run these tails. It implements internally [Node.js stream interfaces](https://nodejs.org/api/stream.html) to handle [backpressure](https://github.com/MaterializeInc/developer-experience/blob/main/mz-playground/postgres-graphql/backend/src/MaterializeClient/TailStream/index.ts), create one second batches and group all the changes in one map [(summary)](https://github.com/MaterializeInc/developer-experience/blob/main/mz-playground/postgres-graphql/backend/src/MaterializeClient/TransformStream/index.ts).
+   The back-end works with [Graphql-ws](https://github.com/enisdenjo/graphql-ws). Subscriptions and subscribe go together like Bonnie and Clyde. Multiple applications send ongoing events to the front-end with sockets or server-sent events (SSE), becoming super handy to use with `subscribe`. Rather than constantly sending queries back-and-forth, we can run a single `subscribe last_half_minute_performance_per_antenna with (snapshot)` and send the results more efficiently. <br/><br/>
+   The back-end will use a modified client to run the `SUBSCRIBE`. It implements internally [Node.js stream interfaces](https://nodejs.org/api/stream.html) to handle [backpressure](https://github.com/MaterializeInc/developer-experience/blob/main/mz-playground/postgres-graphql/backend/src/MaterializeClient/SubscribeStream/index.ts), create one second batches and group all the changes in one map [(summary)](https://github.com/MaterializeInc/developer-experience/blob/main/mz-playground/postgres-graphql/backend/src/MaterializeClient/TransformStream/index.ts).
 
 5. The front-end doesn't require going deep since it will consist of only one component. Apollo GraphQL subscribes to our back-end, and the antennas information gets displayed in a list and a visual map. The frequency at which the information updates is every one second.
 

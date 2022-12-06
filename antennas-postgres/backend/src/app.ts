@@ -10,25 +10,31 @@ import {Context, SubscribeMessage} from 'graphql-ws';
 /**
  * Materialize Client
  */
-const materializeClient = new MaterializeClient({
-  // host: "localhost",
-  host: 'materialized',
-  port: 6875,
-  user: 'materialize',
-  password: 'materialize',
-  database: 'materialize',
-  query_timeout: 5000,
-});
+ const mzHost = process.env.MZ_HOST || 'materialized';
+ const mzPort = Number(process.env.MZ_PORT) || 6875;
+ const mzUser = process.env.MZ_USER || 'materialize';
+ const mzPassword = process.env.MZ_PASSWORD || 'materialize';
+ const mzDatabase = process.env.MZ_DATABASE || 'materialize';
+ const materializeClient = new MaterializeClient({
+   host: mzHost,
+   port: mzPort,
+   user: mzUser,
+   password: mzPassword,
+   database: mzDatabase,
+   ssl: true,
+   query_timeout: 5000,
+ });
 
 /**
  * Postgres Client
  */
+const pgPass = process.env.POSTGRES_PASSWORD || 'pg_password';
 const postgresPool = new Pool({
   // host: "localhost",
   host: 'postgres',
   port: 5432,
   user: 'postgres',
-  password: 'pg_password',
+  password: pgPass,
   database: 'postgres',
 });
 
@@ -58,7 +64,7 @@ const schema = buildSchema(`
 `);
 
 /**
- * Map to follow connections and tails
+ * Map to follow connections and subscribes
  */
 const connectionEventEmitter = new EventEmitter();
 
@@ -148,7 +154,7 @@ async function* antennasUpdates(_, ctxVars) {
     let done = false;
 
     /**
-     * Listen tail events
+     * Listen subscribe events
      */
     const eventEmmiter = new EventEmitter();
     eventEmmiter.on('data', (data) => {
@@ -164,13 +170,13 @@ async function* antennasUpdates(_, ctxVars) {
     });
 
     materializeClient
-      .tail('TAIL (SELECT * FROM last_half_minute_performance_per_antenna)', eventEmmiter)
-      .catch((tailErr) => {
-        console.error('Error running tail.');
-        console.error(tailErr);
+      .subscribe('SUBSCRIBE (SELECT * FROM last_half_minute_performance_per_antenna)', eventEmmiter)
+      .catch((subscribeErr) => {
+        console.error('Error running SUBSCRIBE.');
+        console.error(subscribeErr);
       })
       .finally(() => {
-        console.log('Finished tail.');
+        console.log('Finished SUBSCRIBE.');
         done = true;
         resolve([]);
       });

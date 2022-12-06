@@ -27,5 +27,5 @@ class WebSocketLink extends ApolloLink {
 }
 
 export default new WebSocketLink({
-  url: 'ws://localhost:4000/graphql',
+  url: `ws://${window.location.hostname}:4000/graphql`,
 });

@@ -8,47 +8,44 @@ services:
       - 5432:5432
     restart: always
     environment:
-      POSTGRES_PASSWORD: pg_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pg_password}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
     command:
       - postgres
       - -c
       - wal_level=logical
-  materialized:
-    image: materialize/materialized:v0.26.4
-    container_name: materialized
-    restart: always
-    ports:
-      - 6875:6875
-    depends_on:
-      - postgres
-  grafana_dashboard:
-    image: materialize/dashboard:v0.26.4
-    container_name: grafana_dashboard
-    restart: always
-    ports:
-      - 3001:3000
-    depends_on:
-      - materialized
-    environment:
-      MATERIALIZED_URL: materialized:6875
   helper:
     container_name: helper
     build:
       context: ./helper
     environment:
-      - AUTOSETUP=${AUTOSETUP}
+      AUTOSETUP: ${AUTOSETUP}
+      MZ_HOST: ${MZ_HOST:-materialized}
+      MZ_PORT: ${MZ_PORT:-6875}
+      MZ_USER: ${MZ_USER:-materialize}
+      MZ_PASSWORD: ${MZ_PASSWORD:-materialize}
+      MZ_DATABASE: ${MZ_DATABASE:-materialize}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pg_password}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
     init: true
-    depends_on:
-      - materialized
   backend:
     container_name: backend
     build:
       context: ./backend
     init: true
+    environment:
+      MZ_HOST: ${MZ_HOST:-materialized}
+      MZ_PORT: ${MZ_PORT:-6875}
+      MZ_USER: ${MZ_USER:-materialize}
+      MZ_PASSWORD: ${MZ_PASSWORD:-materialize}
+      MZ_DATABASE: ${MZ_DATABASE:-materialize}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pg_password}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
     ports:
       - 4000:4000
     depends_on:
-      - materialized
+      - postgres
+      - helper
   frontend:
     container_name: frontend
     build:
@@ -62,6 +59,14 @@ services:
     container_name: microservice
     build:
       context: ./microservice
+    environment:
+      MZ_HOST: ${MZ_HOST:-materialized}
+      MZ_PORT: ${MZ_PORT:-6875}
+      MZ_USER: ${MZ_USER:-materialize}
+      MZ_PASSWORD: ${MZ_PASSWORD:-materialize}
+      MZ_DATABASE: ${MZ_DATABASE:-materialize}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pg_password}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
     init: true
     depends_on:
       - backend
