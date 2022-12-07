@@ -392,7 +392,7 @@ Now if you go to the [Confluent Cloud UI](https://confluent.cloud/) and navigate
 We can start simple with a materialized view that aggregates all users that have not completed a purchase:
 
 ```sql
-CREATE MATERIALIZED VIEW incomplate_purchases AS
+CREATE MATERIALIZED VIEW incomplete_purchases AS
     SELECT
         users.id AS user_id,
         users.email AS email,
@@ -434,13 +434,13 @@ Finally, we can create a materialized view that contains all incomplete orders f
 ```sql
 CREATE MATERIALIZED VIEW abandoned_cart AS
     SELECT
-        incomplate_purchases.user_id,
-        incomplate_purchases.email,
-        incomplate_purchases.item_id,
-        incomplate_purchases.purchase_price,
-        incomplate_purchases.status
-    FROM incomplate_purchases
-    JOIN inactive_users_last_3_mins ON inactive_users_last_3_mins.user_id = incomplate_purchases.user_id
+        incomplete_purchases.user_id,
+        incomplete_purchases.email,
+        incomplete_purchases.item_id,
+        incomplete_purchases.purchase_price,
+        incomplete_purchases.status
+    FROM incomplete_purchases
+    JOIN inactive_users_last_3_mins ON inactive_users_last_3_mins.user_id = incomplete_purchases.user_id
     GROUP BY 1, 2, 3, 4, 5;
 ```
 

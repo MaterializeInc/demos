@@ -93,7 +93,10 @@ try:
                 purchase_item = random.choice(item_prices)
                 purchase_user = random.randint(0, userSeedCount - 1)
                 purchase_quantity = random.randint(1, 5)
-                purchase_status = random.randint(0,1)
+                if random.randint(0,100) < 90:
+                    purchase_status = 1
+                else:
+                    purchase_status = 0
 
                 # Write purchaser pageview
                 producer.send(
