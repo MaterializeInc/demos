@@ -31,7 +31,7 @@ categories = ["widgets", "gadgets", "doodads", "clearance"]
 # INSERT TEMPLATES
 item_insert = "INSERT INTO shop.items (name, category, price, inventory) VALUES ( %s, %s, %s, %s )"
 user_insert = "INSERT INTO shop.users (email, is_vip) VALUES ( %s, %s )"
-purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purchase_price) VALUES ( %s, %s, %s, %s )"
+purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purchase_price, status) VALUES ( %s, %s, %s, %s )"
 
 
 # Initialize Kafka
@@ -93,6 +93,10 @@ try:
                 purchase_item = random.choice(item_prices)
                 purchase_user = random.randint(0, userSeedCount - 1)
                 purchase_quantity = random.randint(1, 5)
+                if random.randint(0,100) < 90:
+                    purchase_status = 1
+                else:
+                    purchase_status = 0
 
                 # Write purchaser pageview
                 producer.send(
@@ -129,6 +133,7 @@ try:
                         purchase_item[0],
                         purchase_quantity,
                         purchase_item[1] * purchase_quantity,
+                        purchase_status
                     ),
                 )
                 connection.commit()
