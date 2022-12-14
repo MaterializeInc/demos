@@ -3,7 +3,7 @@ USE shop;
 
 GRANT ALL PRIVILEGES ON shop.* TO 'mysqluser';
 
-CREATE USER 'debezium' IDENTIFIED WITH mysql_native_password BY 'dbz';
+CREATE USER 'debezium' IDENTIFIED WITH mysql_native_password BY 'I957DO9cYXp6JDEv';
 
 GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'debezium';
 
