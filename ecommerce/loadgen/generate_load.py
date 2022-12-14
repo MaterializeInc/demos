@@ -21,8 +21,8 @@ itemPriceMax = 500
 mysqlHost = "mysql"
 mysqlPort = "3306"
 mysqlUser = "mysqluser"
-mysqlPass = "mysqlpw"
-kafkaHostPort = os.getenv("KAFKA_ADDR", "kafka:9092")
+mysqlPass = os.getenv("MYSQL_PASSWORD", "I957DO9cYXp6JDEv")
+kafkaHostPort = os.getenv("CONFLUENT_BROKER_HOST", "kafka:9092")
 kafkaTopic = "pageviews"
 debeziumHostPort = "debezium:8083"
 channels = ["organic search", "paid search", "referral", "social", "display"]
@@ -31,13 +31,17 @@ categories = ["widgets", "gadgets", "doodads", "clearance"]
 # INSERT TEMPLATES
 item_insert = "INSERT INTO shop.items (name, category, price, inventory) VALUES ( %s, %s, %s, %s )"
 user_insert = "INSERT INTO shop.users (email, is_vip) VALUES ( %s, %s )"
-purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purchase_price) VALUES ( %s, %s, %s, %s )"
+purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purchase_price, status) VALUES ( %s, %s, %s, %s )"
 
 
 # Initialize Kafka
 producer = KafkaProducer(
     bootstrap_servers=[kafkaHostPort],
     value_serializer=lambda x: json.dumps(x).encode("utf-8"),
+    security_protocol='SASL_SSL',
+    sasl_mechanism='PLAIN',
+    sasl_plain_username=os.getenv("CONFLUENT_API_KEY", ""),
+    sasl_plain_password=os.getenv("CONFLUENT_API_SECRET", "")
 )
 
 
@@ -89,6 +93,10 @@ try:
                 purchase_item = random.choice(item_prices)
                 purchase_user = random.randint(0, userSeedCount - 1)
                 purchase_quantity = random.randint(1, 5)
+                if random.randint(0,100) < 90:
+                    purchase_status = 1
+                else:
+                    purchase_status = 0
 
                 # Write purchaser pageview
                 producer.send(
@@ -125,6 +133,7 @@ try:
                         purchase_item[0],
                         purchase_quantity,
                         purchase_item[1] * purchase_quantity,
+                        purchase_status
                     ),
                 )
                 connection.commit()

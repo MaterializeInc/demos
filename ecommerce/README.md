@@ -27,9 +27,9 @@ Our load generator (`loadgen`) is a [python script](loadgen/generate_load.py) th
 1. It seeds MySQL with `item`, `user` and `purchase` tables, and then begins rapidly adding `purchase` rows that join an item and a user. _(~10 per second)_
 2. It simultaneously begins sending JSON-encoded `pageview` events directly to kafka. _(~750 per second)_
 
-As the database writes occur, Debezium/Kafka stream the changes out of MySQL. Materialize subscribes to this change feed and maintains our materialized views with the incoming data––materialized views typically being some report whose information we're regularly interested in viewing.
+As the database writes occur, Debezium/Kafka stream the changes out of MySQL to Confluent Cloud Kafka. Materialize subscribes to this change feed and maintains our materialized views with the incoming data––materialized views typically being some report whose information we're regularly interested in viewing.
 
-For example, if we wanted real time statistics of total pageviews and orders by item, Materialize could maintain that report as a materialized view. And, in fact,
+For example, if we wanted real time statistics of total `pageviews` and orders by item, Materialize could maintain that report as a materialized view. And, in fact,
 that is exactly what this demo will show.
 
 ## Prepping Mac Laptops
@@ -46,9 +46,14 @@ available to Docker Engine.
 3. Select at least **8 GiB** of **Memory**.
 4. Click **Apply and Restart**.
 
+## Prerequisites
+
+- Sign up for [Materialize](https://materialize.com/register)
+- Create a Confluent Cloud account, you can sign up for a free account [here](https://www.confluent.io/confluent-cloud/tryfree/).
+- Make sure you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+
 ## Running the Demo
 
-You'll need to have [docker and docker-compose installed](https://materialize.com/docs/third-party/docker) before getting started.
 
 1. Clone this repo and navigate to the directory by running:
 
@@ -57,49 +62,114 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    cd demos/ecommerce
    ```
 
-2. Bring up the Docker Compose containers in the background:
+2. Copy the `.env.example` file to `.env`:
+
+   ```shell
+   cp .env.example .env
+   ```
+
+3. Update the details in the `.env` file:
+
+```
+# Confluent Cloud Details
+CONFLUENT_BROKER_HOST=
+CONFLUENT_API_KEY=
+CONFLUENT_API_SECRET=
+CONFLUENT_SCHEMA_REGISTRY_URL=
+CONFLUENT_SCHEMA_REGISTRY_API_KEY=
+CONFLUENT_SCHEMA_REGISTRY_API_SECRET=
+```
+
+4. Go to your Confluent Cloud dashboard, and create the following topics:
+
+- `mysql.shop.purchases`
+- `mysql.shop.items`
+- `mysql.shop.users`
+- `pageviews`
+
+> **Note**: If you don't create the topics, the demo will not work, and you will see the following error in the Debezium logs:
+> `Error while fetching metadata with correlation id … : {<topic>=UNKNOWN_TOPIC_OR_PARTITION}`
+
+Alternatively, you can set the `auto.create.topics.enable` option for your cluster to `true`, as described in the [Confluent documentation](https://docs.confluent.io/cloud/current/clusters/broker-config.html#change-cluster-settings-for-dedicated-clusters). This option is disabled by default, but once enabled, it will allow you to automatically create topics when they are referenced in a Kafka producer or consumer.
+
+5. Bring up the Docker Compose containers in the background:
 
    ```shell session
    docker-compose up -d
    ```
 
-   **This may take several minutes to complete the first time you run it.** If all goes well, you'll have everything running in their own containers, with Debezium configured to ship changes from MySQL into Kafka.
+   **This may take several minutes to complete the first time you run it.** If all goes well, you'll have everything running in their own containers, with Debezium configured to ship changes from MySQL into Confluent Cloud.
 
-3. Launch the Materialize CLI.
+6. Connect to Materialize
+
+If you already have `psql` installed on your machine, use the provided connection string to connect:
+
+Example:
 
    ```shell session
-   docker-compose run cli
+   psql "postgres://user%40domain.com@materialize_host:6875/materialize"
    ```
 
-   _(This is just a shortcut to a docker container with postgres-client pre-installed, if you already have psql you could run `psql -U materialize -h localhost -p 6875 materialize`)_
+Otherwise, you can find the steps to install and use your CLI of choice under [Supported tools](https://materialize.com/docs/integrations/sql-clients/#supported-tools).
 
-4. Now that you're in the Materialize CLI, define all of the tables in `mysql.shop` as Kafka sources:
+7. In `psql`, start by securely storing your Confluent Cloud credentials for the Kafka cluster and Schema Registry as secrets:
 
-   ```sql
-   CREATE SOURCE purchases
-   FROM KAFKA BROKER 'kafka:9092' TOPIC 'mysql.shop.purchases'
-   FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY 'http://schema-registry:8081'
-   ENVELOPE DEBEZIUM;
+    ```sql
+    CREATE SECRET confluent_username AS '<your-username>';
+    CREATE SECRET confluent_password AS '<your-password>';
+    CREATE SECRET schema_registry_username AS '<your-username>';
+    CREATE SECRET schema_registry_password AS '<your-password>';
+    ```
 
-   CREATE SOURCE items
-   FROM KAFKA BROKER 'kafka:9092' TOPIC 'mysql.shop.items'
-   FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY 'http://schema-registry:8081'
-   ENVELOPE DEBEZIUM;
+8. Create the Kafka and Schema Registry connections:
 
-   CREATE SOURCE users
-   FROM KAFKA BROKER 'kafka:9092' TOPIC 'mysql.shop.users'
-   FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY 'http://schema-registry:8081'
-   ENVELOPE DEBEZIUM;
-   ```
+    ```sql
+    -- Create Kafka connection
+    CREATE CONNECTION confluent_cloud
+      TO KAFKA
+      BROKER '<your_broker>',
+      SASL MECHANISMS = 'PLAIN',
+      SASL USERNAME = SECRET confluent_username,
+      SASL PASSWORD = SECRET confluent_password;
 
-   Because these sources are pulling message schema data from the registry, materialize knows the column types to use for each attribute.
+    -- Create Registry connection
+    CREATE CONNECTION schema_registry
+      TO CONFLUENT SCHEMA REGISTRY
+      URL '<your_schema_registry>',
+      USERNAME = SECRET schema_registry_username,
+      PASSWORD = SECRET schema_registry_password;
+    ```
+9. Now that you have your secrets and connections created, define all of the tables in `mysql.shop` as Kafka sources:
 
-5. We'll also want to create a JSON-formatted source for the pageviews:
+    ```sql
+    CREATE SOURCE purchases
+      FROM KAFKA CONNECTION confluent_cloud (TOPIC 'mysql.shop.purchases')
+      FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
+      ENVELOPE DEBEZIUM
+      WITH (SIZE = '3xsmall');
+
+    CREATE SOURCE items
+        FROM KAFKA CONNECTION confluent_cloud (TOPIC 'mysql.shop.items')
+        FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
+        ENVELOPE DEBEZIUM
+        WITH (SIZE = '3xsmall');
+
+    CREATE SOURCE users
+        FROM KAFKA CONNECTION confluent_cloud (TOPIC 'mysql.shop.users')
+        FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
+        ENVELOPE DEBEZIUM
+        WITH (SIZE = '3xsmall');
+    ```
+
+   Because these sources are pulling message schema data from the registry, Materialize knows the column types to use for each attribute.
+
+10. We'll also want to create a JSON-formatted source for the `pageviews`:
 
    ```sql
    CREATE SOURCE json_pageviews
-   FROM KAFKA BROKER 'kafka:9092' TOPIC 'pageviews'
-   FORMAT BYTES;
+    FROM KAFKA CONNECTION confluent_cloud (TOPIC 'pageviews')
+    FORMAT BYTES
+    WITH (SIZE = '3xsmall');
    ```
 
    With JSON-formatted messages, we don't know the schema so the [JSON is pulled in as raw bytes](https://materialize.com/docs/sql/create-source/json-kafka/) and we still need to CAST data into the proper columns and types. We'll show that in the step below.
@@ -119,7 +189,15 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    materialize=>
    ```
 
-6. Next, we will create our first (non-materialized) view:
+11. Next, you can set up a [cluster](https://materialize.com/docs/sql/create-cluster) (logical compute) with one `xsmall` [replica](https://materialize.com/docs/sql/create-cluster-replica) (physical compute):
+
+    ```sql
+    CREATE CLUSTER ecommerce_demo REPLICAS (xsmall_replica (SIZE 'xsmall'));
+
+    SET CLUSTER = ecommerce_demo;
+    ```
+
+12. Next, we will create our first (non-materialized) view:
 
    ```sql
    CREATE VIEW v_pageviews AS
@@ -138,16 +216,16 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    1. We are converting the incoming data from raw bytes to [jsonb](https://materialize.com/docs/sql/types/jsonb/#main):
 
       ```sql
-      SELECT CONVERT_FROM(data, 'utf8')::jsonb AS data FROM json_pageviews
+      SELECT CONVERT_FROM(data, 'utf8')::jsonb AS data FROM json_pageviews;
       ```
 
-   2. We are using postgres JSON notation (`data->'url'`), type casts (`::string`) and [regexp_match](https://materialize.com/docs/sql/functions/#string-func:~:text=regexp_match(haystack) function to extract only the item_id from the raw pageview URL.
+   2. We are using Postgres JSON notation (`data->'url'`), type casts (`::string`) and [regexp_match](https://materialize.com/docs/sql/functions/#string-func:~:text=regexp_match(haystack) function to extract only the item_id from the raw pageview URL.
 
       ```sql
       (regexp_match((data->'url')::string, '/products/(\d+)')[1])::int AS target_id,
       ```
 
-7. Then, we can use this view as a base to create a materialized view summarizing pageviews by item and channel:
+13. Depending on your setup, in some cases you might want to use a [materialized view](https://materialize.com/docs/sql/create-materialized-view): a view that is persisted in durable storage and incrementally updated as new data arrives. We can use the `v_pageviews` view as a base to create a materialized view summarizing `pageviews` by item and channel:
 
    ```sql
    CREATE MATERIALIZED VIEW item_pageviews AS
@@ -159,15 +237,15 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
     GROUP BY item_id, channel;
    ```
 
-   Nowm if you select from this materialized view, you should see data populating:
+   Now if you select from this materialized view, you should see data populating:
 
    ```sql
    SELECT * FROM item_pageviews ORDER BY pageviews DESC LIMIT 10;
    ```
 
-   If you re-run this statement a few times, you should see the pageview counts changing as new data comes in and results get computed on the fly.
+   If you re-run this statement a few times, you should see the `pageview` counts changing as new data comes in and results get computed on the fly.
 
-8. Let's create some more materialized views:
+14. Let's create some more views:
 
    **Purchase Summary:**
 
@@ -200,7 +278,13 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
        GROUP BY item_name, item_category;
    ```
 
-   This view shows some of the JOIN capabilities of Materialize, we're joining our two previous views with items to create a summary of purchases, pageviews, and conversion rates.
+   This view shows some of the JOIN capabilities of Materialize. We're joining our two previous views with items to create a summary of purchases, pageviews, and conversion rates.
+
+    Indexes assemble and incrementally maintain a query’s results updated in memory within a cluster, which speeds up query time:
+
+    ```sql
+    CREATE INDEX item_summary_idx ON item_summary (item_name);
+    ```
 
    If you select from `item_summary` you can see the results in real-time:
 
@@ -220,8 +304,6 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
         AND purchases.created_at > items.inventory_updated_at
        GROUP BY items.id;
    ```
-
-   [//]: # 'TODO(morsapaes) Materialize supports dense_rank() in unstable builds, revisit this query later on'
 
    **Trending Items:** Here, we are doing a bit of a hack because Materialize doesn't yet support window functions like `RANK`. So instead we are doing a self join on `purchase_summary` and counting up the items with _more purchases than the current item_ to get a basic "trending" rank datapoint.
 
@@ -262,7 +344,114 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    (6 rows)
    ```
 
-9. Now, you've materialized some views that you can visualize in a BI tool like Metabase. Close out of the Materialize CLI (<kbd>Ctrl</kbd> + <kbd>D</kbd>).
+15. To see the results change in real-time let's use `SUBSCRIBE` instead of vanilla `SELECT`:
+
+    ```sql
+    COPY (
+        SUBSCRIBE (
+            SELECT * FROM trending_items
+    )) TO STDOUT;
+    ```
+
+That's it! You've created some views that you can visualize in a BI tool like Metabase!
+
+### Sink data back out to Kafka:
+
+[Sinks](https://materialize.com/docs/sql/create-sink/) let you stream data out of Materialize, using either sources or views.
+
+Let's create a view that flags "high-value" users that have spent $10k or more in total.
+
+```sql
+CREATE MATERIALIZED VIEW high_value_users AS
+  SELECT
+   users.id,
+   users.email,
+   SUM(purchase_price * quantity)::int AS lifetime_value,
+   COUNT(*) as purchases
+ FROM users
+ JOIN purchases ON purchases.user_id = users.id
+ GROUP BY 1,2
+ HAVING SUM(purchase_price * quantity) > 10000;
+```
+
+and then a sink to stream updates to this view back out to Kafka:
+
+```sql
+CREATE SINK high_value_users_sink
+   FROM high_value_users
+   INTO KAFKA CONNECTION confluent_cloud (TOPIC 'high-value-users-sink')
+   FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
+   ENVELOPE DEBEZIUM
+   WITH (SIZE = '3xsmall');
+```
+
+Now if you go to the [Confluent Cloud UI](https://confluent.cloud/) and navigate to the `high-value-users-sink` topic, you should see data streaming in.
+
+## Abandoned cart example
+
+We can start simple with a materialized view that aggregates all users that have not completed a purchase:
+
+```sql
+CREATE MATERIALIZED VIEW incomplete_purchases AS
+    SELECT
+        users.id AS user_id,
+        users.email AS email,
+        users.is_vip AS is_vip,
+        purchases.item_id,
+        purchases.status,
+        purchases.quantity,
+        purchases.purchase_price,
+        purchases.created_at,
+        purchases.updated_at
+    FROM users
+    JOIN purchases ON purchases.user_id = users.id
+    WHERE purchases.status = 0;
+```
+
+Next create a materialized view that contains all users that are no longer browsing the site:
+
+> For the demo we would use 3 minutes as the idle time. But in a real world we could use a larger value like 30 minutes for example.
+
+```sql
+CREATE MATERIALIZED VIEW inactive_users_last_3_mins AS
+    SELECT
+        user_id,
+        date_trunc('minute', to_timestamp(received_at)) as visited_at_minute
+    FROM v_pageviews
+    WHERE
+    mz_now() >= (received_at*1000 + 180000)::numeric
+    GROUP BY 1,2;
+```
+
+We can check that it's working by querying the view:
+
+```sql
+SELECT * FROM inactive_users_last_3_mins LIMIT 5;
+```
+
+Finally, we can create a materialized view that contains all incomplete orders for the inactive users:
+
+```sql
+CREATE MATERIALIZED VIEW abandoned_cart AS
+    SELECT
+        incomplete_purchases.user_id,
+        incomplete_purchases.email,
+        incomplete_purchases.item_id,
+        incomplete_purchases.purchase_price,
+        incomplete_purchases.status
+    FROM incomplete_purchases
+    JOIN inactive_users_last_3_mins ON inactive_users_last_3_mins.user_id = incomplete_purchases.user_id
+    GROUP BY 1, 2, 3, 4, 5;
+```
+
+You can create a [Kafka SINK](https://materialize.com/docs/sql/create-sink/#kafka-sinks) or you can use [`SUBSCRIBE`](https://materialize.com/docs/sql/subscribe) to subscribe to the changes of the `abandoned_cart` view:
+
+```sql
+COPY (
+    SUBSCRIBE (
+        SELECT * FROM abandoned_cart
+    )
+) TO STDOUT;
 
 ## Business Intelligence: Metabase
 
@@ -275,15 +464,15 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
 
 4. On the **Add your data** page, fill in the following information:
 
-   | Field             | Enter...         |
-   | ----------------- | ---------------- |
-   | Database          | **Materialize**  |
-   | Name              | **shop**         |
-   | Host              | **materialized** |
-   | Port              | **6875**         |
-   | Database name     | **materialize**  |
-   | Database username | **materialize**  |
-   | Database password | Leave empty.     |
+   | Field             | Enter...                        |
+   | ----------------- | ------------------------------- |
+   | Database          | **Materialize**                 |
+   | Name              | **shop**                        |
+   | Host              | **Your Materialize Host**       |
+   | Port              | **6875**                        |
+   | Database name     | **materialize**                 |
+   | Database username | **user%40domain.com**           |
+   | Database password | Your Materialize App Password. |
 
 5. Proceed past the screens until you reach your primary dashboard.
 
@@ -304,6 +493,6 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
 
 ## Conclusion
 
-You now have materialize doing real-time materialized views on a changefeed from a database and pageview events from kafka. You have complex multi-layer views doing JOIN's and aggregations in order to distill the raw data into a form that's useful for downstream applications. In metabase, you have the ability to create dashboards and reports using the real-time data.
+You now have Materialize doing real-time materialized views on a changefeed from a database and pageview events from Kafka. You have complex multi-layer views doing JOIN's and aggregations in order to distill the raw data into a form that's useful for downstream applications. In Metabase, you have the ability to create dashboards and reports based on this data.
 
-You have a lot of infrastructure running in docker containers, don't forget to run `docker-compose down` to shut everything down!
+You have som infrastructure running in Docker containers, so don't forget to run `docker-compose down` to shut everything down!
