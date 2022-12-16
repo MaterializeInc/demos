@@ -1,0 +1,2 @@
+[sqlfluff]
+templater = dbt
