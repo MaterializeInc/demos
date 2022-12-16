@@ -27,11 +27,13 @@ kafkaTopic = "pageviews"
 debeziumHostPort = "debezium:8083"
 channels = ["organic search", "paid search", "referral", "social", "display"]
 categories = ["widgets", "gadgets", "doodads", "clearance"]
+toInfinity = True
+purchaseRetentionDays = 1
 
 # INSERT TEMPLATES
 item_insert = "INSERT INTO shop.items (name, category, price, inventory) VALUES ( %s, %s, %s, %s )"
 user_insert = "INSERT INTO shop.users (email, is_vip) VALUES ( %s, %s )"
-purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purchase_price, status) VALUES ( %s, %s, %s, %s )"
+purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purchase_price, status) VALUES ( %s, %s, %s, %s, %s )"
 
 
 # Initialize Kafka
@@ -53,6 +55,15 @@ def generatePageview(viewer_id, target_id, page_type):
         "received_at": int(time.time()),
     }
 
+def purchaseLoop():
+    if toInfinity:
+        index = 0
+        while True:
+            yield index
+            index += 1
+    else:
+        for i in range(purchaseGenCount):
+            yield i
 
 try:
     with connect(
@@ -88,7 +99,7 @@ try:
             item_prices = [(row[0], row[1]) for row in cursor]
 
             print("Preparing to loop + seed kafka pageviews and purchases")
-            for i in range(purchaseGenCount):
+            for i in purchaseLoop():
                 # Get a user and item to purchase
                 purchase_item = random.choice(item_prices)
                 purchase_user = random.randint(0, userSeedCount - 1)
@@ -138,6 +149,10 @@ try:
                 )
                 connection.commit()
 
+                # Delete old purchases (older than purchaseRetentionDays days)
+                cursor.execute(
+                    f"DELETE FROM shop.purchases WHERE purchase_time < DATE_SUB(NOW(), INTERVAL {purchaseRetentionDays} DAY)"
+                )
                 # Pause
                 time.sleep(purchaseGenEveryMS / 1000)
 
