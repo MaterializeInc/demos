@@ -151,8 +151,9 @@ try:
 
                 # Delete old purchases (older than purchaseRetentionDays days)
                 cursor.execute(
-                    f"DELETE FROM shop.purchases WHERE purchase_time < DATE_SUB(NOW(), INTERVAL {purchaseRetentionDays} DAY)"
+                    f"DELETE FROM shop.purchases WHERE updated_at < DATE_SUB(NOW(), INTERVAL {purchaseRetentionDays} DAY)"
                 )
+                connection.commit()
                 # Pause
                 time.sleep(purchaseGenEveryMS / 1000)
 
