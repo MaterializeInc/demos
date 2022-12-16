@@ -215,3 +215,21 @@ SHOW MATERIALIZED VIEWS FROM public_etl_failure;
 <hr>
 
 If you run into issues with the `dbt-materialize` adapter, please [open a GitHub issue](https://github.com/MaterializeInc/materialize/issues/new/choose) so we can look into it!
+
+### SQLFluff
+
+[SQLFluff](https://github.com/sqlfluff/sqlfluff/) is a linter for SQL. It can be used to enforce a consistent style and syntax across your SQL codebase. It can also be used to enforce best practices and prevent common mistakes.
+
+SQLFluff has a Materialize dialect, which can be used to lint SQL code that uses Materialize-specific syntax.
+
+To install SQLFluff, run:
+
+```bash
+pip install sqlfluff-templater-dbt
+```
+
+To fix any linting errors, run:
+
+```bash
+sqlfluff fix --dialect  materialize
+```
