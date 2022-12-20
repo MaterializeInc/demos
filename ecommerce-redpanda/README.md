@@ -6,6 +6,12 @@ This is a variation of the [standard ecommerce demo](../ecommerce), illustrating
 
 **NOTE:** For context on what is happening in the demo, and initial setup instructions, see the [README](https://github.com/MaterializeInc/ecommerce-demo#readme).
 
+Before trying this out you will need the following:
+
+- [Materialize Cloud account](https://materialize.com/register/).
+- A publicly accessible Linux server with Docker installed.
+- [`psql`](https://materialize.com/docs/integrations/sql-clients/#installation-instructions-for-psql) installed.
+
 ## Running Redpanda + Materialize Stack
 
 You'll need to have [docker and docker-compose installed](https://materialize.com/docs/third-party/docker) before getting started.
@@ -17,7 +23,14 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    cd demos/ecommerce-redpanda
    ```
 
-2. Bring up the Docker Compose containers in the background.
+2. Copy the `.env.example` file to `.env` and set the `EXTERNAL_IP` variable to the IP address of your server.
+
+   ```shell session
+   cp .env.example .env
+   export EXTERNAL_IP=$(hostname -I | awk '{print $1}')
+   ```
+
+3. Bring up the Docker Compose containers in the background.
 
    ```shell session
    docker-compose up -d
@@ -25,20 +38,10 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
 
    **This may take several minutes to complete the first time you run it.** If all goes well, you'll have everything running in their own containers, with Debezium configured to ship changes from MySQL into Redpanda.
 
-3. Confirm that everything is running as expected:
+4. Confirm that everything is running as expected:
 
    ```shell session
    docker-compose ps
-   ```
-
-4. Log in to MySQL to confirm that tables are created and seeded:
-
-   ```shell session
-   docker-compose exec mysql bash -c 'mysql -umysqluser -pmysqlpw shop'
-
-   SHOW TABLES;
-
-   SELECT * FROM purchases LIMIT 1;
    ```
 
 5. Exec in to the redpanda container to look around using redpanda's amazing [rpk]() CLI.
@@ -57,7 +60,7 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
 
    You should see a live feed of JSON formatted pageview kafka messages:
 
-   ```
+   ```json
     {
         "key": "3290",
         "message": "{\"user_id\": 3290, \"url\": \"/products/257\", \"channel\": \"social\", \"received_at\": 1634651213}",
@@ -68,42 +71,70 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
     }
    ```
 
-6. Launch the Materialize CLI.
+6. Connect to Materialize
+
+If you already have `psql` installed on your machine, use the provided connection string to connect:
+
+Example:
 
    ```shell session
-   docker-compose run cli
+   psql "postgres://user%40domain.com@materialize_host:6875/materialize"
    ```
 
-   _(This is just a shortcut to a docker container with postgres-client pre-installed, if you already have psql you could run `psql -U materialize -h localhost -p 6875 materialize`)_
+Otherwise, you can find the steps to install and use your CLI of choice under [Supported tools](https://materialize.com/docs/integrations/sql-clients/#supported-tools).
 
-7. Now that you're in the Materialize CLI, define all of the tables in `mysql.shop` as Kafka sources:
+7. Now that you're in the Materialize CLI, define the connection to the Redpanda broker and the schema registry:
 
-   ```sql
-   CREATE SOURCE purchases
-   FROM KAFKA BROKER 'redpanda:9092' TOPIC 'mysql.shop.purchases'
-   FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY 'http://redpanda:8081'
-   ENVELOPE DEBEZIUM;
+    ```sql
+    -- Create Redpanda connection
+    CREATE CONNECTION redpanda_connection
+      TO KAFKA
+      BROKER '<your_server_ip:9092>';
 
-   CREATE SOURCE items
-   FROM KAFKA BROKER 'redpanda:9092' TOPIC 'mysql.shop.items'
-   FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY 'http://redpanda:8081'
-   ENVELOPE DEBEZIUM;
+    -- Create Registry connection
+    CREATE CONNECTION schema_registry
+      TO CONFLUENT SCHEMA REGISTRY
+      URL '<your_server_ip:8082>';
+    ```
 
-   CREATE SOURCE users
-   FROM KAFKA BROKER 'redpanda:9092' TOPIC 'mysql.shop.users'
-   FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY 'http://redpanda:8081'
-   ENVELOPE DEBEZIUM;
+8. Next, define all of the tables in `mysql.shop` as sources:
 
-   CREATE SOURCE json_pageviews
-   FROM KAFKA BROKER 'redpanda:9092' TOPIC 'pageviews'
-   FORMAT BYTES;
+    ```sql
+    CREATE SOURCE purchases
+      FROM KAFKA CONNECTION redpanda_connection (TOPIC 'mysql.shop.purchases')
+      FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
+      ENVELOPE DEBEZIUM
+      WITH (SIZE = '3xsmall');
+
+    CREATE SOURCE items
+        FROM KAFKA CONNECTION redpanda_connection (TOPIC 'mysql.shop.items')
+        FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
+        ENVELOPE DEBEZIUM
+        WITH (SIZE = '3xsmall');
+
+    CREATE SOURCE users
+        FROM KAFKA CONNECTION redpanda_connection (TOPIC 'mysql.shop.users')
+        FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
+        ENVELOPE DEBEZIUM
+        WITH (SIZE = '3xsmall');
    ```
 
    Because the first three sources are pulling message schema data from the registry, materialize knows the column types to use for each attribute. The last source is a JSON-formatted source for the pageviews.
 
+9. We'll also want to create a JSON-formatted source for the `pageviews`:
+
+   ```sql
+   CREATE SOURCE json_pageviews
+    FROM KAFKA CONNECTION redpanda_connection (TOPIC 'pageviews')
+    FORMAT BYTES
+    WITH (SIZE = '3xsmall');
+   ```
+
+   With JSON-formatted messages, we don't know the schema so the [JSON is pulled in as raw bytes](https://materialize.com/docs/sql/create-source/json-kafka/) and we still need to CAST data into the proper columns and types. We'll show that in the step below.
+
    Now if you run `SHOW SOURCES;` in the CLI, you should see the four sources we created:
 
-   ```
+   ```sql
    materialize=> SHOW SOURCES;
        name
    ----------------
@@ -140,7 +171,7 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
        );
    ```
 
-9. **Analytical Views:** Let's create a couple analytical views to get a feel for how it works.
+10. **Analytical Views:** Let's create a couple analytical views to get a feel for how it works.
 
    Start simple with a materialized view that aggregates purchase stats by item:
 
@@ -190,13 +221,13 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
    SELECT * FROM item_summary ORDER BY pageviews DESC LIMIT 5;
    ```
 
-   Or we can even check that it's incrementally updating by exiting out of materialize and running a watch command on that query:
+   Or we can even check that it's incrementally updating by running a watch command via your `psql` shell right after the `SELECT` query above:
 
-   ```bash session
-   watch -n1 "psql -c 'SELECT * FROM item_summary ORDER BY pageviews DESC LIMIT 5;' -U materialize -h localhost -p 6875"
+   ```sql
+   \watch 1
    ```
 
-10. **Views for User-Facing Data:**
+11. **Views for User-Facing Data:**
 
     Redpanda will often be used in building rich data-intensive applications, let's try creating a view meant to power something like the "Who has viewed your profile" feature on Linkedin:
 
@@ -211,7 +242,7 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
         FROM pageview_stg
         WHERE
           pageview_type = 'profiles' AND
-          mz_logical_timestamp() < (received_at*1000 + 600000)::numeric
+          mz_now() < (received_at*1000 + 600000)::numeric
         GROUP BY 1, 2;
     ```
 
@@ -279,10 +310,10 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
     Now let's materialize that data and join the flagged_profile id to a much larger dataset.
 
     ```sql
-    CREATE MATERIALIZED SOURCE dd_flagged_profiles
-    FROM KAFKA BROKER 'redpanda:9092' TOPIC 'dd_flagged_profiles'
-    FORMAT TEXT
-    ENVELOPE UPSERT;
+    CREATE SOURCE dd_flagged_profiles
+        FROM KAFKA CONNECTION redpanda_connection (TOPIC 'dd_flagged_profiles')
+        FORMAT BYTES
+        WITH (SIZE = '3xsmall');
 
     CREATE MATERIALIZED VIEW dd_flagged_profile_view AS
         SELECT pageview_stg.*
@@ -314,20 +345,21 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
     ```sql
     CREATE SINK high_value_users_sink
         FROM high_value_users
-        INTO KAFKA BROKER 'redpanda:9092' TOPIC 'high-value-users-sink'
-        WITH (reuse_topic=true, consistency_topic='high-value-users-sink-consistency')
-        FORMAT AVRO USING
-        CONFLUENT SCHEMA REGISTRY 'http://redpanda:8081';
+        INTO KAFKA CONNECTION redpanda_connection (TOPIC 'high-value-users-sink')
+        FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION 
+        schema_registry
+        ENVELOPE UPSERT
+        WITH (SIZE = '3xsmall');
     ```
-
-    This is a bit more complex because it is an `exactly-once` sink. This means that across materialize restarts, it will never output the same update more than once.
 
     We won't be able to preview the results with `rpk` because it's AVRO formatted. But we can actually stream it BACK into Materialize to confirm the format!
 
     ```sql
-    CREATE MATERIALIZED SOURCE hvu_test
-    FROM KAFKA BROKER 'redpanda:9092' TOPIC 'high-value-users-sink'
-    FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY 'http://redpanda:8081';
+    CREATE SOURCE hvu_test
+        FROM KAFKA CONNECTION redpanda_connection (TOPIC 'high-value-users-sink')
+        FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
+        ENVELOPE DEBEZIUM
+        WITH (SIZE = '3xsmall');
 
     SELECT * FROM hvu_test LIMIT 2;
     ```

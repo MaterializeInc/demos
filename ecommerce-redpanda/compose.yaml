@@ -1,21 +1,16 @@
 services:
-  materialized:
-    image: materialize/materialized:v0.26.4
-    ports:
-      - 6875:6875
-    healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
   mysql:
     image: mysql/mysql-server:8.0.27
     ports:
       - 3306:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=debezium
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_USER=mysqluser
-      - MYSQL_PASSWORD=mysqlpw
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - ../ecommerce/mysql/mysql.cnf:/etc/mysql/conf.d
       - ../ecommerce/mysql/mysql_bootstrap.sql:/docker-entrypoint-initdb.d/mysql_bootstrap.sql
-    healthcheck: {test: mysql -pdebezium -e 'select 1', interval: 1s, start_period: 60s}
+    healthcheck: {test: mysql -p$$MYSQL_PASSWORD -e 'select 1', interval: 1s, start_period: 60s}
   redpanda:
     image: docker.vectorized.io/vectorized/redpanda:v21.11.2
     command:
@@ -27,9 +22,9 @@ services:
       - --node-id 0
       - --check=false
       - --kafka-addr 0.0.0.0:9092
-      - --advertise-kafka-addr redpanda:9092
+      - --advertise-kafka-addr ${EXTERNAL_IP:-redpanda}:9092
       - --pandaproxy-addr 0.0.0.0:8082
-      - --advertise-pandaproxy-addr redpanda:8082
+      - --advertise-pandaproxy-addr ${EXTERNAL_IP:-redpanda}:8082
       - --set redpanda.enable_transactions=true
       - --set redpanda.enable_idempotence=true
     ports:
@@ -38,9 +33,9 @@ services:
       - 8082:8082
     healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
   debezium:
-    image: debezium/connect:1.8
+    image: debezium/connect:1.9
     environment:
-      BOOTSTRAP_SERVERS: redpanda:9092
+      BOOTSTRAP_SERVERS: ${EXTERNAL_IP:-redpanda}:9092
       GROUP_ID: 1
       CONFIG_STORAGE_TOPIC: connect_configs
       OFFSET_STORAGE_TOPIC: connect_offsets
@@ -57,27 +52,27 @@ services:
       redpanda: {condition: service_healthy}
       mysql: {condition: service_healthy}
   debezium_deploy:
-    image: debezium/connect:1.8
+    image: debezium/connect:1.9
     depends_on:
       debezium: {condition: service_healthy}
     environment:
-      KAFKA_ADDR: redpanda:9092
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - KAFKA_ADDR=${EXTERNAL_IP:-redpanda}:9092
     volumes:
-      - ../ecommerce/mysql/mysql_dbz.sh:/mysql_dbz.sh
+      - ./mysql/mysql_dbz.sh:/mysql_dbz.sh
     entrypoint: [bash, -c, /mysql_dbz.sh]
-  metabase:
-    image: metabase/metabase:v0.41.5
-    depends_on: [materialized]
-    ports:
-      - 3030:3000
+  # metabase:
+  #   image: metabase/metabase:v0.41.5
+  #   ports:
+  #     - 3030:3000
   loadgen:
     build: ../ecommerce/loadgen
     init: true
     environment:
-      KAFKA_ADDR: redpanda:9092
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - KAFKA_ADDR=${EXTERNAL_IP:-redpanda}:9092
+      - CONFLUENT_BROKER_HOST=${EXTERNAL_IP:-redpanda}:9092
     depends_on:
       mysql: {condition: service_healthy}
       debezium: {condition: service_healthy}
       redpanda: {condition: service_healthy}
-  cli:
-    image: materialize/cli:v0.26.4
