@@ -18,9 +18,9 @@ itemInventoryMin = 1000
 itemInventoryMax = 5000
 itemPriceMin = 5
 itemPriceMax = 500
-mysqlHost = "mysql"
-mysqlPort = "3306"
-mysqlUser = "mysqluser"
+mysqlHost = os.getenv("MYSQL_HOST", "mysql")
+mysqlPort = os.getenv("MYSQL_PORT", "3306")
+mysqlUser = os.getenv("MYSQL_USER", "mysqluser")
 mysqlPass = os.getenv("MYSQL_PASSWORD", "I957DO9cYXp6JDEv")
 kafkaHostPort = os.getenv("CONFLUENT_BROKER_HOST", "kafka:9092")
 kafkaTopic = "pageviews"
@@ -28,7 +28,6 @@ debeziumHostPort = "debezium:8083"
 channels = ["organic search", "paid search", "referral", "social", "display"]
 categories = ["widgets", "gadgets", "doodads", "clearance"]
 toInfinity = True
-purchaseRetentionDays = 1
 
 # INSERT TEMPLATES
 item_insert = "INSERT INTO shop.items (name, category, price, inventory) VALUES ( %s, %s, %s, %s )"
@@ -149,11 +148,6 @@ try:
                 )
                 connection.commit()
 
-                # Delete old purchases (older than purchaseRetentionDays days)
-                cursor.execute(
-                    f"DELETE FROM shop.purchases WHERE updated_at < DATE_SUB(NOW(), INTERVAL {purchaseRetentionDays} DAY)"
-                )
-                connection.commit()
                 # Pause
                 time.sleep(purchaseGenEveryMS / 1000)
 
