@@ -61,10 +61,10 @@ services:
     volumes:
       - ./mysql/mysql_dbz.sh:/mysql_dbz.sh
     entrypoint: [bash, -c, /mysql_dbz.sh]
-  # metabase:
-  #   image: metabase/metabase:v0.41.5
-  #   ports:
-  #     - 3030:3000
+  metabase:
+    image: metabase/metabase:v0.41.5
+    ports:
+      - 3030:3000
   loadgen:
     build: ../ecommerce/loadgen
     init: true
