@@ -35,7 +35,7 @@ purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purch
 
 
 # Initialize Kafka
-if os.getenv("CONFLUENT_API_KEY", "") == "" or os.getenv("CONFLUENT_API_SECRET", "") == "":
+if os.getenv("CONFLUENT_API_KEY") and os.getenv("CONFLUENT_API_SECRET"):
     producer = KafkaProducer(
         bootstrap_servers=[kafkaHostPort],
         value_serializer=lambda x: json.dumps(x).encode("utf-8"),
