@@ -39,17 +39,16 @@ if os.getenv("CONFLUENT_API_KEY") and os.getenv("CONFLUENT_API_SECRET"):
     producer = KafkaProducer(
         bootstrap_servers=[kafkaHostPort],
         value_serializer=lambda x: json.dumps(x).encode("utf-8"),
+        security_protocol='SASL_SSL',
+        sasl_mechanism='PLAIN',
+        sasl_plain_username=os.getenv("CONFLUENT_API_KEY"),
+        sasl_plain_password=os.getenv("CONFLUENT_API_SECRET")
     )
 else:
     producer = KafkaProducer(
         bootstrap_servers=[kafkaHostPort],
         value_serializer=lambda x: json.dumps(x).encode("utf-8"),
-        security_protocol='SASL_SSL',
-        sasl_mechanism='PLAIN',
-        sasl_plain_username=os.getenv("CONFLUENT_API_KEY", ""),
-        sasl_plain_password=os.getenv("CONFLUENT_API_SECRET", "")
     )
-
 def generatePageview(viewer_id, target_id, page_type):
     return {
         "user_id": viewer_id,
