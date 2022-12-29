@@ -31,20 +31,24 @@ categories = ["widgets", "gadgets", "doodads", "clearance"]
 # INSERT TEMPLATES
 item_insert = "INSERT INTO shop.items (name, category, price, inventory) VALUES ( %s, %s, %s, %s )"
 user_insert = "INSERT INTO shop.users (email, is_vip) VALUES ( %s, %s )"
-purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purchase_price, status) VALUES ( %s, %s, %s, %s )"
+purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purchase_price, status) VALUES ( %s, %s, %s, %s, %s )"
 
 
 # Initialize Kafka
-producer = KafkaProducer(
-    bootstrap_servers=[kafkaHostPort],
-    value_serializer=lambda x: json.dumps(x).encode("utf-8"),
-    security_protocol='SASL_SSL',
-    sasl_mechanism='PLAIN',
-    sasl_plain_username=os.getenv("CONFLUENT_API_KEY", ""),
-    sasl_plain_password=os.getenv("CONFLUENT_API_SECRET", "")
-)
-
-
+if os.getenv("CONFLUENT_API_KEY") and os.getenv("CONFLUENT_API_SECRET"):
+    producer = KafkaProducer(
+        bootstrap_servers=[kafkaHostPort],
+        value_serializer=lambda x: json.dumps(x).encode("utf-8"),
+        security_protocol='SASL_SSL',
+        sasl_mechanism='PLAIN',
+        sasl_plain_username=os.getenv("CONFLUENT_API_KEY"),
+        sasl_plain_password=os.getenv("CONFLUENT_API_SECRET")
+    )
+else:
+    producer = KafkaProducer(
+        bootstrap_servers=[kafkaHostPort],
+        value_serializer=lambda x: json.dumps(x).encode("utf-8"),
+    )
 def generatePageview(viewer_id, target_id, page_type):
     return {
         "user_id": viewer_id,
