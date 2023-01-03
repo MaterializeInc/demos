@@ -32,6 +32,7 @@ categories = ["widgets", "gadgets", "doodads", "clearance"]
 item_insert = "INSERT INTO shop.items (name, category, price, inventory) VALUES ( %s, %s, %s, %s )"
 user_insert = "INSERT INTO shop.users (email, is_vip) VALUES ( %s, %s )"
 purchase_insert = "INSERT INTO shop.purchases (user_id, item_id, quantity, purchase_price, status) VALUES ( %s, %s, %s, %s, %s )"
+purchase_update = "UPDATE shop.purchases SET deleted = true WHERE id=%s"
 
 
 # Initialize Kafka
@@ -144,6 +145,18 @@ try:
 
                 # Pause
                 time.sleep(purchaseGenEveryMS / 1000)
+
+            # Update purchases (soft deletes)
+            cursor.execute("""
+                SELECT id
+                FROM shop.purchases
+                WHERE deleted = false
+                ORDER BY RAND()
+                LIMIT 500
+            """)
+            purchases_to_delete = [(row[0]) for row in cursor]
+            cursor.executemany(purchase_update, purchases_to_delete)
+            connection.commmit()
 
     connection.close()
 
