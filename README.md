@@ -1,4 +1,4 @@
-> 🚧👷 We're working on adapting the demos in this repository to the shiny, new [cloud-native version of Materialize](https://materialize.com/blog/next-generation/). In the meantime, you can take the self-contained demos in [the `lts` branch](https://github.com/MaterializeInc/demos/tree/lts) for a spin!
+> 🚧👷 We have adapted the demos in this repository to the shiny, new [cloud-native version of Materialize](https://materialize.com/blog/next-generation/). You can sign up for Early Access [here](https://materialize.com/register/), and take the self-contained demos in [the `lts` branch](https://github.com/MaterializeInc/demos/tree/lts) for a spin in the meantime!
 
 # Materialize Demos
 
@@ -6,16 +6,7 @@
 
 [Materialize](https://github.com/MaterializeInc/materialize) is a streaming database for real-time applications.
 
-This repo is a collection of runnable demos that walk you through using Materialize for different use cases, and with different stacks. All demos are containerized and should run end-to-end with no modifications.
-
-## Setup
-
-To get started, make sure you have installed:
-
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-
-We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so double check your [resource preferences](https://docs.docker.com/desktop/mac/#preferences) before getting to it!
+This repo is a collection of runnable demos that walk you through using Materialize for different use cases, and with different stacks. All demos assume that you have [signed up for a Materialize account](https://materialize.com/register/).
 
 ## Use Cases
 
@@ -46,11 +37,6 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
           <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/ecommerce-redpanda">ecommerce-redpanda</a></code></b></td>
             <td>MySQL, Debezium, Redpanda, Metabase</td>
         </tr>
-        <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/feature-store">feature-store</a></code></b></td>
-            <td>Postgres, Redpanda</td>
-            <td>Calculating and serving features in real-time for fraud detection</td>
-        </tr>
     </tbody>
 </table>
 
@@ -76,25 +62,6 @@ We recommend running Docker with at least **2 CPUs** and **8GB** of memory, so d
           <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/dbt-jaffle-shop">dbt-jaffle-shop</a></code></b></td>
             <td>dbt</td>
             <td>An adapted version of the dbt Jaffle Shop using <a href="https://docs.getdbt.com/reference/warehouse-profiles/materialize-profile"</a><code>dbt-materialize</code></a></td>
-        </tr>
-    </tbody>
-</table>
-
-## Other
-
-<table>
-    <thead>
-        <tr>
-            <th>Demo</th>
-            <th>Stack</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><b><code><a href="https://github.com/MaterializeInc/demos/tree/main/chbench">chbench</a></code></b></td>
-            <td>MySQL, Debezium, Kafka, Metabase</td>
-            <td>Benchmarking the speed of analytics queries on a streaming dataset</td>
         </tr>
     </tbody>
 </table>

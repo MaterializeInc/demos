@@ -2,20 +2,25 @@ import {Pool} from 'pg';
 import {v4} from 'uuid';
 import ws from 'ws';
 import {createClient} from 'graphql-ws';
-import {Kafka} from 'kafkajs';
+import {Kafka, SASLOptions} from 'kafkajs';
 
 const antennasEventsTopicName = 'antennas_performance';
 
 /**
  * Materialize Client
  */
+ const mzHost = process.env.MZ_HOST || 'materialized';
+ const mzPort = Number(process.env.MZ_PORT) || 6875;
+ const mzUser = process.env.MZ_USER || 'materialize';
+ const mzPassword = process.env.MZ_PASSWORD || 'materialize';
+ const mzDatabase = process.env.MZ_DATABASE || 'materialize';
 const materializePool = new Pool({
-  host: 'materialized',
-  // host: "localhost",
-  port: 6875,
-  user: 'materialize',
-  password: 'materialize',
-  database: 'materialize',
+  host: mzHost,
+  port: mzPort,
+  user: mzUser,
+  password: mzPassword,
+  database: mzDatabase,
+  ssl: true,
 });
 
 /**
@@ -40,10 +45,17 @@ const graphqlClient = createClient({
  * Kafka client
  */
 const brokers = [process.env.KAFKA_BROKER || 'localhost:9092'];
+const sasl: SASLOptions = {
+  username: process.env.KAFKA_USERNAME || 'admin',
+  password: process.env.KAFKA_PASSWORD || 'admin-secret',
+  mechanism: process.env.KAFKA_SASL_MECHANISM as any || 'scram-sha-256',
+};
 
 const kafka = new Kafka({
   clientId: 'kafkaClient',
   brokers,
+  sasl: sasl,
+  ssl: true,
 });
 const producer = kafka.producer();
 producer.connect().catch((err) => {
