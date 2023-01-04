@@ -2,7 +2,20 @@
 
 https://user-images.githubusercontent.com/11491779/166932582-e5a9fd47-e397-4419-b221-e8f38c6f06f5.mp4
 
+Before trying this out you will need the following:
+
+- [Materialize account](https://materialize.com/register/)
+- A Kafka cluster. If you don't have one at hand, you can sign up for a free trial of [Upstash](https://upstash.com/).
+
 If you want to try it right now, clone the project and run:
+
+```
+cp .env.example .env
+```
+
+Then edit the `.env` file and add your Materialize and Upstash credentials.
+
+Then run:
 
 ```
 docker-compose up
@@ -13,10 +26,6 @@ After a successful build:
 ```
 # Check in your browser
 localhost:3000
-
-# Alternatively connect to:
-# Materialize
-psql postgresql://materialize:materialize@localhost:6875/materialize
 ```
 
 ---
@@ -44,10 +53,10 @@ There are different ways to achieve a result like this one using Materialize, bu
 
 1.  Kafka, where all the base data resides.
 2.  Materialize to process and serve the antenna's performance.
-3.  Helper process to generate the antennas random data and initialize Materialize
-4.  Node.js GraphQL API connects to Materialize using [tails](https://materialize.com/docs/sql/tail/#conceptual-framework).
+3.  Helper process to generate the antennas random data and initialize Materialize.
+4.  Node.js GraphQL API connects to Materialize using [SUBSCRIBE](https://materialize.com/docs/sql/subscribe/#conceptual-framework).
 5.  React front-end displaying the information using GraphQL subscriptions.
-6.  Microservice deploying and pushing helper antennas when performance is low
+6.  Microservice deploying and pushing helper antennas when performance is low.
 
 _Our source, Kafka, could be alternatively replaced with any other [Materialize source](https://materialize.com/docs/sql/create-source/#conceptual-framework)_
 
@@ -55,7 +64,7 @@ _Our source, Kafka, could be alternatively replaced with any other [Materialize 
 
 <br/>
 
-1. To begin with, Kafka needs to be up and running. You can reuse the [docker-compose](https://github.com/joacoc/antennas-manhattan/blob/Kafka/docker-compose.yml) code.
+1. To begin with, you will need a Kafka cluster. We will use [Upstash](https://upstash.com/) for this demo. If you don't have an account, you can [sign up](https://upstash.com/signup) for a free trial.
 
 <br/>
 
@@ -99,17 +108,29 @@ The SQL script to build Materialize schema is the next one:
 ```sql
   -- All these queries run inside the helper process.
 
+  -- Create the secrets
+    CREATE SECRET  IF NOT EXISTS up_sasl_username AS 'your_upstash_sasl_username';
+    CREATE SECRET  IF NOT EXISTS up_sasl_password AS 'your_upstash_sasl_password';
+
+  -- Create the Kafka connection
+    CREATE CONNECTION IF NOT EXISTS upstash_kafka
+      FOR KAFKA
+      BROKER 'your_upstas_kafka_broker',
+      SASL MECHANISMS = 'SCRAM-SHA-256',
+      SASL USERNAME = SECRET up_sasl_username,
+      SASL PASSWORD = SECRET up_sasl_password;
 
   -- Create the Kafka Source
     CREATE SOURCE IF NOT EXISTS antennas_performance
-    FROM KAFKA BROKER 'broker:29092' TOPIC 'antennas_performance'
-    WITH (kafka_time_offset = 0)
-    FORMAT BYTES;
+      FROM KAFKA CONNECTION upstash_kafka (TOPIC 'antennas_performance')
+      FORMAT BYTES
+      WITH (SIZE 'xsmall');
+
 
     CREATE SOURCE IF NOT EXISTS antennas
-    FROM KAFKA BROKER 'broker:29092' TOPIC 'antennas'
-    WITH (kafka_time_offset = 0)
-    FORMAT BYTES;
+      FROM KAFKA CONNECTION upstash_kafka (TOPIC 'antennas')
+      FORMAT BYTES
+      WITH (SIZE 'xsmall');
 
   -- Parse antennas
       CREATE MATERIALIZED VIEW IF NOT EXISTS parsed_antennas AS
@@ -142,13 +163,13 @@ The SQL script to build Materialize schema is the next one:
           FROM antennas_performance
         )
       )
-      WHERE ((CAST(parsed_data->'updated_at' AS NUMERIC)) + 60000) > mz_logical_timestamp();
+      WHERE ((CAST(parsed_data->'updated_at' AS NUMERIC)) + 60000) > mz_now();
 
   -- Filter last half minute updates and aggregate by anntena ID and GeoJSON to obtain the average performance in the last half minute.
       CREATE MATERIALIZED VIEW IF NOT EXISTS last_half_minute_performance_per_antenna AS
       SELECT A.antenna_id, A.geojson, AVG(performance) as performance
       FROM parsed_antennas A JOIN last_minute_antennas_performance AP ON (A.antenna_id = AP.antenna_id)
-      WHERE (AP.updated_at + 30000) > mz_logical_timestamp()
+      WHERE (AP.updated_at + 30000) > mz_now()
       GROUP BY A.antenna_id, A.geojson;
 ```
 
@@ -180,8 +201,8 @@ Antennas data generation statement:
 ```
 
 4. Now, the information should be ready to consume. <br/><br/>
-   The back-end works with [Graphql-ws](https://github.com/enisdenjo/graphql-ws). Subscriptions and tails go together like Bonnie and Clyde. Multiple applications send ongoing events to the front-end with sockets or server-sent events (SSE), becoming super handy to use with `tails`. Rather than constantly sending queries back-and-forth, we can run a single `tail last_half_minute_performance_per_antenna with (snapshot)` and send the results more efficiently. <br/><br/>
-   The back-end will use a modified client to run these tails. It implements internally [Node.js stream interfaces](https://nodejs.org/api/stream.html) to handle [backpressure](https://github.com/joacoc/antennas-manhattan/blob/Kafka/backend/src/MaterializeClient/TailStream/index.ts), create one second batches and group all the changes in one map [(summary)](https://github.com/joacoc/antennas-manhattan/blob/Kafka/backend/src/MaterializeClient/TransformStream/index.ts).
+   The back-end works with [Graphql-ws](https://github.com/enisdenjo/graphql-ws). Multiple applications send ongoing events to the front-end with sockets or server-sent events (SSE), becoming super handy to use with `subscribe`. Rather than constantly sending queries back-and-forth, we can run a single `subscribe last_half_minute_performance_per_antenna with (snapshot)` and send the results more efficiently. <br/><br/>
+   The back-end will use a modified client to run the `SUBSCRIBE`. It implements internally [Node.js stream interfaces](https://nodejs.org/api/stream.html) to handle [backpressure](https://github.com/joacoc/antennas-manhattan/blob/Kafka/backend/src/MaterializeClient/TailStream/index.ts), create one second batches and group all the changes in one map [(summary)](https://github.com/joacoc/antennas-manhattan/blob/Kafka/backend/src/MaterializeClient/TransformStream/index.ts).
 
 5. The front-end doesn't require going deep since it will consist of only one component. Apollo GraphQL subscribes to our back-end, and the antennas information gets displayed in a list and a visual map. The frequency at which the information updates is every one second.
 

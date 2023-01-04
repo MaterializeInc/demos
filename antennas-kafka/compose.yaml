@@ -1,74 +1,39 @@
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.2.0
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-
-  broker:
-    image: confluentinc/cp-kafka:7.2.0
-    container_name: broker
-    ports:
-      # To learn about configuring Kafka for access across networks see
-      # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
-      - 9092:9092
-      - 29092:29092
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-
-  materialized:
-    image: materialize/materialized:v0.26.4
-    container_name: materialized
-    restart: always
-    ports:
-      - 6875:6875
-
-  grafana_dashboard:
-    image: materialize/dashboard:v0.26.4
-    container_name: grafana_dashboard
-    restart: always
-    ports:
-      - 3001:3000
-    depends_on:
-      - materialized
-    environment:
-      MATERIALIZED_URL: materialized:6875
-
   helper:
     container_name: helper
     build:
       context: ./helper
     init: true
-    depends_on:
-      - materialized
-    command: sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://broker:29092
-      -wait tcp://materialized:6875 -timeout 80s npm start"
     environment:
-      KAFKA_BROKER: broker:29092
+      MZ_HOST: ${MZ_HOST:-materialized}
+      MZ_PORT: ${MZ_PORT:-6875}
+      MZ_USER: ${MZ_USER:-materialize}
+      MZ_PASSWORD: ${MZ_PASSWORD:-materialize}
+      MZ_DATABASE: ${MZ_DATABASE:-materialize}
+      KAFKA_BROKER: ${KAFKA_BROKER:-broker:29092}
+      KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM:-plain}
+      KAFKA_USERNAME: ${KAFKA_USERNAME:-admin}
+      KAFKA_PASSWORD: ${KAFKA_PASSWORD:-admin-secret}
 
   backend:
     container_name: backend
-    command: sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://broker:29092
-      -wait tcp://materialized:6875 -timeout 80s npm start"
     build:
       context: ./backend
     init: true
     ports:
       - 4000:4000
     depends_on:
-      - materialized
       - helper
     environment:
-      KAFKA_BROKER: broker:29092
+      MZ_HOST: ${MZ_HOST:-materialized}
+      MZ_PORT: ${MZ_PORT:-6875}
+      MZ_USER: ${MZ_USER:-materialize}
+      MZ_PASSWORD: ${MZ_PASSWORD:-materialize}
+      MZ_DATABASE: ${MZ_DATABASE:-materialize}
+      KAFKA_BROKER: ${KAFKA_BROKER:-broker:29092}
+      KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM:-plain}
+      KAFKA_USERNAME: ${KAFKA_USERNAME:-admin}
+      KAFKA_PASSWORD: ${KAFKA_PASSWORD:-admin-secret}
 
   frontend:
     container_name: frontend
@@ -88,7 +53,13 @@ services:
     depends_on:
       - helper
       - backend
-    command: sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://broker:29092
-      -wait tcp://materialized:6875 -timeout 80s npm start"
     environment:
-      KAFKA_BROKER: broker:29092
+      MZ_HOST: ${MZ_HOST:-materialized}
+      MZ_PORT: ${MZ_PORT:-6875}
+      MZ_USER: ${MZ_USER:-materialize}
+      MZ_PASSWORD: ${MZ_PASSWORD:-materialize}
+      MZ_DATABASE: ${MZ_DATABASE:-materialize}
+      KAFKA_BROKER: ${KAFKA_BROKER:-broker:29092}
+      KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM:-plain}
+      KAFKA_USERNAME: ${KAFKA_USERNAME:-admin}
+      KAFKA_PASSWORD: ${KAFKA_PASSWORD:-admin-secret}

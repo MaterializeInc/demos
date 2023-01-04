@@ -1,15 +1,22 @@
 import {Pool} from 'pg';
-import {Kafka} from 'kafkajs';
+import {Kafka, SASLOptions} from 'kafkajs';
 import {helperAntennas, mainAntennas} from './data';
 
 const antennasEventsTopicName = 'antennas_performance';
 const antennasTopic = 'antennas';
 
 const brokers = [process.env.KAFKA_BROKER || 'localhost:9092'];
+const sasl: SASLOptions = {
+  username: process.env.KAFKA_USERNAME || 'admin',
+  password: process.env.KAFKA_PASSWORD || 'admin-secret',
+  mechanism: process.env.KAFKA_SASL_MECHANISM as any || 'scram-sha-256',
+};
 
 const kafka = new Kafka({
   clientId: 'kafkaClient',
   brokers,
+  sasl: sasl,
+  ssl: true,
 });
 
 const producer = kafka.producer();
@@ -18,29 +25,51 @@ const producer = kafka.producer();
  * Create Materialize sources and materialized views
  * Before creating the views it will check if they aren't created already.
  */
+/**
+ * Materialize Client
+ */
+ const mzHost = process.env.MZ_HOST || 'materialized';
+ const mzPort = Number(process.env.MZ_PORT) || 6875;
+ const mzUser = process.env.MZ_USER || 'materialize';
+ const mzPassword = process.env.MZ_PASSWORD || 'materialize';
+ const mzDatabase = process.env.MZ_DATABASE || 'materialize';
 async function setUpMaterialize() {
   console.log('Setting up Materialize...');
   const pool = await new Pool({
-    host: 'materialized',
-    port: 6875,
-    user: 'materialize',
-    password: 'materialize',
-    database: 'materialize',
+    host: mzHost,
+    port: mzPort,
+    user: mzUser,
+    password: mzPassword,
+    database: mzDatabase,
+    ssl: true,
   });
   const poolClient = await pool.connect();
-
+  await poolClient.query(`
+    CREATE SECRET  IF NOT EXISTS up_sasl_username AS '${process.env.KAFKA_USERNAME }';
+  `);
+  await poolClient.query(`
+    CREATE SECRET  IF NOT EXISTS up_sasl_password AS '${process.env.KAFKA_PASSWORD }';
+  `);
+  await poolClient.query(`
+    CREATE CONNECTION IF NOT EXISTS upstash_kafka
+      FOR KAFKA
+      BROKER '${brokers}',
+      SASL MECHANISMS = 'SCRAM-SHA-256',
+      SASL USERNAME = SECRET up_sasl_username,
+      SASL PASSWORD = SECRET up_sasl_password;
+  `);
   await poolClient.query(`
     CREATE SOURCE IF NOT EXISTS antennas_performance
-    FROM KAFKA BROKER 'broker:29092' TOPIC '${antennasEventsTopicName}'
-    WITH (kafka_time_offset = 0)
-    FORMAT BYTES;
+      FROM KAFKA CONNECTION upstash_kafka (TOPIC '${antennasEventsTopicName}')
+      FORMAT BYTES
+      WITH (SIZE 'xsmall');
   `);
 
   await poolClient.query(`
     CREATE SOURCE IF NOT EXISTS antennas
-    FROM KAFKA BROKER 'broker:29092' TOPIC '${antennasTopic}'
-    WITH (kafka_time_offset = 0)
-    FORMAT BYTES;
+      FROM KAFKA CONNECTION upstash_kafka (TOPIC '${antennasTopic}')
+      FORMAT BYTES
+      WITH (SIZE 'xsmall');
   `);
 
   const {rowCount} = await pool.query(
@@ -64,7 +93,7 @@ async function setUpMaterialize() {
           FROM antennas_performance
         )
       )
-      WHERE ((CAST(parsed_data->'updated_at' AS NUMERIC)) + 60000) > mz_logical_timestamp();
+      WHERE ((CAST(parsed_data->'updated_at' AS NUMERIC)) + 60000) > mz_now();
     `);
 
     await poolClient.query(`
@@ -87,7 +116,7 @@ async function setUpMaterialize() {
       CREATE MATERIALIZED VIEW IF NOT EXISTS last_half_minute_performance_per_antenna AS
       SELECT A.antenna_id, A.geojson, AVG(performance) as performance
       FROM parsed_antennas A JOIN last_minute_antennas_performance AP ON (A.antenna_id = AP.antenna_id)
-      WHERE (AP.updated_at + 30000) > mz_logical_timestamp()
+      WHERE (AP.updated_at + 30000) > mz_now()
       GROUP BY A.antenna_id, A.geojson;
     `);
   }
