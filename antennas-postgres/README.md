@@ -2,10 +2,10 @@
 
 https://user-images.githubusercontent.com/11491779/166932582-e5a9fd47-e397-4419-b221-e8f38c6f06f5.mp4
 
-Before trying this out you will need the following:
+Before trying this out, you will need the following:
 
-- [Materialize Cloud account](https://materialize.com/register/).
-- A publicly accessible Linux server with Docker installed.
+- [Materialize account](https://materialize.com/register/).
+- A publicly accessible Linux server with [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
 
 If you want to try it right now, clone the project on your Linux server and run:
 
@@ -13,7 +13,7 @@ If you want to try it right now, clone the project on your Linux server and run:
 cp .env.example .env
 ```
 
-Then edit the `.env` file and add your Materialize Cloud credentials and Upstash credentials.
+Then edit the `.env` file and add your Materialize credentials.
 
 Then run:
 
@@ -54,10 +54,10 @@ There are different ways to achieve a result like this one using Materialize, bu
 
 1.  Postgres, where all the base data resides.
 2.  Materialize to process and serve the antenna's performance.
-3.  Helper process to generate the antennas random data and initialize Materialize
+3.  Helper process to generate the antennas random data and initialize Materialize.
 4.  Node.js GraphQL API connects to Materialize using [subscribe](https://materialize.com/docs/sql/subscribe/#conceptual-framework).
 5.  React front-end displaying the information using GraphQL subscriptions.
-6.  Microservice deploying and pushing helper antennas when performance is low
+6.  Microservice deploying and pushing helper antennas when performance is low.
 
 _Our source, Postgres, could be alternatively replaced with any other [Materialize source](https://materialize.com/docs/sql/create-source/#conceptual-framework)_
 
