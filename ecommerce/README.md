@@ -491,6 +491,136 @@ COPY (
 10. You can save the output and add it to a dashboard, once you've drafted a dashboard you can manually set the refresh rate to 1 second by adding `#refresh=1` to the end of the URL, here is an example of a real-time dashboard of top-viewed items and top converting items:
     ![](https://user-images.githubusercontent.com/11527560/111679085-5228a780-87f7-11eb-86c5-34bf7b6cdcfb.gif)
 
+## Send notifications to Telegram
+
+Materialize is wire-compatible with PostgreSQL, so you can use any PostgreSQL client to connect to Materialize. In this example, we'll use [Node.js](/integrations/node-js) and the `node-postgres` library to create a script that pushes a message to Telegram when a user is inactive for 3 minutes and has incomplete purchases.
+
+### Create a Telegram bot
+
+1. Sign up for a [Telegram account](https://telegram.org/).
+1. Next, create a bot on Telegram by talking to the `BotFather`.
+1. Use the `/newbot` command to create a new bot, and follow the instructions to set a name and username for your bot.
+1. The `BotFather` will give you a token that you will use to authenticate your bot. Keep this token safe, as it will allow anyone to control your bot.
+1. Create a group on Telegram and add your bot to the group.
+1. Get the group's chat ID, which you can obtain by using the `/getUpdates` method of the Bot API:
+
+    ```bash
+    curl https://api.telegram.org/bot<token>/getUpdates | jq '.result[0].message.chat.id'
+    ```
+
+### Create a Node.js script
+
+1. Create a new directory for your project and install the [`node-telegram-bot-api`](https://www.npmjs.com/package/node-telegram-bot-api) package from `npm`:
+
+    ```bash
+    mkdir abandoned-cart-telegram-bot
+    cd abandoned-cart-telegram-bot
+    npm init -y
+    npm install node-telegram-bot-api
+    npm install pg
+    ```
+
+    The `node-telegram-bot-api` package provides an interface for the Telegram Bot API.
+
+    The `pg` package is the official PostgreSQL client for Node.js, which we'll use to connect to Materialize.
+
+1. Here is an example of how you might use the `node-telegram-bot-api` package to send a message to the Telegram group:
+
+    ```javascript
+    const TelegramBot = require('node-telegram-bot-api');
+
+    const token = '<YOUR_TELEGRAM_BOT_TOKEN>';
+    const chatId = '<YOUR_CHAT_ID>';
+
+    const bot = new TelegramBot(token, {polling: true});
+
+    bot.sendMessage(chatId, 'Hello, world!');
+
+    console.log('Message sent');
+    ```
+
+    This code will send a message saying "Hello, world!" to the user or group with the specified chat ID.
+
+    Let's expand this example to send a message to the Telegram group when a user abandons a cart.
+
+1. Next, create a file called `index.js` and add the following code to it:
+
+    ```javascript
+    const TelegramBot = require('node-telegram-bot-api');
+    const { Client } = require('pg');
+
+    // Define your Telegram bot token and chat ID
+    const token = '<YOUR_TELEGRAM_BOT_TOKEN>';
+    const chatId = '<YOUR_CHAT_ID>';
+
+    // Define your Materialize connection details
+    const client = new Client({
+        user: MATERIALIZE_USERNAME,
+        password: MATERIALIZE_PASSWORD,
+        host: MATERIALIZE_HOST,
+        port: 6875,
+        database: 'materialize',
+        ssl: true
+    });
+
+    const bot = new TelegramBot(token, {polling: true});
+
+    async function main() {
+        // Connect to Materialize
+        await client.connect();
+
+        // Subscribe to the abandoned_cart view
+        await client.query('BEGIN');
+        await client.query(`
+            DECLARE c CURSOR FOR SUBSCRIBE abandoned_cart WITH (SNAPSHOT = false)
+        `);
+
+        // Send a message to the Telegram group when a user abandons a cart
+        while (true) {
+            const res = await client.query('FETCH ALL c');
+            if (res.rows.length > 0) {
+                bot.sendMessage(chatId, JSON.stringify(res.rows));
+            }
+            console.log(res.rows);
+        }
+    }
+
+    main();
+    ```
+
+   Run the script:
+
+    ```bash
+    node index.js
+    ```
+
+    Once you run the script, you will see the following output:
+
+    ```javascript
+    [
+        {
+            mz_timestamp: '1671102162899',
+            mz_diff: '1',
+            user_id: 1,
+            email: 'test@test.com',
+            item_id: 1,
+            purchase_price: 2,
+            status: 3
+        },
+        {
+            mz_timestamp: '1671102162899',
+            mz_diff: '1',
+            user_id: 2,
+            email: 'test2@test.com',
+            item_id: 2,
+            purchase_price: 3,
+            status: 3
+        }
+    ]
+    ```
+
+    Each time a user abandons a cart, the script will send a message to the Telegram group.
+
 ## Conclusion
 
 You now have Materialize doing real-time materialized views on a changefeed from a database and pageview events from Kafka. You have complex multi-layer views doing JOIN's and aggregations in order to distill the raw data into a form that's useful for downstream applications. In Metabase, you have the ability to create dashboards and reports based on this data.
