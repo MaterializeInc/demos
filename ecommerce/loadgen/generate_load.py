@@ -18,15 +18,16 @@ itemInventoryMin = 1000
 itemInventoryMax = 5000
 itemPriceMin = 5
 itemPriceMax = 500
-mysqlHost = "mysql"
-mysqlPort = "3306"
-mysqlUser = "mysqluser"
+mysqlHost = os.getenv("MYSQL_HOST", "mysql")
+mysqlPort = os.getenv("MYSQL_PORT", "3306")
+mysqlUser = os.getenv("MYSQL_USER", "mysqluser")
 mysqlPass = os.getenv("MYSQL_PASSWORD", "I957DO9cYXp6JDEv")
 kafkaHostPort = os.getenv("CONFLUENT_BROKER_HOST", "kafka:9092")
 kafkaTopic = "pageviews"
 debeziumHostPort = "debezium:8083"
 channels = ["organic search", "paid search", "referral", "social", "display"]
 categories = ["widgets", "gadgets", "doodads", "clearance"]
+toInfinity = True
 
 # INSERT TEMPLATES
 item_insert = "INSERT INTO shop.items (name, category, price, inventory) VALUES ( %s, %s, %s, %s )"
@@ -58,6 +59,15 @@ def generatePageview(viewer_id, target_id, page_type):
         "received_at": int(time.time()),
     }
 
+def purchaseLoop():
+    if toInfinity:
+        index = 0
+        while True:
+            yield index
+            index += 1
+    else:
+        for i in range(purchaseGenCount):
+            yield i
 
 try:
     with connect(
@@ -93,7 +103,7 @@ try:
             item_prices = [(row[0], row[1]) for row in cursor]
 
             print("Preparing to loop + seed kafka pageviews and purchases")
-            for i in range(purchaseGenCount):
+            for i in purchaseLoop():
                 # Get a user and item to purchase
                 purchase_item = random.choice(item_prices)
                 purchase_user = random.randint(0, userSeedCount - 1)
