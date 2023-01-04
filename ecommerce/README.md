@@ -621,6 +621,8 @@ Materialize is wire-compatible with PostgreSQL, so you can use any PostgreSQL cl
 
     Each time a user abandons a cart, the script will send a message to the Telegram group.
 
+    ![Abandoned Cart Telegram Bot](https://user-images.githubusercontent.com/21223421/210604371-8ab39211-e70d-40a9-92f5-7161f4f9a757.gif)
+
 ## Conclusion
 
 You now have Materialize doing real-time materialized views on a changefeed from a database and pageview events from Kafka. You have complex multi-layer views doing JOIN's and aggregations in order to distill the raw data into a form that's useful for downstream applications. In Metabase, you have the ability to create dashboards and reports based on this data.
