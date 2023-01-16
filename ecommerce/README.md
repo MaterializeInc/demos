@@ -452,6 +452,7 @@ COPY (
         SELECT * FROM abandoned_cart
     )
 ) TO STDOUT;
+```
 
 ## Business Intelligence: Metabase
 
