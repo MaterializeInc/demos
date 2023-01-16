@@ -280,11 +280,11 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
 
    This view shows some of the JOIN capabilities of Materialize. We're joining our two previous views with items to create a summary of purchases, pageviews, and conversion rates.
 
-    Indexes assemble and incrementally maintain a query’s results updated in memory within a cluster, which speeds up query time:
+   Indexes assemble and incrementally maintain a query’s results updated in memory within a cluster, which speeds up query time:
 
-    ```sql
-    CREATE INDEX item_summary_idx ON item_summary (item_name);
-    ```
+   ```sql
+   CREATE INDEX item_summary_idx ON item_summary (item_name);
+   ```
 
    If you select from `item_summary` you can see the results in real-time:
 
