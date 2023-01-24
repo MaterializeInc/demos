@@ -1,3 +1,5 @@
+-- depends_on: {{ ref('auction_house') }}
+
 {{ config(materialized='view') }}
 
 SELECT
