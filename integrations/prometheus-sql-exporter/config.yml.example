@@ -22,7 +22,7 @@ jobs:
     values:
       - "count"
     query:  |
-            select count(*) from mz_materialized_views;
+            SELECT count(*) FROM mz_materialized_views;
   - name: "source_errors_count"
     help: "Source Errors Count"
     labels:
