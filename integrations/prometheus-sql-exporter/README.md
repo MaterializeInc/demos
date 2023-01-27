@@ -80,7 +80,8 @@ You can change the interval at which the exporter queries Materialize by changin
               name::text as replica_name,
               cluster_id::text as cluster_id,
               memory_percent::float as memory_percent
-            FROM mz_cluster_replicas r join mz_internal.mz_cluster_replica_utilization u on r.id=u.replica_id;
+            FROM mz_cluster_replicas r 
+            JOIN mz_internal.mz_cluster_replica_utilization u ON r.id=u.replica_id;
 ```
 
 The `queries` section contains all the queries that the SQL exporter will run to export metrics from Materialize. Each query has the following fields:
