@@ -10,7 +10,7 @@ jobs:
     values:
       - "count"
     query:  |
-            select count(*) from mz_sources where type='kafka';
+            SELECT count(*) FROM mz_sources WHERE type='kafka';
   - name: "total_postgres_sources"
     help: "Total Postgres Sources"
     values:
