@@ -85,11 +85,11 @@ You can change the interval at which the exporter queries Materialize by changin
 ```
 
 The `queries` section contains all the queries that the SQL exporter will run to export metrics from Materialize. Each query has the following fields:
-- **The name of the metric**: This is the name of the metric that will be exported to Prometheus
-- **The help text**: This is the text that will be displayed in the Grafana UI
-- **The labels to export**: These are the columns that will be used as labels in the exported metric
-- **The values to export**: These are the columns that will be used as values in the exported metric
-- **The query to run to get the data**: This is the SQL query that will be run to get the data for the metric
+- `name`: the name of the metric that will be exported to Prometheus
+- `help`: the text that will be displayed in the Grafana UI
+- `labels`: the columns that will be used as labels in the exported metric
+- `values`: the columns that will be used as values in the exported metric
+- `query`: the SQL query that will be run to get the data for the metric
 
 ## Adding extra SQL exporter checks
 
