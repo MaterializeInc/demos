@@ -16,7 +16,7 @@ jobs:
     values:
       - "count"
     query:  |
-            select count(*) from mz_sources where type='postgres';
+            SELECT count(*) FROM mz_sources WHERE type='postgres';
   - name: "total_materialized_views"
     help: "Total Materialized Views"
     values:
