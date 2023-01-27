@@ -102,7 +102,7 @@ sql_exporter:
     values:
     - "count"
     query:  |
-            select count(*) from orders
+            SELECT count(*) FROM orders
 ```
 
 ## Helpful links
