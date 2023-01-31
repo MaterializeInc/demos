@@ -8,10 +8,7 @@ This is a demo of how to use the [Prometheus SQL Exporter](https://github.com/ju
 
 The demo consists of the following components:
 
-* A Materialize instance
-* A Prometheus instance
-* A Prometheus SQL Exporter instance
-* A Grafana instance
+![](https://user-images.githubusercontent.com/21223421/215146476-3a6619ff-fbc3-4f79-bec8-d039b89832b0.png)
 
 ## Prerequisites
 
