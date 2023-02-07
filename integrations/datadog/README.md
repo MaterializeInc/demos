@@ -20,14 +20,14 @@ Datadog's OpenMetrics integration can consume from the Prometheus SQL Exporter e
 
 ## Running the demo
 
-1. Start by cloning the repository:
+1. Start by cloning the `demos` repository and navigating to the `datadog` directory:
 
     ```bash
-    git clone https://github.com/joacoc/DatadogOpenMetricsMaterialize.git
-    cd DatadogOpenMetricsMaterialize
+    git clone https://github.com/MaterializeInc/demos.git
+    cd integrations/datadog
     ```
 
-2. Edit the `config.yaml` file and set your Materialize details under the connections:
+2. Edit the `config.yaml` file and set your Materialize details under the `connections` key:
 
     ```yaml
     connections:
@@ -52,7 +52,7 @@ Datadog's OpenMetrics integration can consume from the Prometheus SQL Exporter e
 
 ## Configuration overview
 
-The `config.yaml` file contains the configuration for the Prometheus SQL exporter. The `jobs` section divides into two:
+The `config.yaml` file contains the configuration for the Prometheus SQL exporter. Each job can have multiple configuration options, including:
 
 1. The `connections` section where you can configure the Prometheus SQL exporter to connect to multiple Materialize instances:
 
@@ -82,13 +82,13 @@ queries:
             FROM mz_cluster_replicas r join mz_internal.mz_cluster_replica_utilization u on r.id=u.replica_id;
 ```
 
-The `queries` section contains all the queries that the Prometheus SQL exporter will run to export metrics from Materialize. Each query has the following fields:
+The `queries` section contains all the queries that the Prometheus SQL exporter will run to export metrics from Materialize. For each query, you can define the following properties:
 - **Name**: This is the name of the metric that will be exported to Prometheus
 - **Labels**: These are the columns that will be used as labels in the exported metric
 - **Values**: These are the columns that will be used as values in the exported metric
 - **Query**: This is the SQL query that will be run to get the data for the metric
 
-## Adding extra Prometheus SQL exporter checks
+### Adding extra Prometheus SQL exporter checks
 
 To configure the Prometheus SQL exporter to export additional metrics, add a new entry to the `sql_exporter` section of the `config.yaml` file. For example, to export the number of rows in the `orders` table, add the following:
 
@@ -104,7 +104,7 @@ sql_exporter:
 
 ## Datadog's OpenMetrics integration
 
-Datadog's agent will run and use the configuration file available in `datadog/conf.d/openmetrics.yaml`. The available configuration file describes consuming and sending all the metrics available from the Prometheus SQL Exporter endpoint.
+Datadog's agent will pick up the `/conf.d/openmetrics.yaml` configuration file to consume the metrics available in the Prometheus SQL Exporter endpoint.
 
 ## Helpful links
 
