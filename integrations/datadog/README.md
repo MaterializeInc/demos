@@ -90,10 +90,10 @@ The `queries` section contains all the queries that the Prometheus SQL exporter 
 
 ### Adding extra Prometheus SQL exporter checks
 
-To configure the Prometheus SQL exporter to export additional metrics, add a new entry to the `sql_exporter` section of the `config.yaml` file. For example, to export the number of rows in the `orders` table, add the following:
+To configure the Prometheus SQL exporter to export additional metrics, add a new entry to the `queries` section of the `config.yaml` file. For example, to export the number of rows in the `orders` table, add the following:
 
 ```yaml
-sql_exporter:
+queries:
 - name: "total_orders"
     help: "Total Orders"
     values:
