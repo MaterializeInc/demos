@@ -1,6 +1,8 @@
-# Materialize + Prometheus SQL Exporter + Grafana
+# Materialize + Grafana
 
-This is a demo of how to use the [Prometheus SQL Exporter](https://github.com/justwatchcom/sql_exporter/) to export data from Materialize to Prometheus, and then use Grafana to visualize the data.
+Materialize exposes a [system catalog](https://materialize.com/docs/sql/system-catalog/) that contains valuable metadata about its internal objects and activity. You can use this metadata to monitor the performance and overall health of your Materialize region.
+
+This demo shows how to make Materialize metadata available as key metrics for monitoring and alerting in Grafana using a [Prometheus SQL Exporter](https://github.com/justwatchcom/sql_exporter/).
 
 ![](https://imgur.com/JN2PVUz.png "Grafana dashboard")
 

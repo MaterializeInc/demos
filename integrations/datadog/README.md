@@ -4,11 +4,9 @@
 
 ## Overview
 
-This is a demo of how to use Datadog to monitor Materialize using the OpenMetrics standard.
+Materialize exposes a [system catalog](https://materialize.com/docs/sql/system-catalog/) that contains valuable metadata about its internal objects and activity. You can use this metadata to monitor the performance and overall health of your Materialize region.
 
-Materialize collects information about its internal components in a [public catalog](https://materialize.com/docs/sql/system-catalog/mz_internal/), consumable by tools like [Prometheus SQL Exporter](https://github.com/justwatchcom/sql_exporter/), _"a service that runs user-defined SQL queries at flexible intervals and exports the resulting metrics via HTTP for Prometheus consumption"_.
-
-Datadog's OpenMetrics integration can consume from the Prometheus SQL Exporter endpoint and allows a way to monitor Materialize.
+This demo shows how to make Materialize metadata available as key metrics for monitoring and alerting in Datadog using a [Prometheus SQL Exporter](https://github.com/justwatchcom/sql_exporter/).
 
 <img width="1499" alt="Datadog" src="https://user-images.githubusercontent.com/11491779/216926716-cc0cdd46-7ea7-496f-8fa3-a4863fc1ce00.png#gh-dark-mode-only">
 <img width="1488" alt="Datadog" src="https://user-images.githubusercontent.com/11491779/217254889-adee0203-dd9c-4756-9c61-ee601c3f8e32.png#gh-light-mode-only">
