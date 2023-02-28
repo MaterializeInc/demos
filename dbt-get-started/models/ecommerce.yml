@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: purchases
+    +schema: qck
+    description: aa
+    columns:
+      - name: id
+        description: aa
+      - name: user_id
+        description: aa
+      - name: item_id
+        description: aa
+      - name: status
+        description: aa
+      - name: quantity
+        description: aa
+      - name: purchase_price
+        description: aa
+      - name: deleted
+        description: aa
+      - name: created_at
+        description: aa
+      - name: updated_at
+        description: aa
+  - name: items
+    +schema: qck
+    description: aa
+    columns:
+      - name: id
+        description: aa
+      - name: name
+        description: aa
+      - name: category
+        description: aa
+      - name: price
+        description: aa
+      - name: inventory
+        description: aa
+      - name: inventory_updated_at
+        description: aa
+      - name: created_at
+        description: aa
+      - name: updated_at
+        description: aa
+  - name: item_purchases
+    +schema: qck
+    description: aa
+    columns:
+      - name: item_id
+        description: aa
+      - name: items_sold
+        description: aa
+      - name: revenue
+        description: aa
+      - name: orders
+        description: aa
+      - name: latest_order
+        description: aa
+  - name: item_summary
+    description: aa
+    columns:
+      - name: item_id
+        description: aa
+      - name: item_name
+        description: aa
+      - name: item_category
+        description: aa
+      - name: items_sold
+        description: aa
+      - name: revenue
+        description: aa
+      - name: orders
+        description: aa
+      - name: latest_order
+        description: aa
+  - name: item_summary_5min
+    description: aa
+    columns:
+      - name: item_id
+        description: aa
+      - name: item_name
+        description: aa
+      - name: item_category
+        description: aa
+      - name: items_sold
+        description: aa
+      - name: revenue
+        description: aa
+      - name: orders
+        description: aa
+      - name: latest_order
+        description: aa
