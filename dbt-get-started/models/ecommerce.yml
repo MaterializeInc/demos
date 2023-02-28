@@ -1,0 +1,92 @@
+version: 2
+
+models:
+  - name: purchases
+    description: aa
+    columns:
+      - name: id
+        description: ''
+      - name: user_id
+        description: ''
+      - name: item_id
+        description: ''
+      - name: status
+        description: ''
+      - name: quantity
+        description: ''
+      - name: purchase_price
+        description: ''
+      - name: deleted
+        description: ''
+      - name: created_at
+        description: ''
+      - name: updated_at
+        description: ''
+  - name: items
+    description: ''
+    columns:
+      - name: id
+        description: ''
+      - name: name
+        description: ''
+      - name: category
+        description: ''
+      - name: price
+        description: ''
+      - name: inventory
+        description: ''
+      - name: inventory_updated_at
+        description: ''
+      - name: created_at
+        description: ''
+      - name: updated_at
+        description: ''
+  - name: item_purchases
+    description: ''
+    columns:
+      - name: item_id
+        description: ''
+      - name: items_sold
+        description: ''
+      - name: revenue
+        description: ''
+      - name: orders
+        description: ''
+      - name: latest_order
+        description: ''
+  - name: item_summary
+    description: ''
+    columns:
+      - name: item_id
+        description: ''
+      - name: item_name
+        description: ''
+        tests:
+          - not_null
+      - name: item_category
+        description: ''
+      - name: items_sold
+        description: ''
+      - name: revenue
+        description: ''
+      - name: orders
+        description: ''
+      - name: latest_order
+        description: ''
+  - name: item_summary_5min
+    description: ''
+    columns:
+      - name: item_id
+        description: ''
+      - name: item_name
+        description: ''
+      - name: item_category
+        description: ''
+      - name: items_sold
+        description: ''
+      - name: revenue
+        description: ''
+      - name: orders
+        description: ''
+      - name: latest_order
+        description: ''
