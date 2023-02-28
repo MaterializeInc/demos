@@ -45,9 +45,8 @@ mz_get_started:
       user: "{{ env_var('MZ_USER') }}"
       pass: "{{ env_var('MZ_PASSWORD') }}"
       database: materialize
-      schema: public
-      cluster: auction_house
-      sslmode: require
+      schema: qck
+      cluster: quickstart
   target: dev
 ```
 
@@ -71,13 +70,57 @@ psql "postgres://<user>:<password>@<host>:6875/materialize"
 
 ### Create a cluster
 
-Set up a [cluster](https://materialize.com/docs/sql/create-cluster) (logical compute) with one `xsmall` [replica](https://materialize.com/docs/sql/create-cluster-replica) (physical compute) so you can start running some queries:
+[//]: # "TODO(morsapaes) Look into a way to hack the cluster and connection creation steps into some dbt operation, or dbt init."
+
+Prepare an isolated environment for experimenting by creating a new [cluster](https://materialize.com/docs/sql/create-cluster) with dedicated physical resources:
 
 ```sql
-CREATE CLUSTER auction_house REPLICAS (xsmall_replica (SIZE = 'xsmall'));
+CREATE CLUSTER quickstart REPLICAS (small_replica (SIZE = '2xsmall'));
+
+SET cluster = quickstart;
 ```
 
-Notice that the `auction_house` cluster you just created is configured as the default cluster in the connection configuration (`profiles.yml`). This means that dbt will run all models against this cluster (though you can override the default in the model configuration using the [`cluster` option](https://materialize.com/docs/integrations/dbt/#clusters)).
+And a custom schema:
+
+```sql
+CREATE SCHEMA qck;
+```
+
+Notice that the `quickstart` cluster and the `qck` schema you just created are configured as defaults in the connection configuration (`profiles.yml`). This means that dbt will run all models using this cluster and schema (though you can override the default in the model configuration using the [`cluster`](https://materialize.com/docs/integrations/dbt/#clusters) and [`schema`](https://docs.getdbt.com/docs/build/custom-schemas) options).
+
+### Create connections
+
+We provide a Kafka cluster with sample data that you can use to explore and learn the basics! Before running dbt, the details on how to connect to the sample Kafka cluster should already exist in Materialize as connections. Navigate to the [Materialize UI](https://cloud.materialize.com/showSourceCredentials) and replace the placeholders below with the provided credentials.
+
+```sql
+CREATE SECRET kafka_user AS '<KAFKA-USER>';
+CREATE SECRET kafka_password AS '<KAFKA-PASSWORD>';
+CREATE SECRET csr_user AS '<CSR-USER>';
+CREATE SECRET csr_password AS '<CSR-PASSWORD>';
+```
+
+Then create the required connections:
+
+```sql
+-- Kafka broker
+-- Where our sample streaming data lives
+CREATE CONNECTION kafka_connection TO KAFKA (
+  BROKER 'pkc-n00kk.us-east-1.aws.confluent.cloud:9092',
+  SASL MECHANISMS = 'PLAIN',
+  SASL USERNAME = SECRET kafka_user,
+  SASL PASSWORD = SECRET kafka_password
+);
+```
+
+```sql
+-- Confluent Schema Registry
+-- Used to fetch the schema of our sample streaming data
+CREATE CONNECTION qck.csr_connection TO CONFLUENT SCHEMA REGISTRY (
+  URL 'https://psrc-ko92v.us-east-2.aws.confluent.cloud:443',
+  USERNAME = SECRET csr_user,
+  PASSWORD = SECRET csr_password
+);
+```
 
 ## dbt
 
@@ -87,19 +130,17 @@ This demo includes all the models needed to recreate the get started demo, inclu
 
 #### Sources
 
-- [`sources/auction_house.sql`](models/sources/auction_house.sql)
+- [`sources/items.sql`](models/sources/items.sql)
+- [`sources/purchases.sql`](models/sources/purchases.sql)
 
 #### Views
 
-- [`staging/avg_bids.sql`](models/staging/avg_bids.sql)
-
-- [`staging/on_time_bids.sql`](models/staging/on_time_bids.sql)
-
-- [`staging/highest_bid_per_auction.sql`](models/staging/highest_bid_per_auction.sql)
+- [`staging/item_purchases.sql`](models/staging/item_purchases.sql)
+- [`staging/item_summary_5min.sql`](models/staging/item_summary_5min.sql)
 
 #### Materialized views
 
-- [`marts/winning_bids.sql`](models/marts/winning_bids.sql)
+- [`marts/item_summary.sql`](models/marts/item_summary.sql)
 
 ### Run the models!
 
@@ -118,11 +159,10 @@ This command generates executable SQL code from any model files under `/models` 
 ```sql
 SHOW SOURCES;
 
-     name      |      type      |  size
----------------+----------------+---------
- auction_house | load-generator | 3xsmall
- auctions      | subsource      |
- bids          | subsource      |
+     name   |   type   |  size
+------------+----------+---------
+ items      | kafka    | 3xsmall
+ purchases  | kafka    | 3xsmall
 ```
 
 **Views**
@@ -132,9 +172,8 @@ SHOW VIEWS;
 
           name
 -------------------------
- avg_bids
- highest_bid_per_auction
- on_time_bids
+ item_purchases
+ item_summary_5min
 ```
 
 **Materialized views**
@@ -144,12 +183,12 @@ SHOW MATERIALIZED VIEWS;
 
      name     |    cluster
 --------------+---------------
- winning_bids | auction_house
+ item_summary | quickstart
 ```
 
 That’s it! From here on, Materialize makes sure that your models are **incrementally updated** as new data streams in, and that you get **fresh and correct** results with millisecond latency whenever you query your views.
 
-> :crab: As an exercise, [SUBSCRIBE](https://materialize.com/docs/sql/subscribe/) to the `winning_bids` materialized view to see who is winning!
+> :crab: As an exercise, [SUBSCRIBE](https://materialize.com/docs/sql/subscribe/) to the `item_summary_5min` view to keep track of any items that had orders in the past 5 minutes (a moving target that changes as time ticks along)!
 
 ### Test the project
 
@@ -162,18 +201,17 @@ tests:
     +schema: 'etl_failure'
 ```
 
-, and that we added some [generic tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests#generic-tests) to the `on_time_bids` model in `auction_house.yml`:
+, and that we added some [generic tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests#generic-tests) to the `item_summary` model in `ecommerce.yml`:
 
 ```yaml
 models:
-  - name: on_time_bids
-    description: 'On time auction bids'
+  - name: item_summary
+    description: ''
     columns:
-      - name: bid_id
-        description: 'Unique ID for each bid'
+      - name: item_name
+        description: ''
         tests:
           - not_null
-          - unique
 ```
 
 Tests are configured to `store_failures`, which instructs dbt to create a materialized view for each test using the respective `SELECT` statements.
@@ -184,7 +222,7 @@ Tests are configured to `store_failures`, which instructs dbt to create a materi
 dbt test
 ```
 
-  This creates two materialized views in a dedicated schema (`public_etl_failure`): `not_null_on_time_bids_bid_id` and `unique_on_time_bids_bid_id`. dbt takes care of naming the views based on the type of test (`not_null`, `unique`) and the columns being tested (`bid_id`).
+  This creates a materialized view in a dedicated schema (`qck_etl_failure`): `not_null_item_summary_item_name`. dbt takes care of naming the view based on the type of test (`not_null`) and the columns being tested (`item_name`).
 
   These views are continuously updated as new data streams in, and allow you to monitor failing rows **as soon as** an assertion fails. You can use this feature for unit testing during the development of your dbt models, and later in production to trigger real-time alerts downstream.
 
@@ -197,19 +235,18 @@ SHOW SCHEMAS;
 
         name
 --------------------
- public
- public_etl_failure
+ qck
+ qck_etl_failure
 ```
 
 #### (Testing) Materialized views
 
 ```sql
-SHOW MATERIALIZED VIEWS FROM public_etl_failure;
+SHOW MATERIALIZED VIEWS FROM qck_etl_failure;
 
              name             |    cluster
 ------------------------------+---------------
- not_null_on_time_bids_bid_id | auction_house
- unique_on_time_bids_bid_id   | auction_house
+ not_null_item_summary_item_name | quickstart
 ```
 
 <hr>
@@ -225,7 +262,8 @@ SQLFluff has a Materialize dialect, which can be used to lint SQL code that uses
 To install SQLFluff, run:
 
 ```bash
-pip install sqlfluff-templater-dbt
+# Pin to 2.0.0a4 due to sqlfluff #4317
+pip install sqlfluff-templater-dbt==2.0.0a4
 ```
 
 To fix any linting errors, run:

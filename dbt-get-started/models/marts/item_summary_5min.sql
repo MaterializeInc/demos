@@ -9,5 +9,6 @@ SELECT
     orders,
     latest_order
 FROM {{ ref('item_summary') }}
-WHERE mz_now() >= latest_order
-AND mz_now() < latest_order + INTERVAL '5' MINUTE
+WHERE
+    mz_now() >= latest_order
+    AND mz_now() < latest_order + INTERVAL '5' MINUTE
