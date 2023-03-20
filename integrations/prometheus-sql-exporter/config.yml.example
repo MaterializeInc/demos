@@ -3,7 +3,7 @@ jobs:
 - name: "global"
   interval: '1m'
   connections:
-  - "postgres://YOUR_MATERIALIZE_USER:YOUR_MATERIALIZE_PASSWORD@YOUR_MATERIALIZE_HOST.materialize.cloud:6875/materialize"
+  - "postgres://YOUR_MATERIALIZE_USER:YOUR_MATERIALIZE_PASSWORD@YOUR_MATERIALIZE_HOST.materialize.cloud:6875/materialize?options=--cluster%3Dmz_introspection"
   queries:
   - name: "total_kafka_sources"
     help: "Total Kafka Sources"
@@ -51,5 +51,5 @@ jobs:
               name::text as replica_name,
               cluster_id::text as cluster_id,
               memory_percent::float as memory_percent
-            FROM mz_cluster_replicas r 
+            FROM mz_cluster_replicas r
             JOIN mz_internal.mz_cluster_replica_utilization u ON r.id=u.replica_id;
