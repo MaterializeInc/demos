@@ -2,7 +2,7 @@
 
 CREATE SOURCE {{ this }}
 FROM KAFKA CONNECTION public.kafka_connection (
-    TOPIC 'mysql.shop.items'
+    TOPIC 'mysql.shop.users'
 )
 FORMAT AVRO
 USING CONFLUENT SCHEMA REGISTRY CONNECTION public.csr_connection

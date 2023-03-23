@@ -271,3 +271,7 @@ To fix any linting errors, run:
 ```bash
 sqlfluff fix --dialect  materialize
 ```
+
+### See the App in Action
+
+[https://materialize-embedded-analytics.vercel.app/](https://materialize-embedded-analytics.vercel.app/)

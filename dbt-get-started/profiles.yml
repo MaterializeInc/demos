@@ -1,12 +1,12 @@
 mz_get_started:
   outputs:
-    dev:
+    demo:
       type: materialize
       host: "{{ env_var('MZ_HOST') }}"
       port: 6875
       user: "{{ env_var('MZ_USER') }}"
       password: "{{ env_var('MZ_PASSWORD') }}"
-      database: materialize
-      cluster: quickstart
-      schema: qck
-  target: dev
+      database: datacouncil2023
+      cluster: datacouncil2023
+      schema: shop
+  target: demo

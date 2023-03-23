@@ -1,4 +1,4 @@
-{{ config(materialized='view') }}
+{{ config(materialized='view', indexes=[{'columns': ['item_id']}]) }}
 
 SELECT
     item_id,

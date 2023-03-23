@@ -2,3 +2,5 @@ target/
 dbt_modules/
 logs/
 dbt_packages
+dbt-venv
+.user.yml
