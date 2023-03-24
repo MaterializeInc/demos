@@ -1,2 +1,8 @@
 source .env
-PGPASSWORD=$MZ_PASSWORD psql 'postgres://chuck%40materialize.com@da8gqtiy8g8jx8ni5c5g9gri0.us-east-1.aws.materialize.cloud:6875/datacouncil2023?sslmode=require&options=--cluster%3Ddatacouncil2023&options=--search_path%3Dshop'
+PGPASSWORD=$MZ_PASSWORD \
+PGOPTIONS='--cluster=datacouncil2023 --search_path=shop' \
+    psql \
+        -U $MZ_USER \
+        -h $MZ_HOST \
+        -p 6875 \
+        -d datacouncil2023
