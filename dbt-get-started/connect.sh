@@ -1,6 +1,6 @@
 source .env
 PGPASSWORD=$MZ_PASSWORD \
-PGOPTIONS='--cluster=default --search_path=shop' \
+PGOPTIONS='--cluster=datacouncil2023 --search_path=shop' \
     psql \
         -U $MZ_USER \
         -h $MZ_HOST \

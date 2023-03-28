@@ -7,6 +7,6 @@ mz_get_started:
       user: "{{ env_var('MZ_USER') }}"
       password: "{{ env_var('MZ_PASSWORD') }}"
       database: datacouncil2023
-      cluster: default
+      cluster: datacouncil2023
       schema: shop
   target: demo
