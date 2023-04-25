@@ -67,20 +67,26 @@ You can change the interval at which the exporter queries Materialize by changin
 
 ```yaml
   queries:
-  - name: "replica_memory_usage"
-    help: "Replica memory usage"
+  - name: "source_messages_received"
+    help: "Count of messages for each source"
     labels:
-      - "replica_name"
+      - "source_name"
+      - "source_type"
       - "cluster_id"
+      - "cluster_name"
     values:
-      - "memory_percent"
+      - "messages_received"
     query:  |
             SELECT
-              name::text as replica_name,
-              cluster_id::text as cluster_id,
-              memory_percent::float as memory_percent
-            FROM mz_cluster_replicas r 
-            JOIN mz_internal.mz_cluster_replica_utilization u ON r.id=u.replica_id;
+              SUM(messages_received) as messages_received,
+              S.name as source_name,
+              S.type as source_type,
+              S.cluster_id,
+              S.name as cluster_name
+            FROM mz_internal.mz_source_statistics SS
+            JOIN mz_catalog.mz_sources S ON (SS.id = S.id)
+            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
+            GROUP BY S.name, S.type, S.cluster_id, cluster_name;
 ```
 
 The `queries` section contains all the queries that the SQL exporter will run to export metrics from Materialize. Each query has the following fields:
@@ -103,6 +109,9 @@ sql_exporter:
     query:  |
             SELECT count(*) FROM orders
 ```
+## Dashboard Template
+
+Use our dashboard template available for Grafana by importing the `dashboard.json` file into your dashboards. By importing the dashboard template, you can quickly set up a customized dashboard that displays the specific metrics and data available in the `config.yaml`. This can save you time and effort in building a dashboard from scratch.
 
 ## Helpful links
 
