@@ -107,6 +107,10 @@ queries:
 
 Datadog's agent will pick up the `/conf.d/openmetrics.yaml` configuration file to consume the metrics available in the Prometheus SQL Exporter endpoint.
 
+## Dashboard Template
+
+Use our dashboard template available for Datadog by importing the `dashboard.json` file into your dashboards. By importing the dashboard template, you can quickly set up a customized dashboard that displays the specific metrics and data available in the `config.yaml`. This can save you time and effort in building a dashboard from scratch.
+
 ## Helpful links
 
 - [Materialize](https://materialize.com/)
