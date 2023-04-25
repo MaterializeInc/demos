@@ -3,7 +3,7 @@ jobs:
 - name: "materialize"
   interval: '5m'
   connections:
-  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize"
+  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?options=--cluster%3Dmz_introspection"
   queries:
   - name: "source_messages_received"
     help: "Count of messages for each source"
