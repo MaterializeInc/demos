@@ -26,10 +26,10 @@ provider "materialize" {
 module "msk" {
   source              = "MaterializeInc/msk-privatelink/aws"
   version             = "0.1.2"
-  mz_msk_cluster_name = "example-msk-cluster"
-  mz_msk_cluster_port = 9092
-  mz_msk_vpc_id       = "vpc-1234567890"
-  aws_region          = "us-east-1"
+  mz_msk_cluster_name = local.mz_msk_cluster_name
+  mz_msk_cluster_port = local.mz_msk_cluster_port
+  mz_msk_vpc_id       = local.mz_msk_vpc_id
+  aws_region          = local.aws_region
 }
 
 # Create a PrivateLink connection in Materialize

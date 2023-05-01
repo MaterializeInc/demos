@@ -16,13 +16,13 @@ The end result is a Materialize cluster that is connected to an Amazon MSK clust
 
 The configuration is divided into several sections:
 
-1.  **Define the Materialize provider**: This section specifies the required Materialize provider version and its source.
-2.  **Include the AWS provider**: This section configures the AWS provider with the specified region.
-3.  **Include the Materialize provider**: This section configures the Materialize provider with connection information, such as host, username, password, port, and database.
-4.  **Use the Materialize MSK module**: This section sets up the MSK cluster by providing necessary information such as the cluster name, port, VPC ID, and AWS region.
-5.  **Create a PrivateLink connection in Materialize**: This section creates a PrivateLink connection in Materialize by providing the necessary information such as name, schema name, service name, and availability zones.
+1.  **Define the Materialize provider**
+2.  **Include the AWS provider**
+3.  **Include the Materialize provider**: Here we configure the Materialize provider with connection information, such as host, username, password, port, and database.
+4.  **Use the Materialize MSK module**: Here we set up the MSK cluster by providing necessary information such as the cluster name, port, VPC ID, and AWS region.
+5.  **Create a PrivateLink connection in Materialize**: The PrivateLink connection is created in Materialize by providing the necessary information such as name, schema name, service name, and availability zones.
 6.  **Add the Materialize allowed principal to the AWS VPC Endpoint Service**: This section allows the Materialize principal to access the AWS VPC Endpoint Service by providing the VPC Endpoint Service ID and Materialize principal ARN.
-7.  **Approve the VPC Endpoint Service connection**: This section instructs you to manually approve the VPC Endpoint Service connection in your AWS account.
+7.  **Approve the VPC Endpoint Service connection**: You will have to manually approve the VPC Endpoint Service connection in your AWS account.
 
 ## Step-by-step Instructions
 
@@ -65,7 +65,6 @@ provider "materialize" {
 }
 ```
 
-
 ### Step 4: Use the Materialize MSK module
 
 Set up the MSK cluster by providing the necessary information:
@@ -74,7 +73,18 @@ Set up the MSK cluster by providing the necessary information:
 module "msk" {
   source              = "MaterializeInc/msk-privatelink/aws"
   version             = "0.1.2"
-  mz_msk_cluster_name = "example-msk-cluster"
+  mz_msk_cluster_name = local.mz_msk_cluster_name
+  mz_msk_cluster_port = local.mz_msk_cluster_port
+  mz_msk_vpc_id       = local.mz_msk_vpc_id
+  aws_region          = local.aws_region
+}
+```
+
+In your `locals.tf` file, define the following variables:
+
+```hcl
+locals {
+  mz_msk_cluster_name = "example_msk_cluster"
   mz_msk_cluster_port = 9092
   mz_msk_vpc_id       = "vpc-1234567890"
   aws_region          = "us-east-1"
