@@ -22,7 +22,6 @@ The configuration is divided into several sections:
 4.  **Use the Materialize MSK module**: Here we set up the MSK cluster by providing necessary information such as the cluster name, port, VPC ID, and AWS region.
 5.  **Create a PrivateLink connection in Materialize**: The PrivateLink connection is created in Materialize by providing the necessary information such as name, schema name, service name, and availability zones.
 6.  **Add the Materialize allowed principal to the AWS VPC Endpoint Service**: This section allows the Materialize principal to access the AWS VPC Endpoint Service by providing the VPC Endpoint Service ID and Materialize principal ARN.
-7.  **Approve the VPC Endpoint Service connection**: You will have to manually approve the VPC Endpoint Service connection in your AWS account.
 
 ## Step-by-step Instructions
 
@@ -114,7 +113,9 @@ resource "aws_vpc_endpoint_service_allowed_principal" "example_privatelink_conne
   principal_arn           = materialize_connection_aws_privatelink.example_privatelink_connection.principal
 }
 ```
-### Step 7: Approve the VPC Endpoint Service connection
+### (Optional) Step 7: Approve the VPC Endpoint Service connection
+
+If you've changed the `mz_acceptance_required` variable to `true` in the PrivateLink module, you will need to approve the VPC Endpoint Service connection in your AWS account. Otherwise, if you've left the default value of `false`, you can skip this step as the connection will be automatically approved.
 
 After Terraform has successfully created the resources, you will need to approve the VPC Endpoint Service connection in your AWS account:
 
