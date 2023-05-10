@@ -14,7 +14,7 @@ The end result is a Materialize cluster that is connected to an Amazon MSK clust
 
 ## Overview
 
-![Terraform Configuration](https://github.com/MaterializeInc/demos/assets/21223421/abbbe183-4f7e-4a26-b492-5f3bf55f64a9)
+![Terraform Configuration](https://github.com/MaterializeInc/demos/assets/21223421/15f99249-fb60-42b4-890e-9b75c771832d)
 
 The Terraform configuration creates the following resources:
 
