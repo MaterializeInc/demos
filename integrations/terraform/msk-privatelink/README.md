@@ -130,4 +130,4 @@ Once the connection is approved, Materialize can access the MSK cluster over the
 
 ## Complete Example
 
-Check out the [`main.tf`](main.tf) file in this repository for a complete example of how to use the Materialize Terraform Provider and the Materialize Terraform Module for AWS PrivateLink and MSK together.
+Check out the [`main.tf`](main.tf) file in this repository for a complete example of how to use the [Materialize Terraform provider](https://github.com/MaterializeInc/terraform-provider-materialize) in combination with the [Terraform module for Amazon MSK](https://github.com/MaterializeInc/terraform-aws-msk-privatelink).
