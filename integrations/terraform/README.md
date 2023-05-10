@@ -16,6 +16,7 @@ This is a collection of demos that show how to use the [Materialize Terraform pr
 - [Materialize](https://console.materialize.com/) account
 - [AWS](https://aws.amazon.com/) account
 - [`aws`](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) CLI
+- [`psql`](https://materialize.com/docs/integrations/sql-clients/#installation-instructions-for-psql) installed
 
 ## Running the demos
 

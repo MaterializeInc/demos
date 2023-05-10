@@ -71,7 +71,7 @@ Set up the MSK cluster by providing the necessary information:
 ```hcl
 module "msk" {
   source              = "MaterializeInc/msk-privatelink/aws"
-  version             = "0.1.2"
+  version             = "0.1.3"
   mz_msk_cluster_name = local.mz_msk_cluster_name
   mz_msk_cluster_port = local.mz_msk_cluster_port
   mz_msk_vpc_id       = local.mz_msk_vpc_id
