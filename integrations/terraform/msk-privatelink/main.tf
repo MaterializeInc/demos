@@ -22,7 +22,7 @@ provider "materialize" {
   database = "materialize"
 }
 
-# Use the materialize msk module
+# Use the MSK PrivateLink module
 module "msk" {
   source              = "MaterializeInc/msk-privatelink/aws"
   version             = "0.1.2"
