@@ -27,7 +27,7 @@ The configuration is divided into several sections:
 
 ### Step 1: Define the Materialize provider
 
-This block specifies the required version of the Materialize provider and its source:
+This block specifies the required version of the Materialize provider and its source address in the Terraform Registry:
 
 ```hcl
 terraform {
