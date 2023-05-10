@@ -1,6 +1,6 @@
 # Materialize Terraform Provider + Materialize Module for Amazon MSK
 
-This is an example of how to use the [Materialize Terraform Provider](https://github.com/MaterializeInc/terraform-provider-materialize) to manage your Materialize resources like [connections](https://materialize.com/docs/sql/create-connection/), [sources](https://materialize.com/docs/sql/create-source/), and [clusters](https://materialize.com/docs/sql/create-cluster/) alongside the [Materialize Module for Amazon MSK](https://github.com/MaterializeInc/terraform-aws-msk-privatelink).
+This is an example of how to use the [Materialize Terraform provider](https://github.com/MaterializeInc/terraform-provider-materialize) in combination with the [Terraform module for Amazon MSK](https://github.com/MaterializeInc/terraform-aws-msk-privatelink) to manage resources like [connections](https://materialize.com/docs/sql/create-connection/), [sources](https://materialize.com/docs/sql/create-source/), and [clusters](https://materialize.com/docs/sql/create-cluster/) in your Materialize region.
 
 The end result is a Materialize cluster that is connected to an Amazon MSK cluster via an AWS PrivateLink connection.
 
