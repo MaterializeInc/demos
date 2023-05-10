@@ -46,4 +46,4 @@ resource "aws_vpc_endpoint_service_allowed_principal" "example_privatelink_conne
   principal_arn           = materialize_connection_aws_privatelink.example_privatelink_connection.principal
 }
 
-# Finally go to your AWS account and approve the VPC Endpoint Service connection
+# Finally, go to your AWS account and approve the VPC Endpoint Service connection
