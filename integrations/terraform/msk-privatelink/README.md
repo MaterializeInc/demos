@@ -126,7 +126,7 @@ After Terraform has successfully created the resources, you will need to approve
 5.  In the **Actions** menu, click **Manage Connections**.
 6.  Select the pending connection request and click **Approve**.
 
-Once the connection is approved, Materialize can access the MSK cluster over the PrivateLink connection. You can now create a Kafka source in Materialize and start streaming data from your MSK cluster.
+Once the connection is approved, Materialize can access the MSK cluster over the PrivateLink connection. You can now [create a Kafka source](https://materialize.com/docs/sql/create-source/kafka/) in Materialize and start streaming data from your MSK cluster.
 
 ## Complete Example
 
