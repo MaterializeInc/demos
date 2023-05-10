@@ -8,7 +8,7 @@ terraform {
   }
 }
 
-# Include aws provider
+# Include the AWS provider
 provider "aws" {
   region = "us-east-1"
 }
