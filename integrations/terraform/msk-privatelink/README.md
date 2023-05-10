@@ -12,16 +12,17 @@ The end result is a Materialize cluster that is connected to an Amazon MSK clust
 - [MSK cluster](https://docs.aws.amazon.com/msk/latest/developerguide/create-cluster.html).
 - Follow the steps in the [README.md](../README.md) file to set up your AWS configuration and Materialize details.
 
-## Overview of the Terraform Configuration
+## Overview
 
-The configuration is divided into several sections:
+![Terraform Configuration](https://github.com/MaterializeInc/demos/assets/21223421/abbbe183-4f7e-4a26-b492-5f3bf55f64a9)
 
-1.  **Define the Materialize provider**
-2.  **Include the AWS provider**
-3.  **Include the Materialize provider**: Here we configure the Materialize provider with connection information, such as host, username, password, port, and database.
-4.  **Use the Materialize MSK module**: Here we set up the MSK cluster by providing necessary information such as the cluster name, port, VPC ID, and AWS region.
-5.  **Create a PrivateLink connection in Materialize**: The PrivateLink connection is created in Materialize by providing the necessary information such as name, schema name, service name, and availability zones.
-6.  **Add the Materialize allowed principal to the AWS VPC Endpoint Service**: This section allows the Materialize principal to access the AWS VPC Endpoint Service by providing the VPC Endpoint Service ID and Materialize principal ARN.
+The Terraform configuration creates the following resources:
+
+- Target Groups for each MSK broker
+- Network Load Balancer
+- Listeners for each MSK broker on the NLB
+- Endpoint Service for the NLB
+- A PrivateLink Connection in Materialize
 
 ## Step-by-step Instructions
 
