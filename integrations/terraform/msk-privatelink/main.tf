@@ -13,7 +13,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Include Materialize provider
+# Include the Materialize provider
 provider "materialize" {
   host     = local.materialize_host
   username = local.materialize_username
