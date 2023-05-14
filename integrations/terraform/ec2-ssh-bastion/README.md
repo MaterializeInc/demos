@@ -10,16 +10,21 @@ The end result is an EC2 SSH Bastion host in your AWS account and an SSH connect
 - [Materialize Cloud](https://cloud.materialize.com/) account
 - [AWS](https://aws.amazon.com/) account
 
-## Overview of the Terraform Configuration
+## Overview
 
-The configuration is divided into several sections:
+![Terraform Configuration](https://github.com/MaterializeInc/demos/assets/21223421/ff6d7317-b74d-4271-8107-433514e81b69)
 
-1.  **Define the Materialize provider**
-2.  **Include the AWS provider**
-3.  **Include the Materialize provider**
-4.  **Use the Materialize EC2 SSH Bastion module**
+The Terraform configuration creates the following resources:
 
-<!-- TODO add a diagram -->
+- In AWS:
+  - An EC2 SSH Bastion host
+  - Security group for EC2 instance
+  - SSH key pair
+
+- In Materialize:
+  - An [SSH connection](https://materialize.com/docs/connect-sources/network-security/ssh-tunnel) to the EC2 SSH Bastion host
+
+The SSH connection in Materialize can later be used to create secure [connections](https://materialize.com/docs/sql/create-connection/) from Materialize to Postgres databases, Kafka clusters, or Confluent Schema Registries.
 
 ## Step-by-step Instructions
 
