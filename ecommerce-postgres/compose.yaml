@@ -1,0 +1,60 @@
+services:
+  redpanda:
+    image: docker.vectorized.io/vectorized/redpanda:v21.10.1
+    container_name: redpanda
+    command:
+     - redpanda start
+     - --overprovisioned
+     - --smp 1
+     - --memory 1G
+     - --reserve-memory 0M
+     - --node-id 0
+     - --check=false
+     - --kafka-addr 0.0.0.0:9092
+     - --advertise-kafka-addr ${EXTERNAL_IP:-redpanda}:9092
+     - --pandaproxy-addr 0.0.0.0:8082
+     - --advertise-pandaproxy-addr ${EXTERNAL_IP:-redpanda}:9092
+     - --set redpanda.enable_transactions=true
+     - --set redpanda.enable_idempotence=true
+     - --set redpanda.auto_create_topics_enabled=true
+     - --set redpanda.delete_retention_ms='6840000'
+    ports:
+     - 9092:9092
+     - 8081:8081
+     - 8082:8082
+  postgres:
+    build: ./postgres
+    container_name: postgres
+    ports:
+     - 5432:5432
+    environment:
+     - POSTGRES_USER=postgres
+     - POSTGRES_PASSWORD=postgres
+     - POSTGRES_DB=postgres
+    volumes:
+     - ${PWD}/postgres:/docker-entrypoint-initdb.d
+    depends_on:
+      - redpanda
+  loadgen:
+    build: loadgen
+    init: true
+    environment:
+      - PSQL_PASSWORD=postgres
+    depends_on:
+      - postgres
+      - redpanda
+  clear-purchases:
+    build: loadgen
+    init: true
+    environment:
+      - PSQL_PASSWORD=postgres
+    entrypoint:
+      - "python"
+      - "clear_purchases.py"
+    depends_on:
+      - postgres
+      - redpanda
+  metabase:
+    image: metabase/metabase:v0.41.5
+    ports:
+      - 3030:3000

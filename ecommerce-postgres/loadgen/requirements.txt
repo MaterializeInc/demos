@@ -1,0 +1,4 @@
+barnum==0.5.1
+kafka-python==2.0.2
+noise==1.2.2
+psycopg2==2.9.5
