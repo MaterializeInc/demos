@@ -102,7 +102,7 @@ jobs:
               U.memory_percent
             FROM mz_internal.mz_cluster_replica_utilization U
             JOIN mz_catalog.mz_cluster_replicas R ON (U.replica_id = R.id)
-            JOIN mz_catalog.mz_clusters C ON (R.id = C.id);
+            JOIN mz_catalog.mz_clusters C ON (R.cluster_id = C.id);
   - name: "cluster_replica_memory_usage"
     help: "Cluster memory usage"
     labels:
@@ -120,7 +120,7 @@ jobs:
               U.memory_percent
             FROM mz_internal.mz_cluster_replica_utilization U
             JOIN mz_catalog.mz_cluster_replicas R ON (U.replica_id = R.id)
-            JOIN mz_catalog.mz_clusters C ON (R.id = C.id);
+            JOIN mz_catalog.mz_clusters C ON (R.cluster_id = C.id);
   - name: "source_status"
     help: "Status for each source"
     labels:
