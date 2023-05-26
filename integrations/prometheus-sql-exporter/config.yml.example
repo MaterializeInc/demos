@@ -180,13 +180,21 @@ jobs:
     values:
       - "size_bytes"
     query:  |
+            WITH last_measure AS (
+              SELECT
+                object_id,
+                MAX(collection_timestamp) timestamp
+              FROM mz_storage_usage
+              GROUP BY object_id
+            )
             SELECT
               name as object_name,
               type as object_type,
               id as object_id,
-              SUM(size_bytes) as size_bytes
+              SUM(size_bytes) AS size_bytes
             FROM mz_storage_usage U
             JOIN mz_objects O ON (U.object_id = O.id)
+            JOIN last_measure L ON (L.timestamp = U.collection_timestamp)
             WHERE owner_id NOT LIKE 's%'
             GROUP BY name, type, id;
   - name: "source_snapshot"
