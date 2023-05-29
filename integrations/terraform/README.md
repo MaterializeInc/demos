@@ -9,6 +9,7 @@ This is a collection of demos that show how to use the [Materialize Terraform pr
 | Demo                               | Description                                                             |
 | ---------------------------------- | ----------------------------------------------------------------------- |
 | [MSK PrivateLink](msk-privatelink) | Create an AWS PrivateLink connection between Materialize and Amazon MSK |
+| [HashiCorp Vault](hashicorp-vault) | Create a Materialize secret from a HashiCorp Vault secret               |
 
 ## Prerequisites
 
