@@ -12,7 +12,7 @@ This is a collection of demos that show how to use the [Materialize Terraform pr
 
 ## Prerequisites
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.13 or later
+- [Terraform](https://www.terraform.io/downloads.html) 1.0.3 or later
 - [Materialize](https://console.materialize.com/) account
 - [AWS](https://aws.amazon.com/) account
 - [`aws`](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) CLI
