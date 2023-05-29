@@ -4,19 +4,7 @@ HashiCorp Vault is a powerful tool for securely accessing secrets. This demo wil
 
 ## Overview
 
-TODO: Change with an actual diagram:
-
-```
-+-------------+    kv get     +----------+    apply   +---------------------+
-|             |  <----------  |          |  <-------  |                     |
-|   HashiCorp |               | Terraform|            | Materialize Secret  |
-|     Vault   |               |          |            |     Resource        |
-|             |  kv put   --->|          |   init --->|                     |
-+-------------+               +----------+            +---------------------+
-|     secret/  |
-|  materialize |
-+--------------+
-```
+![](https://github.com/MaterializeInc/demos/assets/21223421/edc48e99-77b3-4c47-8e86-472c51d45f70)
 
 ## Prerequisites
 
@@ -58,7 +46,7 @@ Once authenticated, you can begin to interact with Vault.
 To store a secret in Vault, we can use the `vault kv put` command.
 
 ```bash
-vault kv put secret/materialize password=some-secret-value
+vault kv put secret/materialize pgpass=some-secret-value
 ```
 
 The vault `kv put` command creates a key-value secret at the path specified. In this case, the secret is stored at `secret/materialize`.
@@ -142,8 +130,8 @@ Finally, you can use the secret retrieved from Vault in your `materialize_secret
 
 ```hcl
 resource "materialize_secret" "example_secret" {
-  name  = "secret"
-  value = data.vault_generic_secret.materialize_password.data["password"]
+  name  = "pgpass"
+  value = data.vault_generic_secret.materialize_password.data["pgpass"]
 }
 ```
 
@@ -178,40 +166,33 @@ Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 
 Once the script has been applied, you can verify that the secret has been created in Materialize Cloud:
 
-```bash
-# Connect to Materialize Cloud:
-psql -h <Materialize-Host> -U <Materialize-Username> -d materialize
-```
-
-Show the secrets:
-
 ```sql
 SHOW SECRETS;
 ```
 
 ## Using the Secret in Connections
 
-Once the secret has been created, you can use it in your `CREATE CONNECTION` statements. In this example, we'll create a connection to a Kafka cluster using the secret we created using the `materialize_connection_kafka` resource:
+Once the secret has been created, you can use it in your `CREATE CONNECTION` statements. In this example, we'll create a connection to a Postgres instance using the secret we created using the `materialize_connection_postgres` resource:
 
 ```hcl
-resource "materialize_connection_kafka" "example_kafka_connection" {
-  name = "example_kafka_connection"
-  kafka_broker {
-    broker = "b-1.hostname-1:9096"
+# Create a Postgres Connection
+resource "materialize_connection_postgres" "example_postgres_connection" {
+  name = "example_postgres_connection"
+  host = "instance.foo000.us-west-1.rds.amazonaws.com"
+  port = 5432
+  user {
+    text = "pguser"
   }
-  sasl_username {
-    text = "kafka_username"
-  }
-  sasl_password {
+  password {
     name          = materialize_secret.example_secret.name
     database_name = "materialize"
     schema_name   = "public"
   }
-  sasl_mechanisms = "SCRAM-SHA-256"
+  database = "pgdatabase"
 }
 ```
 
-The `sasl_password` block references the secret we created earlier.
+The `password` block references the secret we created earlier.
 
 ## Cleaning up
 

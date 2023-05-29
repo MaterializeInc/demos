@@ -29,22 +29,22 @@ data "vault_generic_secret" "materialize_password" {
 }
 
 resource "materialize_secret" "example_secret" {
-  name  = "secret"
-  value = data.vault_generic_secret.materialize_password.data["password"]
+  name  = "pgpass"
+  value = data.vault_generic_secret.materialize_password.data["pgpass"]
 }
 
-resource "materialize_connection_kafka" "example_kafka_connection" {
-  name = "example_kafka_connection"
-  kafka_broker {
-    broker = "b-1.hostname-1:9096"
+# Create a Postgres Connection
+resource "materialize_connection_postgres" "example_postgres_connection" {
+  name = "example_postgres_connection"
+  host = "instance.foo000.us-west-1.rds.amazonaws.com"
+  port = 5432
+  user {
+    text = "pguser"
   }
-  sasl_username {
-    text = "kafka_username"
-  }
-  sasl_password {
+  password {
     name          = materialize_secret.example_secret.name
     database_name = "materialize"
     schema_name   = "public"
   }
-  sasl_mechanisms = "SCRAM-SHA-256"
+  database = "pgdatabase"
 }
