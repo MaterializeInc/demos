@@ -115,7 +115,7 @@ Replace `<Materialize-username>` and `<Materialize-password>` with the username 
 
 ## Retrieving a secret from Vault
 
-Now you can use the `vault_generic_secret` data source to retrieve the secret from Vault:
+To retrieve a secret from Vault, use the `vault_generic_secret` data source:
 
 ```hcl
 data "vault_generic_secret" "materialize_password" {
