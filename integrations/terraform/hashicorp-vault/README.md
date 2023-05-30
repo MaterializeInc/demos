@@ -21,9 +21,7 @@ Before we can use Vault, we need to start a Vault server. For testing purposes, 
 vault server -dev
 ```
 
-This will start Vault in dev mode and output an Unseal Key and a Root Token.
-
-Make sure to note the Root Token as we'll use it to authenticate with Vault.
+In this mode, Vault runs entirely in-memory and starts unsealed with a single unseal key. The command above will return the unseal key and a root token for authentication. Make sure to note down the root token, as you'll use it to authenticate with Vault next.
 
 ## Interacting with Vault
 
