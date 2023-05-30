@@ -11,6 +11,8 @@ terraform {
   }
 }
 
+# Use development mode to experiment
+# https://developer.hashicorp.com/vault/docs/concepts/dev-server
 provider "vault" {
   address = "http://localhost:8200"
   token = local.vault_token
