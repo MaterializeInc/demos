@@ -172,7 +172,7 @@ SHOW SECRETS;
 Once the secret has been created, you can use it in your `CREATE CONNECTION` statements. In this example, we'll create a connection to a Postgres instance using the secret we created using the `materialize_connection_postgres` resource:
 
 ```hcl
-# Create a Postgres Connection
+# Create a PostgreSQL Connection
 resource "materialize_connection_postgres" "example_postgres_connection" {
   name = "example_postgres_connection"
   host = "instance.foo000.us-west-1.rds.amazonaws.com"
