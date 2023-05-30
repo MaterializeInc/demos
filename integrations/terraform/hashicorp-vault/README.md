@@ -59,7 +59,7 @@ vault kv get secret/materialize
 
 Terraform has a Vault provider that you can use in combination with the Materialize provider to manage secrets stored externally.
 
-First, let's start by creating a file called `main.tf` and then in that file you will need to add the Vault provider and the Materialize provider:
+Start by creating a `main.tf` configuration file, and add the Vault provider and the Materialize provider to it:
 
 ```hcl
 terraform {
