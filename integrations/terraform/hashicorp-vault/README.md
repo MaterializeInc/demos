@@ -87,7 +87,7 @@ provider "vault" {
 
 Replace `<root-token>` with the root token of your Vault server.
 
-After that initialize the Materialize provider:
+Then, initialize the Materialize provider:
 
 ```hcl
 provider "materialize" {
