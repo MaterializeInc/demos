@@ -208,7 +208,7 @@ In a production environment, you wouldn't run Vault locally in dev mode. Instead
 
 For the complete Terraform script, see the [`main.tf`](./main.tf) file.
 
-## Useful Links
+## Useful links
 
 - [Materialize Terraform Provider](https://registry.terraform.io/providers/MaterializeInc/materialize/latest/docs)
 - [HashiCorp Vault Terraform Provider](https://registry.terraform.io/providers/hashicorp/vault/latest/docs)
