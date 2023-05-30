@@ -49,7 +49,7 @@ vault kv put secret/materialize pgpass=some-secret-value
 
 The vault `kv put` command creates a key-value secret in the path specified. In this case, the secret is stored in `secret/materialize`.
 
-To retrieve a secret, you use the `vault kv get` command:
+To retrieve a secret, use the `vault kv get` command:
 
 ```bash
 vault kv get secret/materialize
