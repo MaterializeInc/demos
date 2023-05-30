@@ -113,7 +113,7 @@ locals {
 
 Replace `<Materialize-username>` and `<Materialize-password>` with the username and password of your Materialize account.
 
-## Retrieving a Secret from Vault
+## Retrieving a secret from Vault
 
 Now you can use the `vault_generic_secret` data source to retrieve the secret from Vault:
 
