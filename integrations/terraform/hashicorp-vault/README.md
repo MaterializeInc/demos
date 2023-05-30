@@ -76,7 +76,7 @@ terraform {
 }
 ```
 
-You'll then have to initialize the Vault provider:
+In the same file, initialize the Vault provider:
 
 ```hcl
 provider "vault" {
