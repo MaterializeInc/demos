@@ -194,6 +194,8 @@ In this demo, you learned how to use the Materialize Terraform provider to use s
 
 This demo used Vault in development mode, which **should never be used in production environments**. Instead, follow the [HashiCorp documentation](https://developer.hashicorp.com/vault/tutorials/getting-started/getting-started-deploy) to deploy a highly available, secure, and resilient Vault cluster on your cloud instances, ensuring that secrets remain accessible and secure. Rather than using the root token for authentication, you'd employ more secure authentication methods, such as IAM roles for AWS or Kubernetes service accounts, and all communication between Vault and its clients should be over a secure HTTPS connection.
 
+It is important to keep in mind that the secret resides in two locations: within Vault and Materialize. Thus, any modifications to the secret value in Vault requires a re-execution of the Terraform script to ensure the Materialize secret resource aligns with the updated secret in Vault.
+
 For the complete Terraform script, see the [`main.tf`](./main.tf) file.
 
 ## Useful links
