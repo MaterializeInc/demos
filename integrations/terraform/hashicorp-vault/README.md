@@ -132,7 +132,7 @@ resource "materialize_secret" "example_secret" {
 }
 ```
 
-## Running the Terraform Script
+## Running the Terraform script
 
 Now that you have the Terraform script ready, you can run the following commands to initialize and apply the script:
 
