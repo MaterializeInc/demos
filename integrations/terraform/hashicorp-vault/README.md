@@ -203,7 +203,7 @@ terraform destroy
 
 In this demo, you learned how to use the Materialize Terraform provider to use secrets stored in an external secret store like HashiCorp Vault in Materialize.
 
-In a production environment, you wouldn't run Vault locally in dev mode. Instead, a highly available, secure, and resilient Vault cluster would be deployed on your cloud instances, ensuring that secrets remain accessible and secure. Rather than using the root token for authentication, you'd employ more secure authentication methods, such as IAM roles for AWS or Kubernetes service accounts and all communication between Vault and its clients should be over a secure HTTPS connection.
+This demo used Vault in development mode, which **should never be used in production environments**. Instead, follow the [HashiCorp documentation](https://developer.hashicorp.com/vault/tutorials/getting-started/getting-started-deploy) to deploy a highly available, secure, and resilient Vault cluster on your cloud instances, ensuring that secrets remain accessible and secure. Rather than using the root token for authentication, you'd employ more secure authentication methods, such as IAM roles for AWS or Kubernetes service accounts, and all communication between Vault and its clients should be over a secure HTTPS connection.
 
 For the complete Terraform script, see the [`main.tf`](./main.tf) file.
 
