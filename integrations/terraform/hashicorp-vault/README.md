@@ -193,7 +193,7 @@ The `password` block references the secret we created earlier.
 
 ## Cleaning up
 
-To clean up the resources created by Terraform, you can run the following command:
+To clean up the resources created by Terraform, run the following command:
 
 ```bash
 terraform destroy
