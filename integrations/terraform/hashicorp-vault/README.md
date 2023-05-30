@@ -15,7 +15,7 @@ HashiCorp Vault is a powerful tool for securely accessing secrets. This demo wil
 
 ## Setting up Vault
 
-Before we can use Vault, we need to start a Vault server. For testing purposes, we'll run Vault in dev mode:
+Before we can use Vault, we need to start a Vault server. For testing purposes, we'll run Vault in [development mode](https://developer.hashicorp.com/vault/docs/concepts/dev-server):
 
 ```bash
 vault server -dev
