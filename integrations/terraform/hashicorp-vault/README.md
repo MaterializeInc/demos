@@ -41,7 +41,7 @@ Once authenticated, you can begin to interact with Vault.
 
 ## Adding and retrieving secrets in Vault
 
-To store a secret in Vault, we can use the `vault kv put` command.
+To store a secret in Vault, you can use the `vault kv put` command.
 
 ```bash
 vault kv put secret/materialize pgpass=some-secret-value
