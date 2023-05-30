@@ -123,7 +123,7 @@ data "vault_generic_secret" "materialize_password" {
 }
 ```
 
-Finally, you can use the secret retrieved from Vault in your `materialize_secret` resource:
+Finally, use the secret retrieved from Vault in your `materialize_secret` resource:
 
 ```hcl
 resource "materialize_secret" "example_secret" {
