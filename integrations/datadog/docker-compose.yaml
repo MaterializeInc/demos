@@ -5,7 +5,7 @@ services:
     build: datadog
     pid: host
     environment:
-     - DD_API_KEY=${DD_API_KEY}
+     - DD_API_KEY=<API_KEY>
      - DD_SITE=datadoghq.com
      - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
     volumes:
@@ -13,10 +13,17 @@ services:
      - /proc/:/host/proc/:ro
      - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
   sql-exporter:
-    image: justwatch/sql_exporter:latest
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
     ports:
-      - 9237:9237
+      - 9187:9187
     environment:
-      CONFIG: /config/config.yaml
+      DATA_SOURCE_NAME: <PSQL_CONNECTION>
+      PG_EXPORTER_EXTEND_QUERY_PATH: /queries.yml
+    command:
+      - "--disable-default-metrics"
+      - "--disable-settings-metrics"
+      - "--no-collector.database"
+      - "--no-collector.bgwriter"
+      - "--no-collector.replication_slot"
     volumes:
-      - ./config.yaml:/config/config.yaml
+      - ./queries.yaml:/queries.yml

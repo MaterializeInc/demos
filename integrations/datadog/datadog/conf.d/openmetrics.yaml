@@ -32,7 +32,7 @@ init_config:
     ## @param timeout - number - optional - default: 10
     ## The timeout for connecting to services.
     #
-    # timeout: 10
+    timeout: 50
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -49,7 +49,7 @@ instances:
     ## @param openmetrics_endpoint - string - optional
     ## The URL exposing metrics in the OpenMetrics format.
     #
-    openmetrics_endpoint: http://sql-exporter:9237/metrics
+    openmetrics_endpoint: http://sql-exporter:9187/metrics
 
     ## @param namespace - string - optional
     ## The namespace to be prepended to all metrics.
@@ -557,7 +557,7 @@ instances:
     ##
     ## This overrides the `timeout` setting in `init_config`.
     #
-    # timeout: 10
+    timeout: 50
 
     ## @param connect_timeout - number - optional
     ## The connect timeout for accessing services. Defaults to `timeout`.

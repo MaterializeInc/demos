@@ -1,0 +1,184 @@
+cluster_replica_usage:
+  query: |
+          SELECT
+            U.replica_id,
+            R.cluster_id,
+            C.name as cluster_name,
+            R.name as replica_name,
+            U.cpu_percent,
+            U.memory_percent,
+            RS.credits_per_hour,
+            CASE
+              WHEN S.cluster_id IS NOT NULL THEN 'source'
+              WHEN SK.cluster_id IS NOT NULL THEN 'sink'
+              ELSE 'compute'
+            END AS cluster_type
+          FROM mz_internal.mz_cluster_replica_utilization U
+          JOIN mz_catalog.mz_cluster_replicas R ON (U.replica_id = R.id)
+          JOIN mz_catalog.mz_clusters C ON (R.cluster_id = C.id)
+          JOIN mz_internal.mz_cluster_replica_sizes RS ON (R.size = RS.size)
+          LEFT JOIN mz_catalog.mz_sources S ON (C.id = S.cluster_id)
+          LEFT JOIN mz_catalog.mz_sinks SK ON (C.id = SK.cluster_id);
+  master: true
+  metrics:
+    - replica_id:
+        usage: "LABEL"
+        description: "Identifier of this cluster replica"
+    - cluster_id:
+        usage: "LABEL"
+        description: "Identifier of cluster"
+    - cluster_name:
+        usage: "LABEL"
+        description: "Name of this cluster"
+    - replica_name:
+        usage: "LABEL"
+        description: "Name of this cluster replica"
+    - cluster_type:
+        usage: "LABEL"
+        description: "Name of this cluster"
+    - cpu_percent:
+        usage: "GAUGE"
+        description: "CPU percentage usage of this cluster."
+    - memory_percent:
+        usage: "GAUGE"
+        description: "Memory percentage usage of this cluster."
+    - credits_per_hour:
+        usage: "GAUGE"
+        description: "Credits usage of this cluster."
+sink_statistics:
+  query: |
+          SELECT
+            S.name as sink_name,
+            S.type as sink_type,
+            S.cluster_id,
+            C.name as cluster_name,
+            CASE status
+              WHEN 'created' THEN 0
+              WHEN 'starting' THEN 1
+              WHEN 'running' THEN 2
+              WHEN 'stalled' THEN 3
+              WHEN 'failed' THEN 4
+              WHEN 'dropped' THEN 5
+              ELSE 6
+            END AS sink_status,
+            SUM(messages_committed) as messages_committed,
+            SUM(bytes_committed) as bytes_committed
+          FROM mz_internal.mz_sink_statistics SS
+          JOIN mz_catalog.mz_sinks S ON (SS.id = S.id)
+          JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
+          JOIN mz_internal.mz_source_statuses ST ON (S.id = ST.id)
+          GROUP BY sink_name, sink_type, cluster_id, cluster_name, sink_status;
+  master: true
+  metrics:
+    - sink_name:
+        usage: "LABEL"
+        description: "Name of this sink"
+    - sink_type:
+        usage: "LABEL"
+        description: "Type of this sink"
+    - cluster_id:
+        usage: "LABEL"
+        description: "Identifier of this sink's cluster"
+    - cluster_name:
+        usage: "LABEL"
+        description: "Name of this sink's cluster"
+    - sink_status:
+        usage: "GAUGE"
+        description: "Status of this sink"
+    - messages_committed:
+        usage: "COUNTER"
+        description: "Messages commited by this sink."
+    - bytes_committed:
+        usage: "COUNTER"
+        description: "Bytes commited by this sink."
+source_statistics:
+  query: |
+          SELECT
+            S.name as source_name,
+            S.type as source_type,
+            S.cluster_id,
+            C.name as cluster_name,
+            CASE status
+              WHEN 'created' THEN 0
+              WHEN 'starting' THEN 1
+              WHEN 'running' THEN 2
+              WHEN 'stalled' THEN 3
+              WHEN 'failed' THEN 4
+              WHEN 'dropped' THEN 5
+              ELSE 6
+            END AS source_status,
+            bool_and(snapshot_committed)::int::float as snapshot_committed,
+            SUM(SS.envelope_state_bytes) as envelope_state_bytes,
+            SUM(SS.envelope_state_count) as envelope_state_count,
+            SUM(messages_received) as messages_received,
+            SUM(bytes_received) as bytes_received
+          FROM mz_internal.mz_source_statistics SS
+          JOIN mz_catalog.mz_sources S ON (SS.id = S.id)
+          JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
+          JOIN mz_internal.mz_source_statuses ST ON (S.id = ST.id)
+          GROUP BY S.name, S.type, S.cluster_id, cluster_name, source_status, snapshot_committed;
+  master: true
+  metrics:
+    - source_name:
+        usage: "LABEL"
+        description: "Name of this source"
+    - source_type:
+        usage: "LABEL"
+        description: "Type of this source"
+    - cluster_id:
+        usage: "LABEL"
+        description: "Identifier of this source's cluster"
+    - cluster_name:
+        usage: "LABEL"
+        description: "Name of this source's cluster"
+    - source_status:
+        usage: "GAUGE"
+        description: "Status of this source"
+    - snapshot_committed:
+        usage: "GAUGE"
+        description: "1 if the snapshot of this source is commited."
+    - envelope_state_bytes:
+        usage: "COUNTER"
+        description: "Envelope state bytes in this source."
+    - envelope_state_count:
+        usage: "COUNTER"
+        description: "Envelope state count in this source."
+    - messages_received:
+        usage: "COUNTER"
+        description: "Messages received in this source."
+    - bytes_received:
+        usage: "COUNTER"
+        description: "Bytes received in this source."
+storage_usage:
+  query:  |
+          WITH last_measure AS (
+            SELECT
+              object_id,
+              MAX(collection_timestamp) timestamp
+            FROM mz_storage_usage
+            GROUP BY object_id
+          )
+          SELECT
+            name as object_name,
+            type as object_type,
+            id as object_id,
+            SUM(size_bytes) AS size_bytes
+          FROM mz_storage_usage U
+          JOIN mz_objects O ON (U.object_id = O.id)
+          JOIN last_measure L ON (L.timestamp = U.collection_timestamp)
+          WHERE owner_id NOT LIKE 's%'
+          GROUP BY name, type, id;
+  master: true
+  metrics:
+    - object_name:
+        usage: "LABEL"
+        description: "Name of this object."
+    - object_type:
+        usage: "LABEL"
+        description: "Type of this object."
+    - object_id:
+        usage: "LABEL"
+        description: "Identifier of this object."
+    - size_bytes:
+        usage: "GAUGE"
+        description: "Size in bytes used by this object."
