@@ -23,6 +23,9 @@ vault server -dev
 
 In this mode, Vault runs entirely in-memory and starts unsealed with a single unseal key. The command above will return the unseal key and a root token for authentication. Make sure to note down the root token, as you'll use it to authenticate with Vault next.
 
+> **WARNING**:
+> This demo uses Vault in development mode, which **should never be used in production environments**. Instead, follow the [HashiCorp documentation](https://developer.hashicorp.com/vault/tutorials/getting-started/getting-started-deploy) when deploying Vault in production.
+
 ## Interacting with Vault
 
 In development mode, the default Vault address to bind to is `127.0.0.1:8200`. Open a new terminal and export this address using the `VAULT_ADDR` environment variable:
@@ -81,7 +84,7 @@ In the same file, initialize the Vault provider:
 ```hcl
 provider "vault" {
   address = "http://localhost:8200"
-  token = "<Root-Token>"
+  token = "<root-token>"
 }
 ```
 
@@ -91,27 +94,13 @@ Then, initialize the Materialize provider:
 
 ```hcl
 provider "materialize" {
-  host     = local.materialize_host
-  username = local.materialize_username
-  password = local.materialize_password
-  port     = 6875
-  database = "materialize"
+  host     = var.materialize_hostname # optionally use MZ_HOST env var
+  username = var.materialize_username # optionally use MZ_USER env var
+  password = var.materialize_password # optionally use MZ_PW env var
+  port     = var.materialize_port     # optionally use MZ_PORT env var
+  database = var.materialize_database # optionally use MZ_DATABASE env var
 }
 ```
-
-Set the `local` variables for `materialize_host`, `materialize_username`, and `materialize_password` to use your Materialize credentials:
-
-```hcl
-locals {
-  materialize_host     = "cloud.materialize.com"
-  materialize_username = "<Materialize-username>"
-  materialize_password = "<Materialize-password>"
-  # The Vault root token
-  vault_token          = "<root-token>"
-}
-```
-
-Replace `<Materialize-username>` and `<Materialize-password>` with the username and password of your Materialize account.
 
 ## Retrieving a secret from Vault
 
@@ -182,8 +171,8 @@ resource "materialize_connection_postgres" "example_postgres_connection" {
   }
   password {
     name          = materialize_secret.example_secret.name
-    database_name = "materialize"
-    schema_name   = "public"
+    database_name = materialize_secret.example_secret.database_name
+    schema_name   = materialize_secret.example_secret.schema_name
   }
   database = "pgdatabase"
 }
