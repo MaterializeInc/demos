@@ -25,7 +25,7 @@ In this mode, Vault runs entirely in-memory and starts unsealed with a single un
 
 ## Interacting with Vault
 
-Open a new terminal and export the `VAULT_ADDR`:
+In development mode, the default Vault address to bind to is `127.0.0.1:8200`. Open a new terminal and export this address using the `VAULT_ADDR` environment variable:
 
 ```bash
 export VAULT_ADDR='http://127.0.0.1:8200'
