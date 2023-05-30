@@ -167,7 +167,7 @@ Once the script has been applied, you can verify that the secret has been create
 SHOW SECRETS;
 ```
 
-## Using the Secret in Connections
+## Using the secret in connections
 
 Once the secret has been created, you can use it in your `CREATE CONNECTION` statements. In this example, we'll create a connection to a Postgres instance using the secret we created using the `materialize_connection_postgres` resource:
 
