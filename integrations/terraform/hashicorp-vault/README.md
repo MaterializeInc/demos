@@ -1,6 +1,6 @@
 # Materialize Terraform Provider + HashiCorp Vault
 
-HashiCorp Vault is a powerful tool for securely accessing secrets. This demo will guide you through the process of setting up and using [Vault](https://www.vaultproject.io/), as well as demonstrating how to interact with the Materialize Terraform provider using the `materialize_secret` resource with secrets stored in Vault.
+[HashiCorp Vault](https://www.vaultproject.io/) is a powerful tool for securely managing sensitive credentials. This demo guides you through combining the Materialize and Vault Terraform providers to access secrets stored in Vault in Materialize.
 
 ## Overview
 
