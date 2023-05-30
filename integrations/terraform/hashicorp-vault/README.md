@@ -85,7 +85,7 @@ provider "vault" {
 }
 ```
 
-Replace `<Root-Token>` with the actual Root Token of your Vault server.
+Replace `<root-token>` with the root token of your Vault server.
 
 After that initialize the Materialize provider:
 
