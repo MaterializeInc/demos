@@ -99,7 +99,7 @@ provider "materialize" {
 }
 ```
 
-You'll need to set the `local` variables for `materialize_host`, `materialize_username`, and `materialize_password`:
+Set the `local` variables for `materialize_host`, `materialize_username`, and `materialize_password` to use your Materialize credentials:
 
 ```hcl
 locals {
