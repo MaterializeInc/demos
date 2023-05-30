@@ -103,7 +103,6 @@ You'll need to set the `local` variables for `materialize_host`, `materialize_us
 
 ```hcl
 locals {
-  # The Materialize Cloud details
   materialize_host     = "cloud.materialize.com"
   materialize_username = "<Materialize-Username>"
   materialize_password = "<Materialize-Password>"
