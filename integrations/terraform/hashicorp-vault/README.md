@@ -10,7 +10,7 @@ HashiCorp Vault is a powerful tool for securely accessing secrets. This demo wil
 
 - Install [Vault](https://developer.hashicorp.com/vault/downloads)
 - Install [Terraform](https://developer.hashicorp.com/terraform/downloads) 1.0.3 or later
-- [Materialize Cloud](https://cloud.materialize.com/) account.
+- [Materialize](https://cloud.materialize.com/) account.
 - Follow the steps in the [README.md](../README.md) file to set up your AWS configuration and Materialize details.
 
 ## Setting up Vault
