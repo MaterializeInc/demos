@@ -34,7 +34,7 @@ export VAULT_ADDR='http://127.0.0.1:8200'
 Use the root token from previous steps to authenticate:
 
 ```bash
-vault login <Root-Token>
+vault login <root-token>
 ```
 
 Once authenticated, you can begin to interact with Vault.
