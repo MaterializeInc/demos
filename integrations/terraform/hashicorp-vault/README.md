@@ -111,7 +111,7 @@ locals {
 }
 ```
 
-Replace `<Materialize-Username>` and `<Materialize-Password>` with the actual username and password of your Materialize Cloud account.
+Replace `<Materialize-username>` and `<Materialize-password>` with the username and password of your Materialize account.
 
 ## Retrieving a Secret from Vault
 
