@@ -47,7 +47,7 @@ To store a secret in Vault, you can use the `vault kv put` command.
 vault kv put secret/materialize pgpass=some-secret-value
 ```
 
-The vault `kv put` command creates a key-value secret at the path specified. In this case, the secret is stored at `secret/materialize`.
+The vault `kv put` command creates a key-value secret in the path specified. In this case, the secret is stored in `secret/materialize`.
 
 To retrieve a secret, you use the `vault kv get` command:
 
