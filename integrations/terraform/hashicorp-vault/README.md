@@ -57,7 +57,7 @@ vault kv get secret/materialize
 
 ## Integrating Vault with Terraform:
 
-Terraform has a Vault provider which you can use to retrieve secrets from Vault.
+Terraform has a Vault provider that you can use in combination with the Materialize provider to manage secrets stored externally.
 
 First, let's start by creating a file called `main.tf` and then in that file you will need to add the Vault provider and the Materialize provider:
 
