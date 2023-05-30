@@ -31,7 +31,7 @@ Open a new terminal and export the `VAULT_ADDR`:
 export VAULT_ADDR='http://127.0.0.1:8200'
 ```
 
-You'll need to authenticate yourself with the root token:
+Use the root token from previous steps to authenticate:
 
 ```bash
 vault login <Root-Token>
