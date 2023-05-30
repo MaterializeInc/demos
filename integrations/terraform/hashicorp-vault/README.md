@@ -104,10 +104,10 @@ Set the `local` variables for `materialize_host`, `materialize_username`, and `m
 ```hcl
 locals {
   materialize_host     = "cloud.materialize.com"
-  materialize_username = "<Materialize-Username>"
-  materialize_password = "<Materialize-Password>"
+  materialize_username = "<Materialize-username>"
+  materialize_password = "<Materialize-password>"
   # The Vault root token
-  vault_token          = "<Root-Token>"
+  vault_token          = "<root-token>"
 }
 ```
 
