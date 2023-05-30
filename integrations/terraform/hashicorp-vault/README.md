@@ -161,7 +161,7 @@ materialize_secret.example_secret: Creation complete after 3s [id=u111]
 Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 ```
 
-Once the script has been applied, you can verify that the secret has been created in Materialize Cloud:
+Once the script has been applied, you can verify that the secret has been created in Materialize. Connect to your Materialize region using your preferred [SQL client](https://materialize.com/docs/integrations/sql-clients/), and run:
 
 ```sql
 SHOW SECRETS;
