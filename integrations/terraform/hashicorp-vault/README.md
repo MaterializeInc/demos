@@ -169,7 +169,7 @@ SHOW SECRETS;
 
 ## Using the secret in connections
 
-Once the secret has been created, you can use it in your `CREATE CONNECTION` statements. In this example, we'll create a connection to a Postgres instance using the secret we created using the `materialize_connection_postgres` resource:
+Once the secret has been created in Materialize, you can use it in `CREATE CONNECTION` statements. In this example, you'll create a connection to a PostgreSQL instance using the secret created in the previous steps:
 
 ```hcl
 # Create a PostgreSQL Connection
