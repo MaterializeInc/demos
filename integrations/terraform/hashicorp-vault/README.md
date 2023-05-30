@@ -39,7 +39,7 @@ vault login <root-token>
 
 Once authenticated, you can begin to interact with Vault.
 
-## Adding and Retrieving a Secret in Vault
+## Adding and retrieving secrets in Vault
 
 To store a secret in Vault, we can use the `vault kv put` command.
 
