@@ -35,7 +35,7 @@ resource "materialize_secret" "example_secret" {
   value = data.vault_generic_secret.materialize_password.data["pgpass"]
 }
 
-# Create a Postgres Connection
+# Create a PostgreSQL Connection
 resource "materialize_connection_postgres" "example_postgres_connection" {
   name = "example_postgres_connection"
   host = "instance.foo000.us-west-1.rds.amazonaws.com"
