@@ -49,7 +49,7 @@ instances:
     ## @param openmetrics_endpoint - string - optional
     ## The URL exposing metrics in the OpenMetrics format.
     #
-    openmetrics_endpoint: http://sql-exporter:9187/metrics
+    openmetrics_endpoint: http://sql-exporter:9237/metrics
 
     ## @param namespace - string - optional
     ## The namespace to be prepended to all metrics.
