@@ -6,7 +6,7 @@ jobs:
   - "postgres://joaquin%40materialize.com:mzp_4DE-PfIJSyWM4opRrBaUO8KfpoidWUTgmZlHFnz6kao@4eylxydzhfj2ef3sblalf5h32.us-east-1.aws.materialize.cloud:6875/materialize?options=--cluster%3Dmz_introspection"
   queries:
   - name: "cluster_replica_usage"
-    help: "Cluster replica usage"
+    help: "Cluster replica metrics"
     labels:
       - "replica_id"
       - "cluster_id"
@@ -137,5 +137,5 @@ jobs:
             FROM mz_storage_usage U
             JOIN mz_objects O ON (U.object_id = O.id)
             JOIN last_measure L ON (L.timestamp = U.collection_timestamp)
-            WHERE owner_id NOT LIKE 's%'
+            WHERE id NOT LIKE 's%'
             GROUP BY name, type, id;
