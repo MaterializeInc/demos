@@ -133,9 +133,9 @@ jobs:
               name as object_name,
               type as object_type,
               id as object_id,
-              SUM(size_bytes) AS size_bytes
-            FROM mz_storage_usage U
-            JOIN mz_objects O ON (U.object_id = O.id)
-            JOIN last_measure L ON (L.timestamp = U.collection_timestamp)
-            WHERE id NOT LIKE 's%'
-            GROUP BY name, type, id;
+              size_bytes
+            FROM mz_storage_usage U, mz_objects O, last_measure L
+            WHERE O.id = U.object_id
+            AND O.id = L.object_id
+            AND U.collection_timestamp = L.timestamp
+            AND id NOT LIKE 's%';
