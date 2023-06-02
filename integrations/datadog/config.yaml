@@ -3,7 +3,7 @@ jobs:
 - name: "materialize"
   interval: '1m'
   connections:
-  - "postgres://joaquin%40materialize.com:mzp_4DE-PfIJSyWM4opRrBaUO8KfpoidWUTgmZlHFnz6kao@4eylxydzhfj2ef3sblalf5h32.us-east-1.aws.materialize.cloud:6875/materialize?options=--cluster%3Dmz_introspection"
+  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?options=--cluster%3Dmz_introspection"
   queries:
   - name: "cluster_replica_usage"
     help: "Cluster replica metrics"
