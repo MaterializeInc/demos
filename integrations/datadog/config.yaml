@@ -12,8 +12,9 @@ jobs:
       - "cluster_id"
       - "cluster_name"
       - "replica_name"
-      - "replica_status_label"
       - "cluster_type"
+      - "replica_status_label"
+      - "not_ready_reason"
     values:
       - "cpu_percent"
       - "memory_percent"
@@ -26,6 +27,7 @@ jobs:
               C.name as cluster_name,
               R.name as replica_name,
               RST.status as replica_status_label,
+              COALESCE(RST.reason, '') as not_ready_reason,
               U.cpu_percent::float,
               U.memory_percent::float,
               RS.credits_per_hour::float,
@@ -54,9 +56,9 @@ jobs:
       - "cluster_name"
       - "sink_status_label"
     values:
-      - "sink_status"
       - "messages_committed"
       - "bytes_committed"
+      - "sink_status_counter"
     query: |
             SELECT
               S.name as sink_name,
@@ -64,22 +66,14 @@ jobs:
               S.cluster_id as cluster_id,
               C.name as cluster_name,
               status as sink_status_label,
-              CASE status
-                WHEN 'created' THEN 0
-                WHEN 'starting' THEN 1
-                WHEN 'running' THEN 2
-                WHEN 'stalled' THEN 3
-                WHEN 'failed' THEN 4
-                WHEN 'dropped' THEN 5
-                ELSE 6
-              END AS sink_status,
+              1 AS sink_status_counter,
               SUM(messages_committed) as messages_committed,
               SUM(bytes_committed) as bytes_committed
             FROM mz_internal.mz_sink_statistics SS
             JOIN mz_catalog.mz_sinks S ON (SS.id = S.id)
             JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
             JOIN mz_internal.mz_sink_statuses ST ON (S.id = ST.id)
-            GROUP BY sink_name, sink_type, cluster_id, cluster_name, sink_status_label, sink_status;
+            GROUP BY sink_name, sink_type, cluster_id, cluster_name, sink_status_label, sink_status_counter;
   - name: "source_statistics"
     help: "Source statistics"
     labels:
@@ -89,12 +83,12 @@ jobs:
       - "cluster_name"
       - "source_status_label"
     values:
-      - "source_status"
       - "snapshot_committed"
       - "envelope_state_bytes"
       - "envelope_state_count"
       - "messages_received"
       - "bytes_received"
+      - "source_status_counter"
     query: |
             SELECT
               S.name as source_name,
@@ -102,15 +96,7 @@ jobs:
               S.cluster_id,
               C.name as cluster_name,
               status as source_status_label,
-              CASE status
-                WHEN 'created' THEN 0
-                WHEN 'starting' THEN 1
-                WHEN 'running' THEN 2
-                WHEN 'stalled' THEN 3
-                WHEN 'failed' THEN 4
-                WHEN 'dropped' THEN 5
-                ELSE 6
-              END AS source_status,
+              1 AS source_status_counter,
               bool_and(snapshot_committed)::int::float as snapshot_committed,
               SUM(SS.envelope_state_bytes) as envelope_state_bytes,
               SUM(SS.envelope_state_count) as envelope_state_count,
@@ -120,7 +106,7 @@ jobs:
             JOIN mz_catalog.mz_sources S ON (SS.id = S.id)
             JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
             JOIN mz_internal.mz_source_statuses ST ON (S.id = ST.id)
-            GROUP BY S.name, S.type, S.cluster_id, cluster_name, source_status_label, source_status, snapshot_committed;
+            GROUP BY S.name, S.type, S.cluster_id, cluster_name, source_status_label, source_status_counter, snapshot_committed;
   - name: "storage_usage"
     help: "Storage usage"
     labels:
