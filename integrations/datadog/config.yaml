@@ -12,20 +12,27 @@ jobs:
       - "cluster_id"
       - "cluster_name"
       - "replica_name"
+      - "replica_status_label"
       - "cluster_type"
     values:
       - "cpu_percent"
       - "memory_percent"
       - "credits_per_hour"
+      - "replica_status"
     query:  |
             SELECT
               U.replica_id,
               R.cluster_id,
               C.name as cluster_name,
               R.name as replica_name,
+              RST.status as replica_status_label,
               U.cpu_percent::float,
               U.memory_percent::float,
               RS.credits_per_hour::float,
+              CASE RST.status
+                WHEN 'ready' THEN 1
+                ELSE 0
+              END AS replica_status,
               CASE
                 WHEN S.cluster_id IS NOT NULL THEN 'source'
                 WHEN SK.cluster_id IS NOT NULL THEN 'sink'
@@ -35,6 +42,7 @@ jobs:
             JOIN mz_catalog.mz_cluster_replicas R ON (U.replica_id = R.id)
             JOIN mz_catalog.mz_clusters C ON (R.cluster_id = C.id)
             JOIN mz_internal.mz_cluster_replica_sizes RS ON (R.size = RS.size)
+            JOIN mz_internal.mz_cluster_replica_statuses RST ON (RST.replica_id = R.id)
             LEFT JOIN mz_catalog.mz_sources S ON (C.id = S.cluster_id)
             LEFT JOIN mz_catalog.mz_sinks SK ON (C.id = SK.cluster_id);
   - name: "sink_statistics"
