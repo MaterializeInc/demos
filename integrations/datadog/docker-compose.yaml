@@ -5,7 +5,7 @@ services:
     build: datadog
     pid: host
     environment:
-     - DD_API_KEY=103c3e2fee95131db0f6fe72796e9510
+     - DD_API_KEY=<API_KEY>
      - DD_SITE=datadoghq.com
      - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
     volumes:
