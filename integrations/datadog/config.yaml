@@ -23,7 +23,7 @@ jobs:
       - "replica_status"
     query:  |
             SELECT
-              U.replica_id,
+              DISTINCT(U.replica_id),
               R.cluster_id,
               C.name as cluster_name,
               R.name as replica_name,
@@ -130,9 +130,9 @@ jobs:
               GROUP BY object_id
             )
             SELECT
+              DISTINCT(id) as object_id,
               name as object_name,
               type as object_type,
-              id as object_id,
               size_bytes
             FROM mz_storage_usage U, mz_objects O, last_measure L
             WHERE O.id = U.object_id
