@@ -3,6 +3,7 @@ jobs:
 - name: "materialize"
   interval: '1m'
   connections:
+  # There is a second connection needed to be configured at the bottom of the file
   - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?options=--cluster%3Dmz_introspection"
   queries:
   - name: "cluster_replica_usage"
@@ -107,6 +108,11 @@ jobs:
             JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
             JOIN mz_internal.mz_source_statuses ST ON (S.id = ST.id)
             GROUP BY S.name, S.type, S.cluster_id, cluster_name, source_status_label, source_status_counter, snapshot_committed;
+- name: "materialize"
+  interval: '1h'
+  connections:
+  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?options=--cluster%3Dmz_introspection"
+  queries:
   - name: "storage_usage"
     help: "Storage usage"
     labels:

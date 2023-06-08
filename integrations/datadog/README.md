@@ -26,7 +26,7 @@ This demo shows how to make Materialize metadata available as key metrics for mo
     cd integrations/datadog
     ```
 
-2. Edit the `config.yaml` file and set your Materialize details under the `connections` key:
+2. Edit the `config.yaml` file and set your Materialize details under the two available `connections` keys:
 
     ```yaml
     connections:
