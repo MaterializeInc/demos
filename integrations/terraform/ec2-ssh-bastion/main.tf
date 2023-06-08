@@ -69,5 +69,5 @@ output "ssh_connection_details" {
 
 # Output instructions on how to upload the ssh key
 output "upload_ssh_key" {
-  value = "To upload the SSH key to the EC2 bastion server run the following command: \n\n ssh -i ${local.ssh_private_key} ubuntu@${module.ssh_bastion.ssh_bastion_server.public_ip} 'echo ${materialize_connection_ssh_tunnel.example_ssh_connection.public_key_1} >> ~/.ssh/authorized_keys'"
+  value = "# To upload the SSH key to the EC2 bastion server run the following command: \n\n ssh -i ${local.ssh_private_key} ubuntu@${module.ssh_bastion.ssh_bastion_server.public_ip} 'echo ${materialize_connection_ssh_tunnel.example_ssh_connection.public_key_1} >> ~/.ssh/authorized_keys'"
 }
