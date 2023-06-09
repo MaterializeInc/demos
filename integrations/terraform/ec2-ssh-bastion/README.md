@@ -73,15 +73,19 @@ provider "materialize" {
 Use the Materialize EC2 SSH Bastion module to create an EC2 instance that can be used to create an SSH connection in Materialize:
 
 ```hcl
+# Get the Materialize egress IPs
+data "materialize_egress_ips" "all" {}
+
+# Create the EC2 SSH Bastion
 module "ssh_bastion" {
   source  = "MaterializeInc/ec2-ssh-bastion/aws"
   version = "0.1.0"
 
   aws_region     = local.aws_region
-  mz_egress_ips  = local.mz_egress_ips
   vpc_id         = local.vpc_id
   subnet_id      = local.subnet_id
   ssh_public_key = local.ssh_public_key
+  mz_egress_ips  = [for ip in data.materialize_egress_ips.all.egress_ips : "${ip}/32"]
 }
 ```
 
@@ -90,7 +94,6 @@ Define the following variables in your `locals.tf` file:
 ```hcl
 locals {
   aws_region     = "us-east-1"
-  mz_egress_ips  = ["1.2.3.4/32", "4.3.2.1/32"]
   vpc_id         = "vpc-1234567890"
   subnet_id      = "subnet-1234567890"
   ssh_public_key = "ssh-rsa AAAAB..."
