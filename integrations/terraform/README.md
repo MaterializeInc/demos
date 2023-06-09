@@ -9,6 +9,7 @@ This is a collection of demos that show how to use the [Materialize Terraform pr
 | Demo                               | Description                                                             |
 | ---------------------------------- | ----------------------------------------------------------------------- |
 | [MSK PrivateLink](msk-privatelink) | Create an AWS PrivateLink connection between Materialize and Amazon MSK |
+| [EC2 SSH Bastion](ec2-ssh-bastion) | Create an EC2 instance that can be used as an SSH bastion               |
 | [Secret Stores](secret-stores)     | Integrate Materialize with various secret management tools              |
 
 ## Prerequisites
