@@ -4,7 +4,7 @@ jobs:
   interval: '1m'
   connections:
   # There is a second connection needed to be configured at the bottom of the file
-  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?options=--cluster%3Dmz_introspection"
+  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?application_name=mz_grafana_integration&sslmode=require"
   queries:
   - name: "cluster_replica_usage"
     help: "Cluster replica metrics"
@@ -111,7 +111,7 @@ jobs:
 - name: "materialize"
   interval: '1h'
   connections:
-  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?options=--cluster%3Dmz_introspection"
+  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?application_name=mz_grafana_integration&sslmode=require"
   queries:
   - name: "storage_usage"
     help: "Storage usage"
