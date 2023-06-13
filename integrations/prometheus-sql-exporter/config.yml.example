@@ -1,243 +1,127 @@
 ---
 jobs:
-- name: "global"
+- name: "materialize"
   interval: '1m'
   connections:
-  - "postgres://YOUR_MATERIALIZE_USER:YOUR_MATERIALIZE_PASSWORD@YOUR_MATERIALIZE_HOST.materialize.cloud:6875/materialize?options=--cluster%3Dmz_introspection"
+  # There is a second connection needed to be configured at the bottom of the file
+  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?options=--cluster%3Dmz_introspection"
   queries:
-  - name: "source_envelope_state_bytes"
-    help: "Count of messages for each source"
+  - name: "cluster_replica_usage"
+    help: "Cluster replica metrics"
     labels:
-      - "source_name"
-      - "source_type"
-      - "cluster_id"
-      - "cluster_name"
-    values:
-      - "source_envelope_state_bytes"
-    query:  |
-            SELECT
-              SUM(SS.envelope_state_bytes) as source_envelope_state_bytes,
-              S.name as source_name,
-              S.type as source_type,
-              S.cluster_id,
-              C.name as cluster_name
-            FROM mz_internal.mz_source_statistics SS
-            JOIN mz_catalog.mz_sources S ON (SS.id = S.id)
-            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
-            GROUP BY S.name, S.type, S.cluster_id, cluster_name;
-  - name: "source_envelope_state_count"
-    help: "Count of messages for each source"
-    labels:
-      - "source_name"
-      - "source_type"
-      - "cluster_id"
-      - "cluster_name"
-    values:
-      - "source_envelope_state_count"
-    query:  |
-            SELECT
-              SUM(SS.envelope_state_count) as source_envelope_state_count,
-              S.name as source_name,
-              S.type as source_type,
-              S.cluster_id,
-              C.name as cluster_name
-            FROM mz_internal.mz_source_statistics SS
-            JOIN mz_catalog.mz_sources S ON (SS.id = S.id)
-            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
-            GROUP BY S.name, S.type, S.cluster_id, cluster_name;
-  - name: "source_messages_received"
-    help: "Count of messages for each source"
-    labels:
-      - "source_name"
-      - "source_type"
-      - "cluster_id"
-      - "cluster_name"
-    values:
-      - "messages_received"
-    query:  |
-            SELECT
-              SUM(messages_received) as messages_received,
-              S.name as source_name,
-              S.type as source_type,
-              S.cluster_id,
-              C.name as cluster_name
-            FROM mz_internal.mz_source_statistics SS
-            JOIN mz_catalog.mz_sources S ON (SS.id = S.id)
-            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
-            GROUP BY S.name, S.type, S.cluster_id, cluster_name;
-  - name: "source_bytes_received"
-    help: "Volume of messages for each source"
-    labels:
-      - "source_name"
-      - "source_type"
-      - "cluster_id"
-      - "cluster_name"
-    values:
-      - "bytes_received"
-    query:  |
-            SELECT
-              SUM(bytes_received) as bytes_received,
-              S.name as source_name,
-              S.type as source_type,
-              S.cluster_id,
-              C.name as cluster_name
-            FROM mz_internal.mz_source_statistics SS
-            JOIN mz_catalog.mz_sources S ON (SS.id = S.id)
-            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
-            GROUP BY S.name, S.type, S.cluster_id, cluster_name;
-  - name: "sink_messages_commited"
-    help: "Count of messages for each sink"
-    labels:
-      - "sink_name"
-      - "sink_type"
-      - "cluster_id"
-      - "cluster_name"
-    values:
-      - "messages_committed"
-    query:  |
-            SELECT
-              SUM(messages_committed) as messages_committed,
-              S.name as sink_name,
-              S.type as sink_type,
-              S.cluster_id,
-              C.name as cluster_name
-            FROM mz_internal.mz_sink_statistics SS
-            JOIN mz_catalog.mz_sinks S ON (SS.id = S.id)
-            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
-            GROUP BY sink_name, sink_type, cluster_id, cluster_name;
-  - name: "sink_bytes_committed"
-    help: "Volume of messages for each sink"
-    labels:
-      - "sink_name"
-      - "sink_type"
-      - "cluster_id"
-      - "cluster_name"
-    values:
-      - "bytes_committed"
-    query:  |
-            SELECT
-              SUM(bytes_committed) as bytes_committed,
-              S.name as sink_name,
-              S.type as sink_type,
-              S.cluster_id,
-              C.name as cluster_name
-            FROM mz_internal.mz_sink_statistics SS
-            JOIN mz_catalog.mz_sinks S ON (SS.id = S.id)
-            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
-            GROUP BY sink_name, sink_type, cluster_id, cluster_name;
-  - name: "cluster_replica_cpu_usage"
-    help: "Cluster's replica CPU usage"
-    labels:
-      - "cluster_name"
       - "replica_id"
       - "cluster_id"
+      - "cluster_name"
       - "replica_name"
-      - "type"
+      - "cluster_type"
+      - "replica_status_label"
+      - "not_ready_reason"
     values:
       - "cpu_percent"
-    query:  |
-            SELECT
-              U.replica_id,
-              R.cluster_id,
-              C.name as cluster_name,
-              R.name as replica_name,
-              U.cpu_percent,
-              CASE
-                WHEN S.cluster_id IS NOT NULL THEN 'source'
-                WHEN SK.cluster_id IS NOT NULL THEN 'sink'
-                ELSE 'compute'
-              END AS type
-            FROM mz_internal.mz_cluster_replica_utilization U
-            JOIN mz_catalog.mz_cluster_replicas R ON (U.replica_id = R.id)
-            JOIN mz_catalog.mz_clusters C ON (R.cluster_id = C.id)
-            LEFT JOIN mz_catalog.mz_sources S ON (C.id = S.cluster_id)
-            LEFT JOIN mz_catalog.mz_sinks SK ON (C.id = SK.cluster_id);
-  - name: "cluster_replica_memory_usage"
-    help: "Cluster's replica memory usage"
-    labels:
-      - "cluster_name"
-      - "replica_name"
-      - "replica_id"
-      - "cluster_id"
-      - "type"
-    values:
       - "memory_percent"
+      - "credits_per_hour"
+      - "replica_status"
     query:  |
             SELECT
-              U.replica_id,
+              DISTINCT(U.replica_id),
               R.cluster_id,
               C.name as cluster_name,
               R.name as replica_name,
-              U.memory_percent,
+              RST.status as replica_status_label,
+              COALESCE(RST.reason, '') as not_ready_reason,
+              U.cpu_percent::float,
+              U.memory_percent::float,
+              RS.credits_per_hour::float,
+              CASE RST.status
+                WHEN 'ready' THEN 1
+                ELSE 0
+              END AS replica_status,
               CASE
                 WHEN S.cluster_id IS NOT NULL THEN 'source'
                 WHEN SK.cluster_id IS NOT NULL THEN 'sink'
                 ELSE 'compute'
-              END AS type
+              END AS cluster_type
             FROM mz_internal.mz_cluster_replica_utilization U
             JOIN mz_catalog.mz_cluster_replicas R ON (U.replica_id = R.id)
             JOIN mz_catalog.mz_clusters C ON (R.cluster_id = C.id)
+            JOIN mz_internal.mz_cluster_replica_sizes RS ON (R.size = RS.size)
+            JOIN mz_internal.mz_cluster_replica_statuses RST ON (RST.replica_id = R.id)
             LEFT JOIN mz_catalog.mz_sources S ON (C.id = S.cluster_id)
             LEFT JOIN mz_catalog.mz_sinks SK ON (C.id = SK.cluster_id);
-  - name: "source_status"
-    help: "Status for each source"
+  - name: "sink_statistics"
+    help: "Sink statistics"
     labels:
-      - "source_id"
-      - "source_name"
-      - "source_type"
-      - "source_status_label"
-    values:
-      - "source_status"
-    query:  |
-            SELECT
-              id as source_id,
-              name as source_name,
-              type as source_type,
-              status as source_status_label,
-              CASE status
-                WHEN 'created' THEN 0
-                WHEN 'starting' THEN 1
-                WHEN 'running' THEN 2
-                WHEN 'stalled' THEN 3
-                WHEN 'failed' THEN 4
-                WHEN 'dropped' THEN 5
-                ELSE 6
-              END AS source_status
-            FROM mz_internal.mz_source_statuses;
-  - name: "sink_status"
-    help: "Status for each sink"
-    labels:
-      - "sink_id"
       - "sink_name"
       - "sink_type"
+      - "cluster_id"
+      - "cluster_name"
       - "sink_status_label"
     values:
-      - "sink_status"
-    query:  |
+      - "messages_committed"
+      - "bytes_committed"
+      - "sink_status_counter"
+    query: |
             SELECT
-              id as sink_id,
-              name as sink_name,
-              type as sink_type,
+              S.name as sink_name,
+              S.type as sink_type,
+              S.cluster_id as cluster_id,
+              C.name as cluster_name,
               status as sink_status_label,
-              CASE status
-                WHEN 'created' THEN 0
-                WHEN 'starting' THEN 1
-                WHEN 'running' THEN 2
-                WHEN 'stalled' THEN 3
-                WHEN 'failed' THEN 4
-                WHEN 'dropped' THEN 5
-                ELSE 6
-              END AS sink_status
-            FROM mz_internal.mz_sink_statuses;
+              1 AS sink_status_counter,
+              SUM(messages_committed) as messages_committed,
+              SUM(bytes_committed) as bytes_committed
+            FROM mz_internal.mz_sink_statistics SS
+            JOIN mz_catalog.mz_sinks S ON (SS.id = S.id)
+            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
+            JOIN mz_internal.mz_sink_statuses ST ON (S.id = ST.id)
+            GROUP BY sink_name, sink_type, cluster_id, cluster_name, sink_status_label, sink_status_counter;
+  - name: "source_statistics"
+    help: "Source statistics"
+    labels:
+      - "source_name"
+      - "source_type"
+      - "cluster_id"
+      - "cluster_name"
+      - "source_status_label"
+    values:
+      - "snapshot_committed"
+      - "envelope_state_bytes"
+      - "envelope_state_count"
+      - "messages_received"
+      - "bytes_received"
+      - "source_status_counter"
+    query: |
+            SELECT
+              S.name as source_name,
+              S.type as source_type,
+              S.cluster_id,
+              C.name as cluster_name,
+              status as source_status_label,
+              1 AS source_status_counter,
+              bool_and(snapshot_committed)::int::float as snapshot_committed,
+              SUM(SS.envelope_state_bytes) as envelope_state_bytes,
+              SUM(SS.envelope_state_count) as envelope_state_count,
+              SUM(messages_received) as messages_received,
+              SUM(bytes_received) as bytes_received
+            FROM mz_internal.mz_source_statistics SS
+            JOIN mz_catalog.mz_sources S ON (SS.id = S.id)
+            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
+            JOIN mz_internal.mz_source_statuses ST ON (S.id = ST.id)
+            GROUP BY S.name, S.type, S.cluster_id, cluster_name, source_status_label, source_status_counter, snapshot_committed;
+- name: "materialize"
+  interval: '1h'
+  connections:
+  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?options=--cluster%3Dmz_introspection"
+  queries:
   - name: "storage_usage"
-    help: "Storage Usage"
+    help: "Storage usage"
     labels:
       - "object_name"
       - "object_type"
       - "object_id"
     values:
       - "size_bytes"
-    query:  |
+    query: |
             WITH last_measure AS (
               SELECT
                 object_id,
@@ -246,95 +130,12 @@ jobs:
               GROUP BY object_id
             )
             SELECT
+              DISTINCT(id) as object_id,
               name as object_name,
               type as object_type,
-              id as object_id,
-              SUM(size_bytes) AS size_bytes
-            FROM mz_storage_usage U
-            JOIN mz_objects O ON (U.object_id = O.id)
-            JOIN last_measure L ON (L.timestamp = U.collection_timestamp)
-            WHERE owner_id NOT LIKE 's%'
-            GROUP BY name, type, id;
-  - name: "source_snapshot"
-    help: "Source snapshot information"
-    labels:
-      - "source_name"
-      - "source_id"
-      - "source_type"
-      - "cluster_id"
-      - "cluster_name"
-    values:
-      - "snapshot_committed"
-    query:  |
-            SELECT
-              S.id as source_id,
-              S.name as source_name,
-              S.type as source_type,
-              C.id as cluster_id,
-              C.name as cluster_name,
-              bool_and(snapshot_committed)::int as snapshot_committed
-            FROM mz_internal.mz_source_statistics SS
-            JOIN mz_sources S ON (SS.id = S.id)
-            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
-            GROUP BY S.id, S.name, S.type, C.id, C.name;
-  - name: "object_counts"
-    help: "Count per type object created"
-    labels:
-      - "type"
-    values:
-      - "count"
-    query:  |
-            SELECT
-              type,
-              count(1) as count
-            FROM mz_objects
-            WHERE type IN (
-              'table',
-              'view',
-              'materialized-view',
-              'sink',
-              'index',
-              'connection',
-              'secret',
-              'source'
-            ) AND owner_id NOT LIKE 's%'
-            GROUP BY type;
-  - name: "cluster_replica_credits_usage"
-    help: "Cluster's replica credit usage"
-    labels:
-      - "cluster_name"
-      - "replica_id"
-      - "cluster_id"
-      - "replica_name"
-    values:
-      - "credits_per_hour"
-    query:  |
-            SELECT
-                C.name as cluster_name,
-                R.id as replica_id,
-                R.name as replica_name,
-                C.id as cluster_id,
-                S.credits_per_hour
-              FROM mz_cluster_replicas R
-              JOIN mz_internal.mz_cluster_replica_sizes S ON (R.size = S.size)
-              JOIN mz_clusters C ON (R.cluster_id = C.id);
-  # - name: "cluster_replica_statuses"
-  #   help: "Cluster's replica status"
-  #   labels:
-  #     - "cluster_name"
-  #     - "replica_id"
-  #     - "cluster_id"
-  #     - "replica_name"
-  #   values:
-  #     - "credits_per_hour"
-  #   query:  |
-  #           SELECT
-  #               C.name as cluster_name,
-  #               R.id as replica_id,
-  #               R.name as replica_name,
-  #               C.id as cluster_id,
-  #               S.credits_per_hour
-  #             FROM mz_cluster_replicas R
-  #             JOIN mz_internal.mz_cluster_replica_sizes S ON (R.size = S.size)
-  #             JOIN mz_clusters C ON (R.cluster_id = C.id);
-  # Add cluster restarts
+              size_bytes
+            FROM mz_storage_usage U, mz_objects O, last_measure L
+            WHERE O.id = U.object_id
+            AND O.id = L.object_id
+            AND U.collection_timestamp = L.timestamp
+            AND id NOT LIKE 's%';
