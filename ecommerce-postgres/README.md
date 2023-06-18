@@ -90,7 +90,7 @@ that is exactly what this demo will show.
         PORT 5432,
         USER 'postgres',
         PASSWORD SECRET pgpass,
-        DATABASE 'shop'
+        DATABASE 'postgres'
     );
     ```
 
@@ -107,9 +107,9 @@ that is exactly what this demo will show.
 
    ```sql
    CREATE SOURCE json_pageviews
-    FROM KAFKA CONNECTION confluent_cloud (TOPIC 'pageviews')
-    FORMAT BYTES
-    WITH (SIZE = '1');
+        FROM KAFKA CONNECTION redpanda (TOPIC 'pageviews')
+        FORMAT BYTES
+        WITH (SIZE = '1');
    ```
 
    With JSON-formatted messages, we don't know the schema so the [JSON is pulled in as raw bytes](https://materialize.com/docs/sql/create-source/json-kafka/) and we still need to CAST data into the proper columns and types. We'll show that in the step below.
@@ -148,7 +148,7 @@ that is exactly what this demo will show.
    1. We are converting the incoming data from raw bytes to [jsonb](https://materialize.com/docs/sql/types/jsonb/#main):
 
       ```sql
-      SELECT CONVERT_FROM(data, 'utf8')::jsonb AS data FROM json_pageviews;
+      SELECT CONVERT_FROM(data, 'utf8')::jsonb AS data FROM json_pageviews LIMIT 5;
       ```
 
    2. We are using Postgres JSON notation (`data->'url'`), type casts (`::string`) and [regexp_match](https://materialize.com/docs/sql/functions/#string-func:~:text=regexp_match(haystack) function to extract only the item_id from the raw pageview URL.
@@ -261,19 +261,19 @@ that is exactly what this demo will show.
        JOIN trending_items ti ON ti.item_id = rs.item_id;
    ```
 
-   Now if you run `SHOW VIEWS;` you should see all the views we just created:
+   Now if you run `SHOW MATERIALIZED VIEWS;` you should see all the views we just created:
 
    ```
-   materialize=> SHOW VIEWS;
-      name
-   ------------------
-   item_metadata
-   item_pageviews
-   item_summary
-   purchase_summary
-   remaining_stock
-   trending_items
-   (6 rows)
+   materialize=> SHOW MATERIALIZED VIEWS;
+        name         | cluster
+    -----------------+---------
+    item_metadata    | default
+    item_pageviews   | default
+    item_summary     | default
+    purchase_summary | default
+    remaining_stock  | default
+    trending_items   | default
+    (6 rows)
    ```
 
 1. To see the results change in real-time let's use `SUBSCRIBE` instead of vanilla `SELECT`:

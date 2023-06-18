@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebSocket Notifications</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .notification-enter-active {
+        animation: slideInRight 0.5s ease both;
+      }
+
+      .notification-leave-active {
+        animation: fadeOut 0.5s ease both;
+      }
+
+      @keyframes slideInRight {
+        0% {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        100% {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeOut {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+    </style>
+    <script src="https://unpkg.com/vue@3.0.0"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div id="app" class="max-w-lg mx-auto mt-10">
+      <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h2 class="pb-4 text-2xl">WebSocket Notifications</h2>
+
+        <div class="mb-4">
+          <label for="ws-url" class="block text-gray-700 text-sm font-bold mb-2"
+            >WebSocket URL:</label
+          >
+          <input
+            id="ws-url"
+            type="text"
+            v-model="wsUrl"
+            placeholder="ws://your-websocket-url"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+          <button
+            @click="connect"
+            class="mt-3 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Connect
+          </button>
+        </div>
+      </div>
+
+      <div
+        v-for="notification in notifications"
+        :key="notification.id"
+        class="mb-4"
+      >
+        <transition name="notification" mode="out-in">
+          <div
+            class="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+            role="alert"
+          >
+            <p>User ID: {{ notification.user_id }}</p>
+            <p>Email: {{ notification.email }}</p>
+            <p>Item ID: {{ notification.item_id }}</p>
+            <p>Purchase Price: {{ notification.purchase_price }}</p>
+            <p>Status: {{ notification.status }}</p>
+          </div>
+        </transition>
+      </div>
+    </div>
+
+    <script>
+      const { ref, onMounted, onUnmounted } = Vue;
+      const App = {
+        setup() {
+          const wsUrl = ref("");
+          const notifications = ref([]);
+          let ws = null;
+
+          const connect = () => {
+            ws = new WebSocket(wsUrl.value);
+
+            ws.onmessage = event => {
+              const data = JSON.parse(event.data);
+              data.forEach(message => {
+                const notification = {
+                  id: new Date().getTime(),
+                  ...message,
+                };
+                notifications.value.push(notification);
+                setTimeout(() => {
+                  notifications.value = notifications.value.filter(
+                    n => n.id !== notification.id
+                  );
+                }, 10000);
+              });
+            };
+
+            ws.onclose = () => {
+              console.log("Connection closed");
+            };
+
+            ws.onerror = error => {
+              console.log("WebSocket Error: ", error);
+            };
+          };
+
+          onUnmounted(() => {
+            if (ws) ws.close();
+          });
+
+          return { wsUrl, notifications, connect };
+        },
+      };
+
+      Vue.createApp(App).mount("#app");
+    </script>
+  </body>
+</html>

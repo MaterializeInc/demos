@@ -31,6 +31,7 @@ services:
      - POSTGRES_USER=postgres
      - POSTGRES_PASSWORD=postgres
      - POSTGRES_DB=postgres
+    command: postgres -c wal_level=logical
     volumes:
      - ${PWD}/postgres:/docker-entrypoint-initdb.d
     depends_on:
@@ -54,6 +55,20 @@ services:
     depends_on:
       - postgres
       - redpanda
+  notifications-backend:
+    build:
+      context: ./notifications-backend
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+  notifications-frontend:
+    build:
+      context: ./notifications-frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./notifications-frontend:/usr/share/nginx/html
+    ports:
+      - 80:80
   metabase:
     image: metabase/metabase:v0.41.5
     ports:

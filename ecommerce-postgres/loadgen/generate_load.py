@@ -111,7 +111,7 @@ try:
             for i in purchaseLoop():
                 # Get a user and item to purchase
                 purchase_item = random.choice(item_prices)
-                purchase_user = random.randint(0, userSeedCount - 1)
+                purchase_user = random.randint(1, userSeedCount - 1)
                 purchase_quantity = random.randint(1, 5)
                 if random.randint(0,100) < 90:
                     purchase_status = 1

@@ -1,0 +1,17 @@
+{
+  "name": "notifications-backend",
+  "version": "1.0.0",
+  "description": "Notifications Backend WS Server",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.0",
+    "pg-copy-streams": "^6.0.5",
+    "ws": "^8.13.0"
+  }
+}
