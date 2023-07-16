@@ -88,13 +88,13 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
     ```sql
     -- Create Redpanda connection
     CREATE CONNECTION redpanda_connection
-      TO KAFKA
-      BROKER '<your_server_ip:9092>';
+      TO KAFKA (
+      BROKER '<your_server_ip:9092>');
 
     -- Create Registry connection
     CREATE CONNECTION schema_registry
-      TO CONFLUENT SCHEMA REGISTRY
-      URL '<your_server_ip:8082>';
+      TO CONFLUENT SCHEMA REGISTRY (
+      URL 'http://<your_server_ip:8082>');
     ```
 
 8. Next, define all of the tables in `mysql.shop` as sources:
