@@ -44,7 +44,7 @@ You'll need to have [docker installed](https://materialize.com/docs/third-party/
    docker compose ps
    ```
 
-5. Exec in to the redpanda container to look around using redpanda's amazing [rpk]() CLI.
+5. Exec in to the redpanda container to look around using redpanda's amazing [rpk](https://docs.redpanda.com/docs/reference/rpk/) CLI.
 
    ```shell session
    docker compose exec redpanda /bin/bash
