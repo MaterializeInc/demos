@@ -18,7 +18,7 @@ Then edit the `.env` file and add your Materialize and Upstash credentials.
 Then run:
 
 ```
-docker-compose up
+docker compose up
 ```
 
 After a successful build:

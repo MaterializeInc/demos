@@ -42,7 +42,7 @@ The demo consists of the following components:
 - Start the demo:
 
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
 
 - Open Grafana at http://localhost:3000 and check out the `Materialize Example` dashboard.

@@ -14,7 +14,7 @@ Before trying this out you will need the following:
 
 ## Running Redpanda + Materialize Stack
 
-You'll need to have [docker and docker-compose installed](https://materialize.com/docs/third-party/docker) before getting started.
+You'll need to have [docker installed](https://materialize.com/docs/third-party/docker) before getting started.
 
 1. Clone this repo and navigate to the directory by running:
 
@@ -33,7 +33,7 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
 3. Bring up the Docker Compose containers in the background.
 
    ```shell session
-   docker-compose up -d
+   docker compose up -d
    ```
 
    **This may take several minutes to complete the first time you run it.** If all goes well, you'll have everything running in their own containers, with Debezium configured to ship changes from MySQL into Redpanda.
@@ -41,13 +41,13 @@ You'll need to have [docker and docker-compose installed](https://materialize.co
 4. Confirm that everything is running as expected:
 
    ```shell session
-   docker-compose ps
+   docker compose ps
    ```
 
 5. Exec in to the redpanda container to look around using redpanda's amazing [rpk]() CLI.
 
    ```shell session
-   docker-compose exec redpanda /bin/bash
+   docker compose exec redpanda /bin/bash
 
    rpk debug info
 
@@ -368,4 +368,4 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
 
 You now have materialize doing real-time materialized views on a changefeed from a database and pageview events from Redpanda. You have complex multi-layer views doing JOIN's and aggregations in order to distill the raw data into a form that's useful for downstream applications. In metabase, you have the ability to create dashboards and reports using the real-time data.
 
-You have a lot of infrastructure running in docker containers, don't forget to run `docker-compose down` to shut everything down!
+You have a lot of infrastructure running in docker containers, don't forget to run `docker compose down` to shut everything down!
