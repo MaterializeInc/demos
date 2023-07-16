@@ -94,7 +94,7 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
     -- Create Registry connection
     CREATE CONNECTION schema_registry
       TO CONFLUENT SCHEMA REGISTRY (
-      URL 'http://<your_server_ip:8082>');
+      URL 'http://<your_server_ip:8081>');
     ```
 
 8. Next, define all of the tables in `mysql.shop` as sources:
