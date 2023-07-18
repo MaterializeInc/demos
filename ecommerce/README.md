@@ -17,7 +17,7 @@ To generate the data we'll simulate **users**, **items**, **purchases** and **pa
 
 To simplify deploying all of this infrastructure, the demo is enclosed in a series of Docker images glued together via Docker Compose. As a secondary benefit, you can run the demo via Linux, an EC2 VM instance, or a Mac laptop.
 
-The [docker-compose file](docker-compose.yml) spins up containers with the following names, connections and roles:
+The [docker compose file](docker compose.yml) spins up containers with the following names, connections and roles:
 ![Shop demo infra](demo.png)
 
 ## What to Expect
@@ -95,7 +95,7 @@ Alternatively, you can set the `auto.create.topics.enable` option for your clust
 5. Bring up the Docker Compose containers in the background:
 
    ```shell session
-   docker-compose up -d
+   docker compose up -d
    ```
 
    **This may take several minutes to complete the first time you run it.** If all goes well, you'll have everything running in their own containers, with Debezium configured to ship changes from MySQL into Confluent Cloud.
@@ -496,4 +496,4 @@ COPY (
 
 You now have Materialize doing real-time materialized views on a changefeed from a database and pageview events from Kafka. You have complex multi-layer views doing JOIN's and aggregations in order to distill the raw data into a form that's useful for downstream applications. In Metabase, you have the ability to create dashboards and reports based on this data.
 
-You have som infrastructure running in Docker containers, so don't forget to run `docker-compose down` to shut everything down!
+You have som infrastructure running in Docker containers, so don't forget to run `docker compose down` to shut everything down!

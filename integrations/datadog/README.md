@@ -44,7 +44,7 @@ This demo shows how to make Materialize metadata available as key metrics for mo
 4. Start the demo:
 
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
 
 5. Open your Datadog account, import our `dashboard.json`, and explore the `materialize.sql_*` metrics.
