@@ -1,0 +1,141 @@
+---
+jobs:
+- name: "materialize"
+  interval: '1m'
+  connections:
+  # There is a second connection needed to be configured at the bottom of the file
+  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?application_name=mz_grafana_integration&sslmode=require"
+  queries:
+  - name: "cluster_replica_usage"
+    help: "Cluster replica metrics"
+    labels:
+      - "replica_id"
+      - "cluster_id"
+      - "cluster_name"
+      - "replica_name"
+      - "cluster_type"
+      - "replica_status_label"
+      - "not_ready_reason"
+    values:
+      - "cpu_percent"
+      - "memory_percent"
+      - "credits_per_hour"
+      - "replica_status"
+    query:  |
+            SELECT
+              DISTINCT(U.replica_id),
+              R.cluster_id,
+              C.name as cluster_name,
+              R.name as replica_name,
+              RST.status as replica_status_label,
+              COALESCE(RST.reason, '') as not_ready_reason,
+              U.cpu_percent::float,
+              U.memory_percent::float,
+              RS.credits_per_hour::float,
+              CASE RST.status
+                WHEN 'ready' THEN 1
+                ELSE 0
+              END AS replica_status,
+              CASE
+                WHEN S.cluster_id IS NOT NULL THEN 'source'
+                WHEN SK.cluster_id IS NOT NULL THEN 'sink'
+                ELSE 'compute'
+              END AS cluster_type
+            FROM mz_internal.mz_cluster_replica_utilization U
+            JOIN mz_catalog.mz_cluster_replicas R ON (U.replica_id = R.id)
+            JOIN mz_catalog.mz_clusters C ON (R.cluster_id = C.id)
+            JOIN mz_internal.mz_cluster_replica_sizes RS ON (R.size = RS.size)
+            JOIN mz_internal.mz_cluster_replica_statuses RST ON (RST.replica_id = R.id)
+            LEFT JOIN mz_catalog.mz_sources S ON (C.id = S.cluster_id)
+            LEFT JOIN mz_catalog.mz_sinks SK ON (C.id = SK.cluster_id);
+  - name: "sink_statistics"
+    help: "Sink statistics"
+    labels:
+      - "sink_name"
+      - "sink_type"
+      - "cluster_id"
+      - "cluster_name"
+      - "sink_status_label"
+    values:
+      - "messages_committed"
+      - "bytes_committed"
+      - "sink_status_counter"
+    query: |
+            SELECT
+              S.name as sink_name,
+              S.type as sink_type,
+              S.cluster_id as cluster_id,
+              C.name as cluster_name,
+              status as sink_status_label,
+              1 AS sink_status_counter,
+              SUM(messages_committed) as messages_committed,
+              SUM(bytes_committed) as bytes_committed
+            FROM mz_internal.mz_sink_statistics SS
+            JOIN mz_catalog.mz_sinks S ON (SS.id = S.id)
+            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
+            JOIN mz_internal.mz_sink_statuses ST ON (S.id = ST.id)
+            GROUP BY sink_name, sink_type, cluster_id, cluster_name, sink_status_label, sink_status_counter;
+  - name: "source_statistics"
+    help: "Source statistics"
+    labels:
+      - "source_name"
+      - "source_type"
+      - "cluster_id"
+      - "cluster_name"
+      - "source_status_label"
+    values:
+      - "snapshot_committed"
+      - "envelope_state_bytes"
+      - "envelope_state_count"
+      - "messages_received"
+      - "bytes_received"
+      - "source_status_counter"
+    query: |
+            SELECT
+              S.name as source_name,
+              S.type as source_type,
+              S.cluster_id,
+              C.name as cluster_name,
+              status as source_status_label,
+              1 AS source_status_counter,
+              bool_and(snapshot_committed)::int::float as snapshot_committed,
+              SUM(SS.envelope_state_bytes) as envelope_state_bytes,
+              SUM(SS.envelope_state_count) as envelope_state_count,
+              SUM(messages_received) as messages_received,
+              SUM(bytes_received) as bytes_received
+            FROM mz_internal.mz_source_statistics SS
+            JOIN mz_catalog.mz_sources S ON (SS.id = S.id)
+            JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
+            JOIN mz_internal.mz_source_statuses ST ON (S.id = ST.id)
+            GROUP BY S.name, S.type, S.cluster_id, cluster_name, source_status_label, source_status_counter, snapshot_committed;
+- name: "materialize"
+  interval: '1h'
+  connections:
+  - "postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/materialize?application_name=mz_grafana_integration&sslmode=require"
+  queries:
+  - name: "storage_usage"
+    help: "Storage usage"
+    labels:
+      - "object_name"
+      - "object_type"
+      - "object_id"
+    values:
+      - "size_bytes"
+    query: |
+            WITH last_measure AS (
+              SELECT
+                object_id,
+                MAX(collection_timestamp) timestamp
+              FROM mz_storage_usage
+              GROUP BY object_id
+            )
+            SELECT
+              DISTINCT(id) as object_id,
+              name as object_name,
+              type as object_type,
+              size_bytes
+            FROM mz_storage_usage U, mz_objects O, last_measure L
+            WHERE O.id = U.object_id
+            AND O.id = L.object_id
+            AND U.collection_timestamp = L.timestamp
+            AND id NOT LIKE 's%';

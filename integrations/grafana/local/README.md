@@ -23,8 +23,8 @@ The demo consists of the following components:
 - Start by cloning the repository:
 
     ```bash
-    git clone TODO_URL
-    cd TODO_DIR
+    git clone https://github.com/MaterializeInc/demos.git
+    cd demos/integrations/grafana/local
     ```
 
 - Copy the `config.yml.example` file to `config.yml`:
