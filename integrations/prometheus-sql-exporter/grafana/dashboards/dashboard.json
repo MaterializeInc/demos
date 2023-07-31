@@ -920,7 +920,7 @@
           "targets": [
             {
               "exemplar": true,
-              "expr": "{cluster_type=~\"sink|source\",col=\"credits_per_hour\"}",
+              "expr": "{col=\"credits_per_hour\"}",
               "interval": "",
               "legendFormat": "{{cluster_name}}",
               "refId": "A"
