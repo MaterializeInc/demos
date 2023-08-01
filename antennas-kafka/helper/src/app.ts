@@ -52,11 +52,11 @@ async function setUpMaterialize() {
   `);
   await poolClient.query(`
     CREATE CONNECTION IF NOT EXISTS upstash_kafka
-      FOR KAFKA
+      TO KAFKA (
       BROKER '${brokers}',
       SASL MECHANISMS = 'SCRAM-SHA-256',
       SASL USERNAME = SECRET up_sasl_username,
-      SASL PASSWORD = SECRET up_sasl_password;
+      SASL PASSWORD = SECRET up_sasl_password);
   `);
   await poolClient.query(`
     CREATE SOURCE IF NOT EXISTS antennas_performance

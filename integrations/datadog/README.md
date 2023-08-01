@@ -26,7 +26,7 @@ This demo shows how to make Materialize metadata available as key metrics for mo
     cd integrations/datadog
     ```
 
-2. Edit the `config.yaml` file and set your Materialize details under the `connections` key:
+2. Edit the `config.yaml` file and set your Materialize details under the two available `connections` keys:
 
     ```yaml
     connections:
@@ -44,10 +44,10 @@ This demo shows how to make Materialize metadata available as key metrics for mo
 4. Start the demo:
 
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
 
-5. Open your Datadog account and explore the `materialize.*` metrics.
+5. Open your Datadog account, import our `dashboard.json`, and explore the `materialize.sql_*` metrics.
 
 ## Configuration overview
 

@@ -18,8 +18,8 @@ Then edit the `.env` file and add your Materialize credentials.
 Then run:
 
 ```bash
-# Run `AUTOSETUP=1 docker-compose up` to run steps 2-3 automatically
-docker-compose up
+# Run `AUTOSETUP=1 docker compose up` to run steps 2-3 automatically
+docker compose up
 ```
 
 After a successful build:

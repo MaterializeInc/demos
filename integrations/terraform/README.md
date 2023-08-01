@@ -10,6 +10,8 @@ This is a collection of demos that show how to use the [Materialize Terraform pr
 | ---------------------------------- | ----------------------------------------------------------------------- |
 | [MSK PrivateLink](msk-privatelink) | Create an AWS PrivateLink connection between Materialize and Amazon MSK |
 | [HashiCorp Vault](hashicorp-vault) | Create a Materialize secret from a HashiCorp Vault secret               |
+| [EC2 SSH Bastion](ec2-ssh-bastion) | Create an EC2 instance that can be used as an SSH bastion               |
+| [Secret Stores](secret-stores)     | Integrate Materialize with various secret management tools              |
 
 ## Prerequisites
 
@@ -54,12 +56,15 @@ For each demo, follow the instructions in the demo's README. All demos assume th
 ### Materialize Configuration
 
 - Get your Materialize host, username, and password from the [Materialize console](https://console.materialize.com/).
-- Create a file called `locals.tf` and define your Materialize details:
+- Configure the Materialize Terraform provider by adding the following block to your Terraform project:
 
     ```hcl
-    locals {
-        materialize_host     = "YOUR_MATERIALIZE_HOST"
-        materialize_username = "YOUR_MATERIALIZE_USERNAME"
-        materialize_password = "YOUR_MATERIALIZE_PASSWORD"
+    # Configuration-based authentication
+    provider "materialize" {
+      host     = var.materialize_hostname # optionally use MZ_HOST env var
+      username = var.materialize_username # optionally use MZ_USER env var
+      password = var.materialize_password # optionally use MZ_PW env var
+      port     = var.materialize_port     # optionally use MZ_PORT env var
+      database = var.materialize_database # optionally use MZ_DATABASE env var
     }
     ```

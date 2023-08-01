@@ -18,7 +18,7 @@ Then edit the `.env` file and add your Materialize and Upstash credentials.
 Then run:
 
 ```
-docker-compose up
+docker compose up
 ```
 
 After a successful build:
@@ -114,11 +114,11 @@ The SQL script to build Materialize schema is the next one:
 
   -- Create the Kafka connection
     CREATE CONNECTION IF NOT EXISTS upstash_kafka
-      FOR KAFKA
+      FOR KAFKA (
       BROKER 'your_upstas_kafka_broker',
       SASL MECHANISMS = 'SCRAM-SHA-256',
       SASL USERNAME = SECRET up_sasl_username,
-      SASL PASSWORD = SECRET up_sasl_password;
+      SASL PASSWORD = SECRET up_sasl_password);
 
   -- Create the Kafka Source
     CREATE SOURCE IF NOT EXISTS antennas_performance
