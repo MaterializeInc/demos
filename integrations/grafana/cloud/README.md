@@ -10,7 +10,10 @@ This demo shows how to make Materialize metadata available as key metrics for mo
 
 The demo consists of the following components:
 
-![]()
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/MaterializeInc/demos/assets/11491779/df3e1478-4091-4dbf-b8c8-923fe327cbd5">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/MaterializeInc/demos/assets/11491779/765582f0-44bf-4065-9071-46b94bc5ac1f">
+</picture>
 
 ## Prerequisites
 
@@ -28,8 +31,8 @@ The demo consists of the following components:
     cd demos/integrations/grafana/cloud
     ```
 
-- Edit the `agent.yaml` file and set your Grafana Agent :
-
+- Edit the `agent.yaml` file and set your Grafana Agent:
+-
   ```yaml
     remote_write:
       - url: <REMOTE_WRITE_URL>
@@ -37,6 +40,12 @@ The demo consists of the following components:
           username: <USERNAME>
           password: <PASSWORD>
   ```
+
+  <details><summary>Video to generate the fields for the first time.</summary>
+
+  ![Gif](https://github.com/MaterializeInc/demos/assets/11491779/e512a95f-e3c6-433d-bc8f-6f5138b08115)
+
+  <details>
 
 - Copy the `config.yml.example` file to `config.yml`:
 
