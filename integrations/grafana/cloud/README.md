@@ -11,8 +11,8 @@ This demo shows how to make Materialize metadata available as key metrics for mo
 The demo consists of the following components:
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/MaterializeInc/demos/assets/11491779/df3e1478-4091-4dbf-b8c8-923fe327cbd5">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/MaterializeInc/demos/assets/11491779/765582f0-44bf-4065-9071-46b94bc5ac1f">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/joacoc/demos/assets/11491779/8dd0df96-58e0-4af7-8918-8ce848fc4a79">
+  <img alt="Shows an illustration of the components." src="https://github.com/joacoc/demos/assets/11491779/c3f30984-9ee1-4b96-ba58-2d5c000ae379">
 </picture>
 
 ## Prerequisites
