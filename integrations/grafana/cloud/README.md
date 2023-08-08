@@ -32,7 +32,7 @@ The demo consists of the following components:
     ```
 
 - Edit the `agent.yaml` file and set your Grafana Agent:
--
+
   ```yaml
     remote_write:
       - url: <REMOTE_WRITE_URL>
