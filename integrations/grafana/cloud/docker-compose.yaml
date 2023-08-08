@@ -1,0 +1,31 @@
+version: '2'
+
+services:
+   agent:
+    profiles: [agent]
+    image: grafana/agent:latest
+    volumes:
+      - ./agent/config:/etc/agent-config
+    entrypoint:
+      - /bin/grafana-agent
+      - -server.http.address=0.0.0.0:12345
+      - -config.file=/etc/agent-config/agent.yaml
+      - -metrics.wal-directory=/tmp/agent/wal
+      - -enable-features=integrations-next
+      - -config.expand-env
+      - -config.enable-read-api
+    ports:
+      - "12345:12345"
+    depends_on:
+      - cortex
+      - loki
+      - tempo
+
+  sql-exporter:
+    image: justwatch/sql_exporter:latest
+    ports:
+      - 9237:9237
+    environment:
+      CONFIG: /config/config.yml
+    volumes:
+      - ./config.yml:/config/config.yml

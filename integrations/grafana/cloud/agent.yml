@@ -1,0 +1,14 @@
+metrics:
+  global:
+    scrape_interval: 60s
+  configs:
+  - name: hosted-prometheus
+    scrape_configs:
+      - job_name: node
+        static_configs:
+        - targets: ['localhost:9237']
+    remote_write:
+      - url: <REMOTE_WRITE_URL>
+        basic_auth:
+          username: <USERNAME>
+          password: <PASSWORD>

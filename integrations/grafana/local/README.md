@@ -10,7 +10,10 @@ This demo shows how to make Materialize metadata available as key metrics for mo
 
 The demo consists of the following components:
 
-![](https://user-images.githubusercontent.com/21223421/215146476-3a6619ff-fbc3-4f79-bec8-d039b89832b0.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/joacoc/demos/assets/11491779/d2317886-cb7c-43a5-b742-7b5ed71fd039">
+  <img alt="Shows an illustration of the components." src="https://github.com/joacoc/demos/assets/11491779/f5de3d3f-a70d-4f7f-ad3c-1ce5c74c6c21">
+</picture>
 
 ## Prerequisites
 
@@ -23,8 +26,8 @@ The demo consists of the following components:
 - Start by cloning the repository:
 
     ```bash
-    git clone TODO_URL
-    cd TODO_DIR
+    git clone https://github.com/MaterializeInc/demos.git
+    cd demos/integrations/grafana/local
     ```
 
 - Copy the `config.yml.example` file to `config.yml`:
