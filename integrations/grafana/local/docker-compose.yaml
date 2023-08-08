@@ -9,9 +9,9 @@ services:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
     volumes:
-      - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
-      - ./grafana/datasources:/etc/grafana/provisioning/datasources
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./misc/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+      - ./misc/datasources:/etc/grafana/provisioning/datasources
+      - ./misc/dashboards:/var/lib/grafana/dashboards
   prometheus:
     image: prom/prometheus:v2.30.3
     ports:

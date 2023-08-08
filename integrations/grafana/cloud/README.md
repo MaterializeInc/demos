@@ -33,19 +33,19 @@ The demo consists of the following components:
 
 - Edit the `agent.yaml` file and set your Grafana Agent:
 
-  ```yaml
-    remote_write:
-      - url: <REMOTE_WRITE_URL>
-        basic_auth:
-          username: <USERNAME>
-          password: <PASSWORD>
-  ```
+    ```yaml
+      remote_write:
+        - url: <REMOTE_WRITE_URL>
+          basic_auth:
+            username: <USERNAME>
+            password: <PASSWORD>
+    ```
 
-  <details><summary>Video to generate the fields for the first time.</summary>
+    <details><summary>Video to generate the fields for the first time.</summary>
 
-  ![Gif](https://github.com/MaterializeInc/demos/assets/11491779/e512a95f-e3c6-433d-bc8f-6f5138b08115)
+    ![Gif](https://github.com/MaterializeInc/demos/assets/11491779/e512a95f-e3c6-433d-bc8f-6f5138b08115)
 
-  <details>
+    <details>
 
 - Copy the `config.yml.example` file to `config.yml`:
 
@@ -53,7 +53,7 @@ The demo consists of the following components:
     cp config.yml.example config.yml
     ```
 
-- Edit the `config.yml` file and set your Materialize details under the connection section:
+- Edit the `config.yml` file and set your Materialize details under the two connection sections:
 
   ```yaml
     - "postgres://YOUR_MATERIALIZE_USER:YOUR_MATERIALIZE_PASSWORD@YOUR_MATERIALIZE_HOST.materialize.cloud:6875/materialize"
@@ -65,7 +65,7 @@ The demo consists of the following components:
     docker compose up -d
     ```
 
-- Open your Grafana account and import [the Materialize dashboard template](https://github.com/MaterializeInc/demos/blob/main/integrations/prometheus-sql-exporter/grafana/dashboards/dashboard.json).
+- Open your Grafana account and import [the Materialize dashboard template](https://github.com/MaterializeInc/demos/blob/main/integrations/grafana/local/misc/dashboards/dashboard.json).
 
 ## Configuration overview
 
