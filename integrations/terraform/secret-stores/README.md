@@ -180,16 +180,14 @@ Rotating secrets is an essential practice in security management to minimize pot
 
 1.  **Update the Secret in Your Secret Management System**: Change the value of the secret using the tools and processes specific to your chosen secret management system.
 
-2.  **Refresh Terraform's State**: Run the `terraform refresh` command to update Terraform's understanding of the resources under its control, including any changes to secrets.
-
-3.  **Apply the Changes**: Run the `terraform apply` command to make Terraform update the Materialize secret resource to align with the updated value in your secret management system.
+2.  **Apply the Changes**: Run the `terraform apply` command to make Terraform update the Materialize secret resource to align with the updated value in your secret management system.
 
 
 ### Automating Secret Rotation
 
-You can automate the rotation of secrets by running the refresh and apply commands on a regular basis. This can be done as part of your continuous integration (CI) pipeline, such as running it every hour, every day, or based on your specific needs.
+You can automate the rotation of secrets by running the apply command on a regular basis. This can be done as part of your continuous integration (CI) pipeline, such as running it every hour, every day, or based on your specific needs.
 
-For example, you could create a GitHub Actions workflow that performs the refresh and apply operation on a schedule. Here's a sample GitHub Actions YAML file:
+For example, you could create a GitHub Actions workflow that performs the apply operation on a schedule. Here's a sample GitHub Actions YAML file:
 
 ```yaml
 name: Rotate Materialize Secrets
@@ -209,14 +207,11 @@ jobs:
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v2
 
-    - name: Terraform Refresh
-      run: terraform refresh
-
     - name: Terraform Apply
       run: terraform apply -auto-approve
 ```
 
-This example workflow runs every hour, checks out your code, sets up Terraform, and then refreshes and applies the Terraform configuration, updating any rotated secrets in Materialize.
+This example workflow runs every hour, checks out your code, sets up Terraform, and then applies the Terraform configuration, updating any rotated secrets in Materialize.
 
 ### Zero Downtime Considerations
 
