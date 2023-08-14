@@ -1,11 +1,10 @@
 version: '2'
 
 services:
-   agent:
-    profiles: [agent]
+  agent:
     image: grafana/agent:latest
     volumes:
-      - ./agent/config:/etc/agent-config
+      - ./agent.yaml:/etc/agent-config/agent.yaml
     entrypoint:
       - /bin/grafana-agent
       - -server.http.address=0.0.0.0:12345
@@ -16,11 +15,6 @@ services:
       - -config.enable-read-api
     ports:
       - "12345:12345"
-    depends_on:
-      - cortex
-      - loki
-      - tempo
-
   sql-exporter:
     image: justwatch/sql_exporter:latest
     ports:
