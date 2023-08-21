@@ -172,6 +172,51 @@ resource "materialize_secret" "example_secret" {
 
 In the Akeyless Vault example, we set up the Akeyless provider with the appropriate access ID and key. Then, we get the secret from Akeyless Vault and use it to set up a new secret in Materialize.
 
+## Rotating Secrets
+
+Rotating secrets is an essential practice in security management to minimize potential damage if a secret is compromised. In the context of Materialize and the integrated secret management tools, here's how you can rotate existing secrets and ensure the process is smooth.
+
+### Rotating an Existing Secret
+
+1.  **Update the Secret in Your Secret Management System**: Change the value of the secret using the tools and processes specific to your chosen secret management system.
+
+2.  **Apply the Changes**: Run the `terraform apply` command to make Terraform update the Materialize secret resource to align with the updated value in your secret management system.
+
+
+### Automating Secret Rotation
+
+You can automate the rotation of secrets by running the apply command on a regular basis. This can be done as part of your continuous integration (CI) pipeline, such as running it every hour, every day, or based on your specific needs.
+
+For example, you could create a GitHub Actions workflow that performs the apply operation on a schedule. Here's a sample GitHub Actions YAML file:
+
+```yaml
+name: Rotate Materialize Secrets
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Runs every hour
+
+jobs:
+  rotate-secrets:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+```
+
+This example workflow runs every hour, checks out your code, sets up Terraform, and then applies the Terraform configuration, updating any rotated secrets in Materialize.
+
+### Zero Downtime Considerations
+
+The above process is not a "zero downtime" way of doing secret rotation. Consider planning your secret rotations during maintenance windows or use more complex patterns like dual secrets for minimal disruption.
+
 ## Conclusion
 
 It is important to keep in mind that your secrets will reside in two locations: within Materialize and your secret management system. The Materialize secret resource is a reference to the secret in your secret management system. Thus, any modifications to the secret value in your secret management system require a re-execution of the Terraform script to ensure the Materialize secret resource aligns with the updated secret.
