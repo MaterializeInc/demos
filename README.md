@@ -2,8 +2,6 @@
 
 [![Slack Badge](https://img.shields.io/badge/Join%20us%20on%20Slack!-blueviolet?style=flat&logo=slack&link=https://materialize.com/s/chat)](https://materialize.com/s/chat)
 
-[Materialize](https://github.com/MaterializeInc/materialize) is a streaming database purpose-built for low-latency applications. It lets you ask complex questions about your data using **SQL**, and incrementally maintains the results of these SQL queries as the underlying data changes.
-
 Materialize is a **data warehouse** purpose-built for **operational workloads**. It allows you build real-time automation, engaging customer experiences, and interactive
 data products using SQL and other common tools in the ecosystem.
 
