@@ -37,7 +37,7 @@ This project showcases a real-time visualization of sensor data updates using St
 4.  Set the `DATABASE_URL` environment variable to the connection string of your Materialize instance:
 
     ```python
-    export DATABASE_URL="postgres://USERNAME:APP_PASSWORD@ID.materialize.cloud:6875/materialize?sslmode=require"
+    export DATABASE_URL="postgres://<USERNAME>:<APP_PASSWORD>@<HOST>/materialize?sslmode=require"
     ```
 
 ## Generating Data
