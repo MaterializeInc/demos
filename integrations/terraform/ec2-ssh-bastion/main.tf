@@ -3,7 +3,7 @@ terraform {
   required_providers {
     materialize = {
       source  = "MaterializeInc/materialize"
-      version = "0.0.7"
+      version = ">= 0.1.0"
     }
     # null = {
     #   source = "hashicorp/null"

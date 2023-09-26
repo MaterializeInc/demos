@@ -5,6 +5,7 @@ import threading
 import queue
 import pandas as pd
 import os
+from collections import defaultdict
 
 DATABASE_URL = os.environ['DATABASE_URL']
 updates_queue = queue.Queue()
@@ -22,15 +23,7 @@ thread.start()
 
 # Initialize the session state
 if 'data' not in st.session_state:
-    st.session_state.data = {
-        'mz_timestamp': [],
-        'mz_state': [],
-        'key': [],
-        'total_records': [],
-        'avg_temperature': [],
-        'latest_timestamp': []
-    }
-
+    st.session_state.data = defaultdict(list)
 
 chart_placeholder = st.empty()
 

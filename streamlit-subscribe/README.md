@@ -31,13 +31,13 @@ This project showcases a real-time visualization of sensor data updates using St
 3.  Install the required packages:
 
     ```bash
-    pip install streamlit psycopg altair pandas
+    pip install -r requirements.txt
     ```
 
 4.  Set the `DATABASE_URL` environment variable to the connection string of your Materialize instance:
 
     ```python
-    export DATABASE_URL="postgres://<USERNAME>:<APP_PASSWORD>@<HOST>/materialize?sslmode=require"
+    export DATABASE_URL="postgres://<username>:<app_password>@<host>/materialize?sslmode=require"
     ```
 
 ## Generating Data
@@ -65,8 +65,8 @@ CREATE SOURCE my_webhook_source IN CLUSTER my_webhook_cluster FROM WEBHOOK
     );
 ```
 
-The public URL for this webhook source is `https://<HOST>/api/webhook/<database>/<schema>/<src_name>`:
-- `<HOST>` is the hostname of the Materialize cluster.
+The public URL for this webhook source is `https://<host>/api/webhook/<database>/<schema>/<src_name>`:
+- `<host>` is the hostname of the Materialize cluster.
 - `<database>` is the name of the database where the source is created. Defaults to `materialize`.
 - `<schema>` is the name of the schema where the source is created. Defaults to `public`.
 - `<src_name>` is the name of the source. In this case, it's `my_webhook_source`.
@@ -87,7 +87,7 @@ Once you have your Materialize webhook source ready, create a `.env` file with t
 
 ```
 # Webhook
-export WEBHOOK_URL=https://<HOST>/api/webhook/<database>/<schema>/<src_name>
+export WEBHOOK_URL=https://<host>/api/webhook/<database>/<schema>/<src_name>
 export WEBHOOK_SECRET=some-secret-value
 ```
 
@@ -105,7 +105,7 @@ The above command will generate 10000 JSON payloads and send them to your Materi
 
 
 ℹ  Sending payload to webhook...
-  Webhook: https://<HOST>/api/webhook/<database>/<schema>/<src_name>
+  Webhook: https://<host>/api/webhook/<database>/<schema>/<src_name>
   Payload: {"sensor_id":82,"timestamp":"2025-12-22T20:02:08.692Z","location":{"latitude":-9,"longitude":97},"temperature":40.46}
 ...
 ```
