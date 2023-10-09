@@ -1,6 +1,6 @@
 ## Node.js + Drizzle + Materialize demo
 
-In this demo, we'll explore how to integrate Node.js with Drizzle ORM to query data from Materialize, a streaming database.
+In this demo, we'll explore how to integrate Node.js with Drizzle ORM to query data from Materialize, an operational data warehouse.
 
 ### Prerequisites:
 
