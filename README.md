@@ -65,6 +65,22 @@ This repo is a collection of sample code that walks you through using Materializ
     </tbody>
 </table>
 
+## [Connection examples](./connection-examples)
+
+This is a collection of reference examples for common language-specific PostgreSQL drivers and PostgreSQL-compatible ORMs that have been tested with Materialize.
+
+- [PHP](./connection-examples/php)
+- [NodeJS](./connection-examples/nodejs)
+- [TypeScript](./connection-examples/typescript)
+- [Deno](./connection-examples/deno)
+- [Java](./connection-examples/java)
+- [Python](./connection-examples/python)
+  - [FastAPI](./connection-examples/fastapi)
+- [Ruby](./connection-examples/ruby)
+- [Go](./connection-examples/go)
+- [Lua](./connection-examples/lua)
+- [Rust](./connection-examples/rust)
+
 ## Getting support
 
 If you run into a snag or need support as you explore the demos in this repo, join the Materialize [Slack community](https://materialize.com/s/chat) or [open an issue](https://github.com/MaterializeInc/demos/issues/new)!
