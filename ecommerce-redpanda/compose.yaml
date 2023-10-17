@@ -33,7 +33,7 @@ services:
       - 8082:8082
     healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
   debezium:
-    image: debezium/connect:1.9
+    build: ./connect
     environment:
       BOOTSTRAP_SERVERS: ${EXTERNAL_IP:-redpanda}:9092
       GROUP_ID: 1
@@ -52,7 +52,7 @@ services:
       redpanda: {condition: service_healthy}
       mysql: {condition: service_healthy}
   debezium_deploy:
-    image: debezium/connect:1.9
+    image: debezium/connect:2.4
     depends_on:
       debezium: {condition: service_healthy}
     environment:
@@ -62,7 +62,7 @@ services:
       - ./mysql/mysql_dbz.sh:/mysql_dbz.sh
     entrypoint: [bash, -c, /mysql_dbz.sh]
   metabase:
-    image: metabase/metabase:v0.41.5
+    image: materialize/metabase:1.0.3
     ports:
       - 3030:3000
   loadgen:
