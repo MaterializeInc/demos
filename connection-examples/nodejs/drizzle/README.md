@@ -108,6 +108,14 @@ When done, it's a good practice to close the connection to the database:
 await client.end();
 ```
 
+### Step 8: Run the Application
+
+To run the application, execute the following command:
+
+```bash
+node app.js
+```
+
 ### Conclusion
 
 By following this demo, you've set up a Node.js application that uses Drizzle ORM to query data from Materialize.

@@ -13,9 +13,7 @@ const client = new Client({
   user: process.env.MZ_USER,
   password: process.env.MZ_PASSWORD,
   database: process.env.MZ_DATABASE,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl: true
 });
 
 await client.connect();
