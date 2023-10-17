@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "target": "ES2022",
+        "module": "ES2022",
+        "incremental": true,
+        "sourceMap": true,
+        "noUnusedLocals": true,
+        "moduleResolution": "Node",
+        "esModuleInterop": true,
+        "importHelpers": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "declaration": true,
+        "outDir": "dist",
+        "declarationMap": true,
+        "useUnknownInCatchVariables": false
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"]
+}
