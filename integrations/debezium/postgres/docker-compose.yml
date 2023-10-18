@@ -1,0 +1,97 @@
+version: '3.9'
+services:
+  redpanda:
+    image: docker.vectorized.io/vectorized/redpanda:v21.10.1
+    container_name: redpanda
+    command:
+     - redpanda start
+     - --overprovisioned
+     - --smp 1
+     - --memory 1G
+     - --reserve-memory 0M
+     - --node-id 0
+     - --check=false
+     - --kafka-addr 0.0.0.0:9092
+     - --advertise-kafka-addr ${EXTERNAL_IP:-redpanda}:9092
+     - --pandaproxy-addr 0.0.0.0:8082
+     - --advertise-pandaproxy-addr ${EXTERNAL_IP:-redpanda}:9092
+     - --set redpanda.enable_transactions=true
+     - --set redpanda.enable_idempotence=true
+    ports:
+     - 9092:9092
+     - 8081:8081
+     - 8082:8082
+    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
+  postgres:
+    build: ./postgres
+    container_name: postgres
+    ports:
+     - 5432:5432
+    environment:
+     - POSTGRES_USER=postgres
+     - POSTGRES_PASSWORD=postgres
+     - POSTGRES_DB=postgres
+    volumes:
+     - ${PWD}/postgres/postgres_bootstrap.sql:/docker-entrypoint-initdb.d/postgres_bootstrap.sql
+    depends_on:
+      redpanda: {condition: service_healthy}
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 1s
+      start_period: 60s
+  debezium:
+    #image: debezium/connect:2.4
+    build: ./connect
+    container_name: debezium
+    environment:
+      BOOTSTRAP_SERVERS: ${EXTERNAL_IP:-redpanda}:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_status
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://${EXTERNAL_IP:-redpanda}:8081
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://${EXTERNAL_IP:-redpanda}:8081
+    ports:
+      - 8083:8083
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
+    depends_on:
+      redpanda: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+  debezium_deploy:
+    build: ./deploy
+    depends_on:
+      redpanda: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+      debezium: {condition: service_healthy}
+    environment:
+      - EXTERNAL_IP=${EXTERNAL_IP:-redpanda}
+  datagen1:
+    image: materialize/datagen:latest
+    container_name: datagen1
+    depends_on:
+      postgres: {condition: service_healthy}
+    environment:
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./schemas:/schemas
+    entrypoint:
+      datagen -s /schemas/users.sql -f postgres -n 1000
+  datagen2:
+    image: materialize/datagen:latest
+    container_name: datagen2
+    depends_on:
+      postgres: {condition: service_healthy}
+    environment:
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./schemas:/schemas
+    entrypoint:
+      datagen -s /schemas/reviews.sql -f postgres -n 100000 -w 1000
