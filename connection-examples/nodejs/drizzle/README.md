@@ -6,7 +6,9 @@ In this demo, we'll explore how to integrate Node.js with Drizzle ORM to query d
 
 -   Node.js installed on your machine
 -   Materialize instance
--   Materialize [getting started guide](https://materialize.com/docs/get-started/)
+-   Materialize [getting started guide](https://materialize.com/docs/get-started/quickstart/)
+
+> **Note**: The Materialize getting started guide contains cleanup steps. If you intend to follow this demo, avoid those steps until after you've completed the Drizzle demo. Once finished, you can proceed with the cleanup.
 
 ### Step 1: Setting up the Project
 
@@ -89,7 +91,7 @@ export const winningBids = pgView("winning_bids", {
 }).existing();
 ```
 
-Here, `pgView` is used to map the database view to a JavaScript object. Data types like `serial`, `text`, `integer`, etc., are used to define the columns and their types.
+Here, `pgView` is used to map the database view to a JavaScript object. Data types like `serial`, `text`, `integer`, etc., are used to define the columns and their types. The `pgView` function works with non-materialized views, but Drizzle also provides a [`pgMaterializedView`](https://orm.drizzle.team/docs/views#materialized-views) function that can be used to define a materialized view as well.
 
 ### Step 6: Fetching Data
 
