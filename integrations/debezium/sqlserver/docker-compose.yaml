@@ -1,0 +1,63 @@
+version: '2'
+services:
+  redpanda:
+    image: docker.vectorized.io/vectorized/redpanda:v21.10.1
+    container_name: redpanda
+    command:
+     - redpanda start
+     - --overprovisioned
+     - --smp 1
+     - --memory 1G
+     - --reserve-memory 0M
+     - --node-id 0
+     - --check=false
+     - --kafka-addr 0.0.0.0:9092
+     - --advertise-kafka-addr ${EXTERNAL_IP:-redpanda}:9092
+     - --pandaproxy-addr 0.0.0.0:8082
+     - --advertise-pandaproxy-addr ${EXTERNAL_IP:-redpanda}:9092
+     - --set redpanda.enable_transactions=true
+     - --set redpanda.enable_idempotence=true
+    ports:
+     - 9092:9092
+     - 8081:8081
+     - 8082:8082
+    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
+  sqlserver:
+    # image: mcr.microsoft.com/mssql/server:2019-latest
+    build: ./sqlserver
+    ports:
+     - 1433:1433
+    environment:
+     - ACCEPT_EULA=Y
+     - MSSQL_PID=Standard
+     - SA_PASSWORD=Password!
+     - MSSQL_AGENT_ENABLED=true
+    healthcheck:
+        test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -Q "SELECT 1" || exit 1
+        interval: 10s
+        timeout: 3s
+        retries: 10
+        start_period: 10s
+  debezium:
+    build: ./connect
+    container_name: debezium
+    ports:
+     - 8083:8083
+    environment:
+     - BOOTSTRAP_SERVERS=${EXTERNAL_IP:-redpanda}:9092
+     - GROUP_ID=1
+     - CONFIG_STORAGE_TOPIC=my_connect_configs
+     - OFFSET_STORAGE_TOPIC=my_connect_offsets
+     - STATUS_STORAGE_TOPIC=my_connect_statuses
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
+    depends_on:
+      redpanda: {condition: service_healthy}
+      sqlserver: {condition: service_healthy}
+  debezium_deploy:
+    build: ./deploy
+    depends_on:
+      redpanda: {condition: service_healthy}
+      sqlserver: {condition: service_healthy}
+      debezium: {condition: service_healthy}
+    environment:
+      - EXTERNAL_IP=${EXTERNAL_IP:-redpanda}

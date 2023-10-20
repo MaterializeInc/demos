@@ -1,4 +1,4 @@
-# 
+# Debezium + PostgreSQL + Materialize
 
 Before trying this out, you will need the following:
 
@@ -162,24 +162,6 @@ To stop the services and remove the containers, run:
 ```shell session
 docker compose down
 ```
-
-## Notes
-
-Beginning with Debezium 2.0.0, Confluent Schema Registry support is not included in the Debezium containers. To enable the Confluent Schema Registry for a Debezium container, install the following Confluent Avro converter JAR files into the Connect plugin directory:
-
--   `kafka-connect-avro-converter`
-
--   `kafka-connect-avro-data`
-
--   `kafka-avro-serializer`
-
--   `kafka-schema-serializer`
-
--   `kafka-schema-registry-client`
-
--   `common-config`
-
--   `common-utils`
 
 ## Helpful resources:
 
