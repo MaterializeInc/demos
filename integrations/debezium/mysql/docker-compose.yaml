@@ -58,7 +58,3 @@ services:
     environment:
       - MYSQL_PASSWORD='mysqlpwd'
       - EXTERNAL_IP=${EXTERNAL_IP:-redpanda}
-  # metabase:
-  #   image: materialize/metabase:1.0.3
-  #   ports:
-  #     - 3030:3000

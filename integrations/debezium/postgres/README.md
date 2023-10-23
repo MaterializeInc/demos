@@ -31,7 +31,7 @@ If you want to try it right now, follow these steps:
    docker compose up -d --build
    ```
 
-   **This may take several minutes to complete the first time you run it.** If all goes well, you'll have everything running in their own containers, with Debezium configured to ship changes from Postgres into Redpanda.
+   **This may take one or two minutes to complete the first time you run it.** If all goes well, you'll have everything running in their own containers, with Debezium configured to ship changes from Postgres into Redpanda.
 
 1. Confirm that everything is running as expected:
 
@@ -60,7 +60,7 @@ Example:
 
 Otherwise, you can find the steps to install and use your CLI of choice under [Supported tools](https://materialize.com/docs/integrations/sql-clients/#supported-tools).
 
-1. Now that you're in the Materialize CLI, define the connection to the Redpanda broker and the schema registry:
+1. Now that you're in the Materialize, define the connection to the Redpanda broker and the schema registry:
 
     ```sql
     -- Create Redpanda connection

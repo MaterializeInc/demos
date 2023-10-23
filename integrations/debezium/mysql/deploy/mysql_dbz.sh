@@ -38,8 +38,6 @@ fi
 ##
 
 # Start generating reviews
-# Start generating reviews
-# Start generating reviews
 echo "Generating reviews..."
 id=1
 while [[ true ]] ; do
