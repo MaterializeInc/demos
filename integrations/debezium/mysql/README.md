@@ -1,4 +1,4 @@
-# Debezium + PostgreSQL + Materialize
+# Debezium + MySQL + Materialize
 
 Before trying this out, you will need the following:
 
@@ -13,7 +13,7 @@ If you want to try it right now, follow these steps:
 
     ```shell session
     git clone https://github.com/MaterializeInc/demos.git
-    cd demos/integrations/debezium/postgres
+    cd demos/integrations/debezium/mysql
     ```
 
 1. After cloning the project, you will need to set the `EXTERNAL_IP` environment variable to the IP address of your Linux server. For example:
@@ -31,7 +31,7 @@ If you want to try it right now, follow these steps:
    docker compose up -d --build
    ```
 
-   **This may take several minutes to complete the first time you run it.** If all goes well, you'll have everything running in their own containers, with Debezium configured to ship changes from Postgres into Redpanda.
+   **This may take several minutes to complete the first time you run it.** If all goes well, you'll have everything running in their own containers, with Debezium configured to ship changes from MySQL into Redpanda.
 
 1. Confirm that everything is running as expected:
 
@@ -78,19 +78,19 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
 
     ```sql
     CREATE SOURCE users
-      FROM KAFKA CONNECTION redpanda_connection (TOPIC 'pg_repl.demo.users')
+      FROM KAFKA CONNECTION redpanda_connection (TOPIC 'mysql_repl.demo.users')
       FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
       ENVELOPE DEBEZIUM
       WITH (SIZE = '3xsmall');
 
     CREATE SOURCE roles
-        FROM KAFKA CONNECTION redpanda_connection (TOPIC 'pg_repl.demo.roles')
+        FROM KAFKA CONNECTION redpanda_connection (TOPIC 'mysql_repl.demo.roles')
         FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
         ENVELOPE DEBEZIUM
         WITH (SIZE = '3xsmall');
 
     CREATE SOURCE reviews
-        FROM KAFKA CONNECTION redpanda_connection (TOPIC 'pg_repl.demo.reviews')
+        FROM KAFKA CONNECTION redpanda_connection (TOPIC 'mysql_repl.demo.reviews')
         FORMAT AVRO USING CONFLUENT SCHEMA REGISTRY CONNECTION schema_registry
         ENVELOPE DEBEZIUM
         WITH (SIZE = '3xsmall');
@@ -104,8 +104,7 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
     CREATE MATERIALIZED VIEW vip_users AS
         SELECT
             users.id,
-            users.first_name,
-            users.last_name,
+            users.name,
             users.email,
             users.role_id,
             roles.name AS role_name
@@ -133,8 +132,7 @@ Otherwise, you can find the steps to install and use your CLI of choice under [S
     ```sql
     CREATE MATERIALIZED VIEW vip_users_with_bad_reviews AS
         SELECT
-            vip_users.first_name,
-            vip_users.last_name,
+            vip_users.name,
             vip_users.email,
             vip_users.role_name,
             bad_reviews.rating,
@@ -172,9 +170,8 @@ DROP CONNECTION schema_registry CASCADE;
 
 ## Helpful resources:
 
-* [`CREATE SOURCE: PostgreSQL`](https://materialize.com/docs/sql/create-source/postgres)
-* [`Postgres + Kafka + Debezium`](https://materialize.com/docs/integrations/cdc-postgres/#kafka--debezium)
-* [`CREATE SOURCE`](https://materialize.com/docs/sql/create-source)
+* [`CREATE CONNECTION`](https://materialize.com/docs/sql/create-connection/)
+* [`MySQL CDC using Kafka and Debezium`](https://materialize.com/docs/ingest-data/cdc-mysql/)
 * [`CREATE MATERIALIZED VIEW`](https://materialize.com/docs/sql/create-materialized-view)
 
 ## Community

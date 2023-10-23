@@ -1,0 +1,23 @@
+{
+    "name": "mysql-connector",
+    "config": {
+        "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+        "tasks.max": "1",
+        "database.hostname": "mysql",
+        "database.port": "3306",
+        "database.user": "debezium",
+        "database.password": "mysqlpwd",
+        "database.server.id":"223344",
+        "topic.prefix": "mysql_repl",
+        "database.include.list": "demo",
+        "database.history.kafka.topic":"mysql_repl.history",
+        "database.history.kafka.bootstrap.servers":"EXTERNAL_IP:9092",
+        "schema.history.internal.kafka.bootstrap.servers": "EXTERNAL_IP:9092",
+        "schema.history.internal.kafka.topic": "mysql_repl.internal.history",
+        "key.converter": "io.confluent.connect.avro.AvroConverter",
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "key.converter.schema.registry.url": "http://redpanda:8081",
+        "value.converter.schema.registry.url": "http://redpanda:8081",
+        "include.schema.changes": false
+      }
+  }

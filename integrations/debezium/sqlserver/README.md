@@ -121,6 +121,13 @@ To stop the services and remove the containers, run:
 docker compose down
 ```
 
+In Materialize, run:
+
+```sql
+DROP CONNECTION redpanda_connection CASCADE;
+DROP CONNECTION schema_registry CASCADE;
+```
+
 ## Helpful resources:
 
 * [`CREATE CONNECTION`](https://materialize.com/docs/sql/create-connection/)

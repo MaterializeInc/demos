@@ -1,0 +1,37 @@
+CREATE DATABASE IF NOT EXISTS demo;
+USE demo;
+
+GRANT ALL PRIVILEGES ON demo.* TO 'mysqluser';
+
+CREATE USER 'debezium' IDENTIFIED WITH mysql_native_password BY 'mysqlpwd';
+
+GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'debezium';
+
+FLUSH PRIVILEGES;
+
+CREATE TABLE IF NOT EXISTS demo.users
+(
+    id SERIAL PRIMARY KEY,
+    role_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS demo.roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+INSERT INTO demo.roles (name) VALUES ('admin'), ('user'), ('guest'), ('vip');
+
+-- Create reviews table
+CREATE TABLE IF NOT EXISTS demo.reviews (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    rating INT NOT NULL,
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
