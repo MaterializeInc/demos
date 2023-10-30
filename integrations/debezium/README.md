@@ -11,7 +11,7 @@ This is a collection of demos that show how to use the [Debezium](https://materi
 | [Postgres](postgres)               | Connect to a Postgres database and stream changes to Kafka/Redpanda         | [Postgres](https://materialize.com/docs/ingest-data/cdc-postgres-kafka-debezium/)    |
 | [MySQL](mysql)                     | Connect to a MySQL database and stream changes to Kafka/Redpanda            | [MySQL](https://materialize.com/docs/ingest-data/cdc-mysql/)                         |
 | [SQL server](sqlserver)            | Connect to a SQL server database and stream changes to Kafka/Redpanda       | TODO                                                                                 |
-<!-- | TODO: [MongoDB](mongodb)           | Connect to a MongoDB database and stream changes to Kafka/Redpanda     | TODO                                                                                 | -->
+| [MongoDB](mongodb)                 | Connect to a MongoDB database and stream changes to Kafka/Redpanda          | WIP: This demo is not yet complete.                                                  |
 
 ## Prerequisites
 
