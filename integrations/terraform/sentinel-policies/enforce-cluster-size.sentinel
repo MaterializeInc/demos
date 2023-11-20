@@ -1,0 +1,16 @@
+import "tfplan"
+
+allowed_sizes = [
+    "3xsmall",
+    "2xsmall",
+    "xsmall",
+    "small",
+]
+
+main = rule {
+    all tfplan.resources.materialize_cluster as _, instances {
+        all instances as _, r {
+            r.applied.size in allowed_sizes or r.destroy
+        }
+    }
+}
