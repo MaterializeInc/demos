@@ -137,7 +137,7 @@ Before adding a custom query, make sure to consider the following:
 1. The label set cannot repeat across rows within the results of the same query.
 2. Columns must not contain `NULL` values.
 3. Value columns must be of type `float`.
-5. Queries can impact cluster performance.
+4. Queries can impact cluster performance.
 
 ## Dashboard Template
 
