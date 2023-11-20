@@ -112,6 +112,16 @@ sql_exporter:
     query:  |
             SELECT count(*) FROM orders
 ```
+
+### Considerations
+
+Before adding a custom query, make sure to consider the following:
+
+1. The label set cannot repeat across rows within the results of the same query.
+2. Columns must not contain `NULL` values.
+3. Value columns must be of type `float`.
+4. Queries can impact cluster performance.
+
 ## Dashboard Template
 
 Use our dashboard template available for Grafana by importing the `dashboard.json` file into your dashboards. By importing the dashboard template, you can quickly set up a customized dashboard that displays the specific metrics and data available in the `config.yaml`. This can save you time and effort in building a dashboard from scratch.
