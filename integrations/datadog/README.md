@@ -101,6 +101,16 @@ queries:
             select count(*) from orders
 ```
 
+### Considerations
+
+Before adding a custom query, make sure to consider the following:
+
+1. The label set cannot repeat across rows within the results of the same query.
+2. Columns must not contain `NULL` values.
+3. Value columns must be of type `float`.
+4. The Datadog agent is subject to a limit of 2000 metrics.
+5. Queries can impact cluster performance.
+
 ## Datadog's OpenMetrics integration
 
 Datadog's agent will pick up the `/conf.d/openmetrics.yaml` configuration file to consume the metrics available in the Prometheus SQL Exporter endpoint.
