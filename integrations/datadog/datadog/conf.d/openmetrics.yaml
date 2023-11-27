@@ -116,7 +116,7 @@ instances:
     ## you can use a negative lookahead regex like:
     ##   - ^(?!foo).*$
     #
-    # exclude_metrics: []
+    exclude_metrics: [^go.*$]
 
     ## @param exclude_metrics_by_labels - mapping - optional
     ## A mapping of labels where metrics with matching label name and values are ignored. To match
