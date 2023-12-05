@@ -108,6 +108,56 @@ jobs:
             JOIN mz_catalog.mz_clusters C ON (S.cluster_id = C.id)
             JOIN mz_internal.mz_source_statuses ST ON (S.id = ST.id)
             GROUP BY S.name, S.type, S.cluster_id, cluster_name, source_status_label, source_status_counter, snapshot_committed;
+  - name: "query_latency"
+    help: "Query latency"
+    labels:
+      - "cluster_replica"
+    values:
+      - "max_latency"
+      - "min_latency"
+      - "avg_latency"
+    query: |
+            SELECT
+              COALESCE(max(extract(epoch from mseh.finished_at)::text::float * 1000 - extract(epoch from mseh.began_at)::text::float * 1000)::text::float, 0.0) as max,
+              COALESCE(min(extract(epoch from mseh.finished_at)::text::float * 1000 - extract(epoch from mseh.began_at)::text::float * 1000)::text::float, 0.0) as min,
+              COALESCE(avg(extract(epoch from mseh.finished_at)::text::float * 1000 - extract(epoch from mseh.began_at)::text::float * 1000)::text::float, 0.0) as avg,
+              mseh.cluster_name||'.'||r.name as cluster_replica
+            FROM mz_catalog.mz_cluster_replicas as r
+            JOIN mz_internal.mz_statement_execution_history_redacted as mseh
+              ON r.cluster_id = mseh.cluster_id
+            JOIN mz_internal.mz_prepared_statement_history_redacted as mpsh
+              ON mpsh.id = mseh.prepared_statement_id
+            WHERE mseh.began_at > now() - interval '1 min'
+              AND mpsh.prepared_at > now() - interval '1 min'
+              AND SUBSTRING(R.cluster_id, 1, 1) != 's'
+            GROUP BY mseh.cluster_name||'.'||r.name;
+  - name: "object_freshness"
+    help: "Freshness"
+    labels:
+      - "cluster_replica"
+      - "object_name"
+      - "object_type"
+      - "object_id"
+    values:
+      - "write_frontier"
+      - "approx_lag_ms"
+    query: |
+            SELECT
+              COALESCE(f.write_frontier, 0) as write_frontier,
+              o.name as object_name,
+              o.type as object_type,
+              COALESCE(mz_now()::text::float - f.write_frontier::text::float, 0) as approx_lag_ms,
+              c.name||'.'||r.name as cluster_replica,
+              f.object_id as object_id
+            FROM mz_internal.mz_cluster_replica_frontiers as f
+            JOIN mz_catalog.mz_cluster_replicas as r
+              on r.id = f.replica_id
+            JOIN mz_catalog.mz_clusters as c
+              on r.cluster_id = c.id
+            JOIN mz_catalog.mz_objects as o
+              on f.object_id = o.id
+            -- Filter the system's catalog.
+            WHERE substring(o.schema_id, 0, 2) != 's';
 - name: "materialize"
   interval: '1h'
   connections:
