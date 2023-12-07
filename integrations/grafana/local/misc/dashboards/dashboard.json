@@ -1046,7 +1046,7 @@
       },
       "id": 37,
       "options": {
-        "content": "This section displays the current credit usage from clusters.\n\nIt is not intended to show an accurate amount of credit usage but rather to provide a way to visualize and monitor unexpected credit consumption.",
+        "content": "This section displays the current credit usage from clusters.\n\nIts purpose is to provide a way to visualize and monitor unexpected credit consumption, not showing an accurate amount of credit usage.",
         "mode": "markdown"
       },
       "pluginVersion": "8.2.0",

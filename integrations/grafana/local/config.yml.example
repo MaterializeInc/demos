@@ -131,7 +131,7 @@ jobs:
             FROM mz_catalog.mz_cluster_replicas as R
             JOIN mz_internal.mz_statement_execution_history_redacted as MSEH
               ON R.cluster_id = MSEH.cluster_id
-            JOIN SELECT * FROM mz_internal.mz_activity_log as MPSH
+            JOIN mz_internal.mz_prepared_statement_history_redacted as MPSH
               ON MPSH.id = MSEH.prepared_statement_id
             WHERE MSEH.began_at > now() - interval '1 min'
               AND MPSH.prepared_at > now() - interval '1 min'
