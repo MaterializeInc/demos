@@ -44,7 +44,7 @@ jobs:
             FROM mz_internal.mz_cluster_replica_utilization U
             JOIN mz_catalog.mz_cluster_replicas R ON (U.replica_id = R.id)
             JOIN mz_catalog.mz_clusters C ON (R.cluster_id = C.id)
-            JOIN mz_internal.mz_cluster_replica_sizes RS ON (R.size = RS.size)
+            JOIN mz_catalog.mz_cluster_replica_sizes RS ON (R.size = RS.size)
             JOIN mz_internal.mz_cluster_replica_statuses RST ON (RST.replica_id = R.id)
             LEFT JOIN mz_catalog.mz_sources S ON (C.id = S.cluster_id)
             LEFT JOIN mz_catalog.mz_sinks SK ON (C.id = SK.cluster_id);
