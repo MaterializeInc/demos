@@ -99,8 +99,8 @@ jobs:
               status as source_status_label,
               1 AS source_status_counter,
               bool_and(snapshot_committed)::int::float as snapshot_committed,
-              SUM(SS.envelope_state_bytes) as envelope_state_bytes,
-              SUM(SS.envelope_state_count) as envelope_state_count,
+              SUM(SS.bytes_indexed) as envelope_state_bytes,
+              SUM(SS.records_indexed) as envelope_state_count,
               SUM(messages_received) as messages_received,
               SUM(bytes_received) as bytes_received
             FROM mz_internal.mz_source_statistics SS
