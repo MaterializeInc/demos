@@ -1,0 +1,66 @@
+version: '3.9'
+services:
+  redpanda:
+    image: docker.vectorized.io/vectorized/redpanda:v21.10.1
+    container_name: redpanda
+    command:
+     - redpanda start
+     - --overprovisioned
+     - --smp 1
+     - --memory 1G
+     - --reserve-memory 0M
+     - --node-id 0
+     - --check=false
+     - --kafka-addr 0.0.0.0:9092
+     - --advertise-kafka-addr ${EXTERNAL_IP:-redpanda}:9092
+     - --pandaproxy-addr 0.0.0.0:8082
+     - --advertise-pandaproxy-addr ${EXTERNAL_IP:-redpanda}:9092
+     - --set redpanda.enable_transactions=true
+     - --set redpanda.enable_idempotence=true
+    ports:
+     - 9092:9092
+     - 8081:8081
+     - 8082:8082
+    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
+  mongodb:
+    # image: quay.io/debezium/example-mongodb:2.4
+    build: ./mongodb
+    hostname: mongodb
+    ports:
+     - 27017:27017
+    environment:
+     - MONGODB_USER=debezium
+     - MONGODB_PASSWORD=dbz
+    # volumes:
+    #   - ./mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 1s
+      timeout: 10s
+      retries: 5
+  debezium:
+    #image: debezium/connect:2.4
+    build: ./connect
+    container_name: debezium
+    environment:
+      BOOTSTRAP_SERVERS: ${EXTERNAL_IP:-redpanda}:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_status
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://${EXTERNAL_IP:-redpanda}:8081
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://${EXTERNAL_IP:-redpanda}:8081
+    ports:
+      - 8083:8083
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
+    depends_on:
+      redpanda: {condition: service_healthy}
+      mongodb: {condition: service_healthy}
+  debezium_deploy:
+    build: ./deploy
+    depends_on:
+      redpanda: {condition: service_healthy}
+      mongodb: {condition: service_healthy}
+      debezium: {condition: service_healthy}
+    environment:
+      - EXTERNAL_IP=${EXTERNAL_IP:-redpanda}
