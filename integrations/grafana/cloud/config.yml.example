@@ -184,20 +184,11 @@ jobs:
     values:
       - "size_bytes"
     query: |
-            WITH last_measure AS (
-              SELECT
-                object_id,
-                MAX(collection_timestamp) timestamp
-              FROM mz_storage_usage
-              GROUP BY object_id
-            )
             SELECT
-              DISTINCT(id) as object_id,
-              name as object_name,
-              type as object_type,
-              size_bytes
-            FROM mz_storage_usage U, mz_objects O, last_measure L
-            WHERE O.id = U.object_id
-            AND O.id = L.object_id
-            AND U.collection_timestamp = L.timestamp
+              o.id AS object_id,
+              o.name as object_name,
+              o.type as object_type,
+              o.size_bytes
+            FROM mz_recent_storage_usage u, mz_objects o
+            WHERE o.id = u.object_id
             AND id NOT LIKE 's%';
