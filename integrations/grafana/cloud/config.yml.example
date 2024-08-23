@@ -41,7 +41,7 @@ jobs:
                 WHEN SK.cluster_id IS NOT NULL THEN 'sink'
                 ELSE 'compute'
               END AS cluster_type
-            FROM mz_internal.mz_cluster_replica_utilization U
+            FROM mz_catalog.mz_cluster_replica_utilization U
             JOIN mz_catalog.mz_cluster_replicas R ON (U.replica_id = R.id)
             JOIN mz_catalog.mz_clusters C ON (R.cluster_id = C.id)
             JOIN mz_catalog.mz_cluster_replica_sizes RS ON (R.size = RS.size)
@@ -161,7 +161,7 @@ jobs:
               C.id as cluster_id,
               R.id as replica_id,
               F.object_id as object_id
-            FROM mz_internal.mz_cluster_replica_frontiers as F
+            FROM mz_catalog.mz_cluster_replica_frontiers as F
             JOIN mz_catalog.mz_cluster_replicas as R
               on R.id = F.replica_id
             JOIN mz_catalog.mz_clusters as C

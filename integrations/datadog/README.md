@@ -78,7 +78,7 @@ queries:
             name::text as replica_name,
             cluster_id::text as cluster_id,
             memory_percent::float as memory_percent
-            FROM mz_cluster_replicas r join mz_internal.mz_cluster_replica_utilization u on r.id=u.replica_id;
+            FROM mz_cluster_replicas r join mz_catalog.mz_cluster_replica_utilization u on r.id=u.replica_id;
 ```
 
 The `queries` section contains all the queries that the Prometheus SQL exporter will run to export metrics from Materialize. For each query, you can define the following properties:
