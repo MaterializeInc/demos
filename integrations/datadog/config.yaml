@@ -129,12 +129,11 @@ jobs:
               R.name as replica_name,
               R.id as replica_id
             FROM mz_catalog.mz_cluster_replicas as R
-            JOIN mz_internal.mz_statement_execution_history_redacted as MSEH
+            JOIN mz_internal.mz_recent_activity_log_redacted as MSEH
               ON R.cluster_id = MSEH.cluster_id
-            JOIN mz_internal.mz_prepared_statement_history_redacted as MPSH
-              ON MPSH.id = MSEH.prepared_statement_id
+
             WHERE MSEH.began_at > now() - interval '1 min'
-              AND MPSH.prepared_at > now() - interval '1 min'
+              AND MSEH.prepared_at > now() - interval '1 min'
               AND SUBSTRING(R.cluster_id, 1, 1) != 's'
             GROUP BY MSEH.cluster_name, MSEH.cluster_id, R.name, R.id;
   - name: "object_freshness"
@@ -184,20 +183,11 @@ jobs:
     values:
       - "size_bytes"
     query: |
-            WITH last_measure AS (
-              SELECT
-                object_id,
-                MAX(collection_timestamp) timestamp
-              FROM mz_storage_usage
-              GROUP BY object_id
-            )
             SELECT
-              DISTINCT(id) as object_id,
-              name as object_name,
-              type as object_type,
-              size_bytes
-            FROM mz_storage_usage U, mz_objects O, last_measure L
-            WHERE O.id = U.object_id
-            AND O.id = L.object_id
-            AND U.collection_timestamp = L.timestamp
-            AND id NOT LIKE 's%';
+              DISTINCT(O.id) as object_id,
+              O.name as object_name,
+              O.type as object_type,
+              U.size_bytes
+            FROM mz_recent_storage_usage U
+            JOIN mz_objects O ON O.id = U.object_id
+            WHERE O.id NOT LIKE 's%';
