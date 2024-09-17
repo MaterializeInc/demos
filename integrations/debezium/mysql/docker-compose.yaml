@@ -1,0 +1,60 @@
+services:
+  mysql:
+    image: mysql/mysql-server:8.0.27
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysqlpwd
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=mysqlpwd
+    volumes:
+      - ./mysql/mysql.cnf:/etc/mysql/conf.d
+      - ./mysql/mysql_bootstrap.sql:/docker-entrypoint-initdb.d/mysql_bootstrap.sql
+    healthcheck: {test: mysql -p$$MYSQL_PASSWORD -e 'select 1', interval: 1s, start_period: 60s}
+  redpanda:
+    image: docker.vectorized.io/vectorized/redpanda:v21.11.2
+    command:
+      - redpanda start
+      - --overprovisioned
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --node-id 0
+      - --check=false
+      - --kafka-addr 0.0.0.0:9092
+      - --advertise-kafka-addr ${EXTERNAL_IP:-redpanda}:9092
+      - --pandaproxy-addr 0.0.0.0:8082
+      - --advertise-pandaproxy-addr ${EXTERNAL_IP:-redpanda}:8082
+      - --set redpanda.enable_transactions=true
+      - --set redpanda.enable_idempotence=true
+    ports:
+      - 9092:9092
+      - 8081:8081
+      - 8082:8082
+    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
+  debezium:
+    build: ./connect
+    environment:
+      BOOTSTRAP_SERVERS: ${EXTERNAL_IP:-redpanda}:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://redpanda:8081
+    volumes:
+      - ${PWD}/mysql:/data
+    ports:
+      - 8083:8083
+    healthcheck: {test: curl -f localhost:8083, interval: 1s, start_period: 120s}
+    depends_on:
+      redpanda: {condition: service_healthy}
+      mysql: {condition: service_healthy}
+  debezium_deploy:
+    build: ./deploy
+    depends_on:
+      debezium: {condition: service_healthy}
+    environment:
+      - MYSQL_PASSWORD='mysqlpwd'
+      - EXTERNAL_IP=${EXTERNAL_IP:-redpanda}
