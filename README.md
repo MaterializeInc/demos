@@ -65,7 +65,16 @@ This repo is a collection of sample code that walks you through using Materializ
     </tbody>
 </table>
 
-## [Connection examples](./connection-examples)
+## Integration Examples
+
+This is a collection of reference integration for various operational tools.
+
+- [datadog][./integrations/datadog]
+- [grafana][./integrations/grafana]
+- [terraform][./integrations/terraform]
+
+
+## Connection Examples
 
 This is a collection of reference examples for common language-specific PostgreSQL drivers and PostgreSQL-compatible ORMs that have been tested with Materialize.
 
