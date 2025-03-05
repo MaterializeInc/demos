@@ -2,8 +2,7 @@
 
 [![Slack Badge](https://img.shields.io/badge/Join%20us%20on%20Slack!-blueviolet?style=flat&logo=slack&link=https://materialize.com/s/chat)](https://materialize.com/s/chat)
 
-Materialize is a **data warehouse** purpose-built for **operational workloads**. It allows you build real-time automation, engaging customer experiences, and interactive
-data products using SQL and other common tools in the ecosystem.
+Materialize is the real-time data integration platform that enables you to use SQL to transform, deliver, and act on fast changing data.
 
 This repo is a collection of sample code that walks you through using Materialize for different use cases, and with different stacks. All demos assume that you have [signed up for a Materialize account](https://materialize.com/register/).
 
