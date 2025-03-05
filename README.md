@@ -2,8 +2,7 @@
 
 [![Slack Badge](https://img.shields.io/badge/Join%20us%20on%20Slack!-blueviolet?style=flat&logo=slack&link=https://materialize.com/s/chat)](https://materialize.com/s/chat)
 
-Materialize is a **data warehouse** purpose-built for **operational workloads**. It allows you build real-time automation, engaging customer experiences, and interactive
-data products using SQL and other common tools in the ecosystem.
+Materialize is the real-time data integration platform that enables you to use SQL to transform, deliver, and act on fast changing data.
 
 This repo is a collection of sample code that walks you through using Materialize for different use cases, and with different stacks. All demos assume that you have [signed up for a Materialize account](https://materialize.com/register/).
 
@@ -65,7 +64,16 @@ This repo is a collection of sample code that walks you through using Materializ
     </tbody>
 </table>
 
-## [Connection examples](./connection-examples)
+## Integration Examples
+
+This is a collection of reference integration for various operational tools.
+
+- [datadog][./integrations/datadog]
+- [grafana][./integrations/grafana]
+- [terraform][./integrations/terraform]
+
+
+## Connection Examples
 
 This is a collection of reference examples for common language-specific PostgreSQL drivers and PostgreSQL-compatible ORMs that have been tested with Materialize.
 
